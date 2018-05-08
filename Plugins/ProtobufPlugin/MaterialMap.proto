@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package Acts.protobuf;
+
+message MaterialMap {
+  
+  uint32 rows = 1;
+  uint32 cols = 2;
+
+  uint64 geo_id = 3;
+
+  int32 vol_id = 4;
+  int32 lay_id = 5;
+  int32 app_id = 6;
+  int32 sen_id = 7;
+
+  message MaterialBin {
+    double thickness = 1;
+    double X0 = 2;
+    double L0 = 3;
+    double A = 4;
+    double Z = 5;
+    double rho = 6;
+  }
+
+  repeated MaterialBin bins = 8;
+}

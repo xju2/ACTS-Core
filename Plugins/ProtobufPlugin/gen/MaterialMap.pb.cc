@@ -21,11 +21,11 @@
 // @@protoc_insertion_point(includes)
 namespace Acts {
 namespace protobuf {
-class MaterialMap_MaterialBinDefaultTypeInternal {
+class MaterialMap_MaterialPropertiesDefaultTypeInternal {
  public:
-  ::google::protobuf::internal::ExplicitlyConstructed<MaterialMap_MaterialBin>
+  ::google::protobuf::internal::ExplicitlyConstructed<MaterialMap_MaterialProperties>
       _instance;
-} _MaterialMap_MaterialBin_default_instance_;
+} _MaterialMap_MaterialProperties_default_instance_;
 class MaterialMapDefaultTypeInternal {
  public:
   ::google::protobuf::internal::ExplicitlyConstructed<MaterialMap>
@@ -34,7 +34,7 @@ class MaterialMapDefaultTypeInternal {
 }  // namespace protobuf
 }  // namespace Acts
 namespace protobuf_MaterialMap_2eproto {
-void InitDefaultsMaterialMap_MaterialBinImpl() {
+void InitDefaultsMaterialMap_MaterialPropertiesImpl() {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
 
 #ifdef GOOGLE_PROTOBUF_ENFORCE_UNIQUENESS
@@ -43,16 +43,16 @@ void InitDefaultsMaterialMap_MaterialBinImpl() {
   ::google::protobuf::internal::InitProtobufDefaults();
 #endif  // GOOGLE_PROTOBUF_ENFORCE_UNIQUENESS
   {
-    void* ptr = &::Acts::protobuf::_MaterialMap_MaterialBin_default_instance_;
-    new (ptr) ::Acts::protobuf::MaterialMap_MaterialBin();
+    void* ptr = &::Acts::protobuf::_MaterialMap_MaterialProperties_default_instance_;
+    new (ptr) ::Acts::protobuf::MaterialMap_MaterialProperties();
     ::google::protobuf::internal::OnShutdownDestroyMessage(ptr);
   }
-  ::Acts::protobuf::MaterialMap_MaterialBin::InitAsDefaultInstance();
+  ::Acts::protobuf::MaterialMap_MaterialProperties::InitAsDefaultInstance();
 }
 
-void InitDefaultsMaterialMap_MaterialBin() {
+void InitDefaultsMaterialMap_MaterialProperties() {
   static GOOGLE_PROTOBUF_DECLARE_ONCE(once);
-  ::google::protobuf::GoogleOnceInit(&once, &InitDefaultsMaterialMap_MaterialBinImpl);
+  ::google::protobuf::GoogleOnceInit(&once, &InitDefaultsMaterialMap_MaterialPropertiesImpl);
 }
 
 void InitDefaultsMaterialMapImpl() {
@@ -63,7 +63,7 @@ void InitDefaultsMaterialMapImpl() {
 #else
   ::google::protobuf::internal::InitProtobufDefaults();
 #endif  // GOOGLE_PROTOBUF_ENFORCE_UNIQUENESS
-  protobuf_MaterialMap_2eproto::InitDefaultsMaterialMap_MaterialBin();
+  protobuf_MaterialMap_2eproto::InitDefaultsMaterialMap_MaterialProperties();
   {
     void* ptr = &::Acts::protobuf::_MaterialMap_default_instance_;
     new (ptr) ::Acts::protobuf::MaterialMap();
@@ -81,16 +81,16 @@ void InitDefaultsMaterialMap() {
 
 const ::google::protobuf::uint32 TableStruct::offsets[] GOOGLE_PROTOBUF_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
   ~0u,  // no _has_bits_
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::Acts::protobuf::MaterialMap_MaterialBin, _internal_metadata_),
+  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::Acts::protobuf::MaterialMap_MaterialProperties, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::Acts::protobuf::MaterialMap_MaterialBin, thickness_),
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::Acts::protobuf::MaterialMap_MaterialBin, x0_),
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::Acts::protobuf::MaterialMap_MaterialBin, l0_),
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::Acts::protobuf::MaterialMap_MaterialBin, a_),
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::Acts::protobuf::MaterialMap_MaterialBin, z_),
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::Acts::protobuf::MaterialMap_MaterialBin, rho_),
+  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::Acts::protobuf::MaterialMap_MaterialProperties, thickness_),
+  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::Acts::protobuf::MaterialMap_MaterialProperties, x0_),
+  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::Acts::protobuf::MaterialMap_MaterialProperties, l0_),
+  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::Acts::protobuf::MaterialMap_MaterialProperties, a_),
+  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::Acts::protobuf::MaterialMap_MaterialProperties, z_),
+  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::Acts::protobuf::MaterialMap_MaterialProperties, rho_),
   ~0u,  // no _has_bits_
   GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::Acts::protobuf::MaterialMap, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -106,12 +106,12 @@ const ::google::protobuf::uint32 TableStruct::offsets[] GOOGLE_PROTOBUF_ATTRIBUT
   GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::Acts::protobuf::MaterialMap, bins_),
 };
 static const ::google::protobuf::internal::MigrationSchema schemas[] GOOGLE_PROTOBUF_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
-  { 0, -1, sizeof(::Acts::protobuf::MaterialMap_MaterialBin)},
+  { 0, -1, sizeof(::Acts::protobuf::MaterialMap_MaterialProperties)},
   { 11, -1, sizeof(::Acts::protobuf::MaterialMap)},
 };
 
 static ::google::protobuf::Message const * const file_default_instances[] = {
-  reinterpret_cast<const ::google::protobuf::Message*>(&::Acts::protobuf::_MaterialMap_MaterialBin_default_instance_),
+  reinterpret_cast<const ::google::protobuf::Message*>(&::Acts::protobuf::_MaterialMap_MaterialProperties_default_instance_),
   reinterpret_cast<const ::google::protobuf::Message*>(&::Acts::protobuf::_MaterialMap_default_instance_),
 };
 
@@ -137,17 +137,18 @@ void protobuf_RegisterTypes(const ::std::string&) {
 void AddDescriptorsImpl() {
   InitDefaults();
   static const char descriptor[] GOOGLE_PROTOBUF_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
-      "\n\021MaterialMap.proto\022\rActs.protobuf\"\214\002\n\013M"
+      "\n\021MaterialMap.proto\022\rActs.protobuf\"\232\002\n\013M"
       "aterialMap\022\014\n\004rows\030\001 \001(\r\022\014\n\004cols\030\002 \001(\r\022\016"
       "\n\006geo_id\030\003 \001(\004\022\016\n\006vol_id\030\004 \001(\005\022\016\n\006lay_id"
-      "\030\005 \001(\005\022\016\n\006app_id\030\006 \001(\005\022\016\n\006sen_id\030\007 \001(\005\0224"
-      "\n\004bins\030\010 \003(\0132&.Acts.protobuf.MaterialMap"
-      ".MaterialBin\032[\n\013MaterialBin\022\021\n\tthickness"
-      "\030\001 \001(\001\022\n\n\002X0\030\002 \001(\001\022\n\n\002L0\030\003 \001(\001\022\t\n\001A\030\004 \001("
-      "\001\022\t\n\001Z\030\005 \001(\001\022\013\n\003rho\030\006 \001(\001b\006proto3"
+      "\030\005 \001(\005\022\016\n\006app_id\030\006 \001(\005\022\016\n\006sen_id\030\007 \001(\005\022;"
+      "\n\004bins\030\010 \003(\0132-.Acts.protobuf.MaterialMap"
+      ".MaterialProperties\032b\n\022MaterialPropertie"
+      "s\022\021\n\tthickness\030\001 \001(\001\022\n\n\002X0\030\002 \001(\001\022\n\n\002L0\030\003"
+      " \001(\001\022\t\n\001A\030\004 \001(\001\022\t\n\001Z\030\005 \001(\001\022\013\n\003rho\030\006 \001(\001b"
+      "\006proto3"
   };
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
-      descriptor, 313);
+      descriptor, 327);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "MaterialMap.proto", &protobuf_RegisterTypes);
 }
@@ -168,26 +169,26 @@ namespace protobuf {
 
 // ===================================================================
 
-void MaterialMap_MaterialBin::InitAsDefaultInstance() {
+void MaterialMap_MaterialProperties::InitAsDefaultInstance() {
 }
 #if !defined(_MSC_VER) || _MSC_VER >= 1900
-const int MaterialMap_MaterialBin::kThicknessFieldNumber;
-const int MaterialMap_MaterialBin::kX0FieldNumber;
-const int MaterialMap_MaterialBin::kL0FieldNumber;
-const int MaterialMap_MaterialBin::kAFieldNumber;
-const int MaterialMap_MaterialBin::kZFieldNumber;
-const int MaterialMap_MaterialBin::kRhoFieldNumber;
+const int MaterialMap_MaterialProperties::kThicknessFieldNumber;
+const int MaterialMap_MaterialProperties::kX0FieldNumber;
+const int MaterialMap_MaterialProperties::kL0FieldNumber;
+const int MaterialMap_MaterialProperties::kAFieldNumber;
+const int MaterialMap_MaterialProperties::kZFieldNumber;
+const int MaterialMap_MaterialProperties::kRhoFieldNumber;
 #endif  // !defined(_MSC_VER) || _MSC_VER >= 1900
 
-MaterialMap_MaterialBin::MaterialMap_MaterialBin()
+MaterialMap_MaterialProperties::MaterialMap_MaterialProperties()
   : ::google::protobuf::Message(), _internal_metadata_(NULL) {
   if (GOOGLE_PREDICT_TRUE(this != internal_default_instance())) {
-    ::protobuf_MaterialMap_2eproto::InitDefaultsMaterialMap_MaterialBin();
+    ::protobuf_MaterialMap_2eproto::InitDefaultsMaterialMap_MaterialProperties();
   }
   SharedCtor();
-  // @@protoc_insertion_point(constructor:Acts.protobuf.MaterialMap.MaterialBin)
+  // @@protoc_insertion_point(constructor:Acts.protobuf.MaterialMap.MaterialProperties)
 }
-MaterialMap_MaterialBin::MaterialMap_MaterialBin(const MaterialMap_MaterialBin& from)
+MaterialMap_MaterialProperties::MaterialMap_MaterialProperties(const MaterialMap_MaterialProperties& from)
   : ::google::protobuf::Message(),
       _internal_metadata_(NULL),
       _cached_size_(0) {
@@ -195,49 +196,49 @@ MaterialMap_MaterialBin::MaterialMap_MaterialBin(const MaterialMap_MaterialBin& 
   ::memcpy(&thickness_, &from.thickness_,
     static_cast<size_t>(reinterpret_cast<char*>(&rho_) -
     reinterpret_cast<char*>(&thickness_)) + sizeof(rho_));
-  // @@protoc_insertion_point(copy_constructor:Acts.protobuf.MaterialMap.MaterialBin)
+  // @@protoc_insertion_point(copy_constructor:Acts.protobuf.MaterialMap.MaterialProperties)
 }
 
-void MaterialMap_MaterialBin::SharedCtor() {
+void MaterialMap_MaterialProperties::SharedCtor() {
   ::memset(&thickness_, 0, static_cast<size_t>(
       reinterpret_cast<char*>(&rho_) -
       reinterpret_cast<char*>(&thickness_)) + sizeof(rho_));
   _cached_size_ = 0;
 }
 
-MaterialMap_MaterialBin::~MaterialMap_MaterialBin() {
-  // @@protoc_insertion_point(destructor:Acts.protobuf.MaterialMap.MaterialBin)
+MaterialMap_MaterialProperties::~MaterialMap_MaterialProperties() {
+  // @@protoc_insertion_point(destructor:Acts.protobuf.MaterialMap.MaterialProperties)
   SharedDtor();
 }
 
-void MaterialMap_MaterialBin::SharedDtor() {
+void MaterialMap_MaterialProperties::SharedDtor() {
 }
 
-void MaterialMap_MaterialBin::SetCachedSize(int size) const {
+void MaterialMap_MaterialProperties::SetCachedSize(int size) const {
   GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
   _cached_size_ = size;
   GOOGLE_SAFE_CONCURRENT_WRITES_END();
 }
-const ::google::protobuf::Descriptor* MaterialMap_MaterialBin::descriptor() {
+const ::google::protobuf::Descriptor* MaterialMap_MaterialProperties::descriptor() {
   ::protobuf_MaterialMap_2eproto::protobuf_AssignDescriptorsOnce();
   return ::protobuf_MaterialMap_2eproto::file_level_metadata[kIndexInFileMessages].descriptor;
 }
 
-const MaterialMap_MaterialBin& MaterialMap_MaterialBin::default_instance() {
-  ::protobuf_MaterialMap_2eproto::InitDefaultsMaterialMap_MaterialBin();
+const MaterialMap_MaterialProperties& MaterialMap_MaterialProperties::default_instance() {
+  ::protobuf_MaterialMap_2eproto::InitDefaultsMaterialMap_MaterialProperties();
   return *internal_default_instance();
 }
 
-MaterialMap_MaterialBin* MaterialMap_MaterialBin::New(::google::protobuf::Arena* arena) const {
-  MaterialMap_MaterialBin* n = new MaterialMap_MaterialBin;
+MaterialMap_MaterialProperties* MaterialMap_MaterialProperties::New(::google::protobuf::Arena* arena) const {
+  MaterialMap_MaterialProperties* n = new MaterialMap_MaterialProperties;
   if (arena != NULL) {
     arena->Own(n);
   }
   return n;
 }
 
-void MaterialMap_MaterialBin::Clear() {
-// @@protoc_insertion_point(message_clear_start:Acts.protobuf.MaterialMap.MaterialBin)
+void MaterialMap_MaterialProperties::Clear() {
+// @@protoc_insertion_point(message_clear_start:Acts.protobuf.MaterialMap.MaterialProperties)
   ::google::protobuf::uint32 cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
@@ -248,11 +249,11 @@ void MaterialMap_MaterialBin::Clear() {
   _internal_metadata_.Clear();
 }
 
-bool MaterialMap_MaterialBin::MergePartialFromCodedStream(
+bool MaterialMap_MaterialProperties::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
 #define DO_(EXPRESSION) if (!GOOGLE_PREDICT_TRUE(EXPRESSION)) goto failure
   ::google::protobuf::uint32 tag;
-  // @@protoc_insertion_point(parse_start:Acts.protobuf.MaterialMap.MaterialBin)
+  // @@protoc_insertion_point(parse_start:Acts.protobuf.MaterialMap.MaterialProperties)
   for (;;) {
     ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoffNoLastTag(127u);
     tag = p.first;
@@ -354,17 +355,17 @@ bool MaterialMap_MaterialBin::MergePartialFromCodedStream(
     }
   }
 success:
-  // @@protoc_insertion_point(parse_success:Acts.protobuf.MaterialMap.MaterialBin)
+  // @@protoc_insertion_point(parse_success:Acts.protobuf.MaterialMap.MaterialProperties)
   return true;
 failure:
-  // @@protoc_insertion_point(parse_failure:Acts.protobuf.MaterialMap.MaterialBin)
+  // @@protoc_insertion_point(parse_failure:Acts.protobuf.MaterialMap.MaterialProperties)
   return false;
 #undef DO_
 }
 
-void MaterialMap_MaterialBin::SerializeWithCachedSizes(
+void MaterialMap_MaterialProperties::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  // @@protoc_insertion_point(serialize_start:Acts.protobuf.MaterialMap.MaterialBin)
+  // @@protoc_insertion_point(serialize_start:Acts.protobuf.MaterialMap.MaterialProperties)
   ::google::protobuf::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
@@ -402,13 +403,13 @@ void MaterialMap_MaterialBin::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         (::google::protobuf::internal::GetProto3PreserveUnknownsDefault()   ? _internal_metadata_.unknown_fields()   : _internal_metadata_.default_instance()), output);
   }
-  // @@protoc_insertion_point(serialize_end:Acts.protobuf.MaterialMap.MaterialBin)
+  // @@protoc_insertion_point(serialize_end:Acts.protobuf.MaterialMap.MaterialProperties)
 }
 
-::google::protobuf::uint8* MaterialMap_MaterialBin::InternalSerializeWithCachedSizesToArray(
+::google::protobuf::uint8* MaterialMap_MaterialProperties::InternalSerializeWithCachedSizesToArray(
     bool deterministic, ::google::protobuf::uint8* target) const {
   (void)deterministic; // Unused
-  // @@protoc_insertion_point(serialize_to_array_start:Acts.protobuf.MaterialMap.MaterialBin)
+  // @@protoc_insertion_point(serialize_to_array_start:Acts.protobuf.MaterialMap.MaterialProperties)
   ::google::protobuf::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
@@ -446,12 +447,12 @@ void MaterialMap_MaterialBin::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         (::google::protobuf::internal::GetProto3PreserveUnknownsDefault()   ? _internal_metadata_.unknown_fields()   : _internal_metadata_.default_instance()), target);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:Acts.protobuf.MaterialMap.MaterialBin)
+  // @@protoc_insertion_point(serialize_to_array_end:Acts.protobuf.MaterialMap.MaterialProperties)
   return target;
 }
 
-size_t MaterialMap_MaterialBin::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:Acts.protobuf.MaterialMap.MaterialBin)
+size_t MaterialMap_MaterialProperties::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:Acts.protobuf.MaterialMap.MaterialProperties)
   size_t total_size = 0;
 
   if ((_internal_metadata_.have_unknown_fields() &&  ::google::protobuf::internal::GetProto3PreserveUnknownsDefault())) {
@@ -496,23 +497,23 @@ size_t MaterialMap_MaterialBin::ByteSizeLong() const {
   return total_size;
 }
 
-void MaterialMap_MaterialBin::MergeFrom(const ::google::protobuf::Message& from) {
-// @@protoc_insertion_point(generalized_merge_from_start:Acts.protobuf.MaterialMap.MaterialBin)
+void MaterialMap_MaterialProperties::MergeFrom(const ::google::protobuf::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:Acts.protobuf.MaterialMap.MaterialProperties)
   GOOGLE_DCHECK_NE(&from, this);
-  const MaterialMap_MaterialBin* source =
-      ::google::protobuf::internal::DynamicCastToGenerated<const MaterialMap_MaterialBin>(
+  const MaterialMap_MaterialProperties* source =
+      ::google::protobuf::internal::DynamicCastToGenerated<const MaterialMap_MaterialProperties>(
           &from);
   if (source == NULL) {
-  // @@protoc_insertion_point(generalized_merge_from_cast_fail:Acts.protobuf.MaterialMap.MaterialBin)
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:Acts.protobuf.MaterialMap.MaterialProperties)
     ::google::protobuf::internal::ReflectionOps::Merge(from, this);
   } else {
-  // @@protoc_insertion_point(generalized_merge_from_cast_success:Acts.protobuf.MaterialMap.MaterialBin)
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:Acts.protobuf.MaterialMap.MaterialProperties)
     MergeFrom(*source);
   }
 }
 
-void MaterialMap_MaterialBin::MergeFrom(const MaterialMap_MaterialBin& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:Acts.protobuf.MaterialMap.MaterialBin)
+void MaterialMap_MaterialProperties::MergeFrom(const MaterialMap_MaterialProperties& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:Acts.protobuf.MaterialMap.MaterialProperties)
   GOOGLE_DCHECK_NE(&from, this);
   _internal_metadata_.MergeFrom(from._internal_metadata_);
   ::google::protobuf::uint32 cached_has_bits = 0;
@@ -538,29 +539,29 @@ void MaterialMap_MaterialBin::MergeFrom(const MaterialMap_MaterialBin& from) {
   }
 }
 
-void MaterialMap_MaterialBin::CopyFrom(const ::google::protobuf::Message& from) {
-// @@protoc_insertion_point(generalized_copy_from_start:Acts.protobuf.MaterialMap.MaterialBin)
+void MaterialMap_MaterialProperties::CopyFrom(const ::google::protobuf::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:Acts.protobuf.MaterialMap.MaterialProperties)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-void MaterialMap_MaterialBin::CopyFrom(const MaterialMap_MaterialBin& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:Acts.protobuf.MaterialMap.MaterialBin)
+void MaterialMap_MaterialProperties::CopyFrom(const MaterialMap_MaterialProperties& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:Acts.protobuf.MaterialMap.MaterialProperties)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-bool MaterialMap_MaterialBin::IsInitialized() const {
+bool MaterialMap_MaterialProperties::IsInitialized() const {
   return true;
 }
 
-void MaterialMap_MaterialBin::Swap(MaterialMap_MaterialBin* other) {
+void MaterialMap_MaterialProperties::Swap(MaterialMap_MaterialProperties* other) {
   if (other == this) return;
   InternalSwap(other);
 }
-void MaterialMap_MaterialBin::InternalSwap(MaterialMap_MaterialBin* other) {
+void MaterialMap_MaterialProperties::InternalSwap(MaterialMap_MaterialProperties* other) {
   using std::swap;
   swap(thickness_, other->thickness_);
   swap(x0_, other->x0_);
@@ -572,7 +573,7 @@ void MaterialMap_MaterialBin::InternalSwap(MaterialMap_MaterialBin* other) {
   swap(_cached_size_, other->_cached_size_);
 }
 
-::google::protobuf::Metadata MaterialMap_MaterialBin::GetMetadata() const {
+::google::protobuf::Metadata MaterialMap_MaterialProperties::GetMetadata() const {
   protobuf_MaterialMap_2eproto::protobuf_AssignDescriptorsOnce();
   return ::protobuf_MaterialMap_2eproto::file_level_metadata[kIndexInFileMessages];
 }
@@ -772,7 +773,7 @@ bool MaterialMap::MergePartialFromCodedStream(
         break;
       }
 
-      // repeated .Acts.protobuf.MaterialMap.MaterialBin bins = 8;
+      // repeated .Acts.protobuf.MaterialMap.MaterialProperties bins = 8;
       case 8: {
         if (static_cast< ::google::protobuf::uint8>(tag) ==
             static_cast< ::google::protobuf::uint8>(66u /* 66 & 0xFF */)) {
@@ -844,7 +845,7 @@ void MaterialMap::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteInt32(7, this->sen_id(), output);
   }
 
-  // repeated .Acts.protobuf.MaterialMap.MaterialBin bins = 8;
+  // repeated .Acts.protobuf.MaterialMap.MaterialProperties bins = 8;
   for (unsigned int i = 0,
       n = static_cast<unsigned int>(this->bins_size()); i < n; i++) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
@@ -900,7 +901,7 @@ void MaterialMap::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(7, this->sen_id(), target);
   }
 
-  // repeated .Acts.protobuf.MaterialMap.MaterialBin bins = 8;
+  // repeated .Acts.protobuf.MaterialMap.MaterialProperties bins = 8;
   for (unsigned int i = 0,
       n = static_cast<unsigned int>(this->bins_size()); i < n; i++) {
     target = ::google::protobuf::internal::WireFormatLite::
@@ -925,7 +926,7 @@ size_t MaterialMap::ByteSizeLong() const {
       ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
         (::google::protobuf::internal::GetProto3PreserveUnknownsDefault()   ? _internal_metadata_.unknown_fields()   : _internal_metadata_.default_instance()));
   }
-  // repeated .Acts.protobuf.MaterialMap.MaterialBin bins = 8;
+  // repeated .Acts.protobuf.MaterialMap.MaterialProperties bins = 8;
   {
     unsigned int count = static_cast<unsigned int>(this->bins_size());
     total_size += 1UL * count;

@@ -14,7 +14,7 @@ message MaterialMap {
   int32 app_id = 6;
   int32 sen_id = 7;
 
-  message MaterialBin {
+  message MaterialProperties {
     double thickness = 1;
     double X0 = 2;
     double L0 = 3;
@@ -23,5 +23,5 @@ message MaterialMap {
     double rho = 6;
   }
 
-  repeated MaterialBin bins = 8;
+  repeated MaterialProperties bins = 8;
 }

@@ -48,15 +48,17 @@ set(PROTOBUF_INCLUDE_DIRS "${SOURCE_DIR}/src")
 
 
 add_library (ACTSProtobufPlugin SHARED ${src_files})
+target_include_directories (ACTSProtobufPlugin PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/> $<INSTALL_INTERFACE:include>)
 target_link_libraries(ACTSProtobufPlugin PRIVATE ${PROTOBUF_LIBRARY})
-target_include_directories (ACTSProtobufPlugin PRIVATE ${PROTOBUF_INCLUDE_DIRS})
+target_link_libraries(ACTSProtobufPlugin PUBLIC ACTSCore)
+target_include_directories (ACTSProtobufPlugin SYSTEM PRIVATE ${PROTOBUF_INCLUDE_DIRS})
 target_include_directories (ACTSProtobufPlugin PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
-add_executable(ACTSProtobufTest src/test.cpp)
-target_link_libraries(ACTSProtobufPlugin PRIVATE ${PROTOBUF_LIBRARY})
-target_link_libraries(ACTSProtobufTest PUBLIC ACTSProtobufPlugin)
-target_include_directories (ACTSProtobufTest PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_include_directories (ACTSProtobufTest PRIVATE ${PROTOBUF_INCLUDE_DIRS})
+#add_executable(ACTSProtobufTest src/test.cpp)
+#target_link_libraries(ACTSProtobufPlugin PRIVATE ${PROTOBUF_LIBRARY})
+#target_link_libraries(ACTSProtobufTest PUBLIC ACTSProtobufPlugin)
+#target_include_directories (ACTSProtobufTest PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+#target_include_directories (ACTSProtobufTest PRIVATE ${PROTOBUF_INCLUDE_DIRS})
 
 install (TARGETS ACTSProtobufPlugin
          EXPORT ACTSProtobufPluginTargets

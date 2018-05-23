@@ -1,22 +1,22 @@
-#include <iostream>
-#include "gen/MaterialMap.pb.h"
-#include <google/protobuf/text_format.h>
 #include <fstream>
+#include <google/protobuf/text_format.h>
+#include <iostream>
 #include <memory>
+#include "gen/MaterialMap.pb.h"
 
 #include <cstdlib>
 
-//#include <fcntl.h>
 #include <stdio.h>
 
-#include <google/protobuf/message_lite.h>
-#include <google/protobuf/io/zero_copy_stream.h>
 #include <google/protobuf/io/coded_stream.h>
+#include <google/protobuf/io/zero_copy_stream.h>
 #include <google/protobuf/io/zero_copy_stream_impl.h>
+#include <google/protobuf/message_lite.h>
 
-bool writeDelimitedTo(
-    const google::protobuf::MessageLite& message,
-    google::protobuf::io::ZeroCopyOutputStream* rawOutput) {
+bool
+writeDelimitedTo(const google::protobuf::MessageLite&        message,
+                 google::protobuf::io::ZeroCopyOutputStream* rawOutput)
+{
   // We create a new coded stream for each message.  Don't worry, this is fast.
   google::protobuf::io::CodedOutputStream output(rawOutput);
 
@@ -38,9 +38,10 @@ bool writeDelimitedTo(
   return true;
 }
 
-bool readDelimitedFrom(
-    google::protobuf::io::ZeroCopyInputStream* rawInput,
-    google::protobuf::MessageLite* message) {
+bool
+readDelimitedFrom(google::protobuf::io::ZeroCopyInputStream* rawInput,
+                  google::protobuf::MessageLite*             message)
+{
   // We create a new coded stream for each message.  Don't worry, this is fast,
   // and it makes sure the 64MB total size limit is imposed per-message rather
   // than on the whole stream.  (See the CodedInputStream interface for more
@@ -52,8 +53,7 @@ bool readDelimitedFrom(
   if (!input.ReadVarint32(&size)) return false;
 
   // Tell the stream not to read beyond that size.
-  google::protobuf::io::CodedInputStream::Limit limit =
-      input.PushLimit(size);
+  google::protobuf::io::CodedInputStream::Limit limit = input.PushLimit(size);
 
   // Parse the message.
   if (!message->MergeFromCodedStream(&input)) return false;
@@ -65,59 +65,59 @@ bool readDelimitedFrom(
   return true;
 }
 
-void write_map(std::string fname) {
-  auto outfd = fopen(fname.c_str(), "w+");
+void
+write_map(std::string fname)
+{
+  //auto outfd = fopen(fname.c_str(), "w+"); auto outstream = std::make_unique<google::protobuf::io::FileOutputStream>(fileno(outfd)); size_t rows = 100; size_t cols = 100;
 
-  auto outstream = std::make_unique<google::protobuf::io::FileOutputStream>(fileno(outfd));
+  //size_t globidx = 0;
 
-  size_t rows = 3;
-  size_t cols = 3;
+  //for (size_t j = 0; j < 50; j++) {
 
-  size_t globidx = 0;
+    //Acts::protobuf::MaterialMap matMap;
 
-  for(size_t j=0;j<50;j++) {
+    //matMap.set_rows(rows);
+    //matMap.set_cols(cols);
+    //matMap.set_geo_id(j);
 
-    Acts::protobuf::MaterialMap matMap;
+    //matMap.set_sen_id(j);
 
-    matMap.set_rows(rows);
-    matMap.set_cols(cols);
-    matMap.set_geo_id(j);
+    //for (size_t i = 0; i < rows * cols; i++) {
+      //Acts::protobuf::MaterialMap::MaterialBin* matBin = matMap.add_bins();
 
-    matMap.set_sen_id(j);
+      //double val = globidx;
+      //globidx++;
 
+      //// std::cout << "add bin: " << i << " => " << val << " size: " <<
+      //// matMap.bins_size() << std::endl;
 
-    for(size_t i=0;i<rows*cols;i++) {
-      Acts::protobuf::MaterialMap::MaterialBin* matBin = matMap.add_bins();
-      
-      double val = globidx;
-      globidx++;
-      
-      //std::cout << "add bin: " << i << " => " << val << " size: " << matMap.bins_size() << std::endl;
+      //matBin->set_thickness(val);
+      //matBin->set_x0(0);
+      //matBin->set_l0(0);
+      //matBin->set_a(0);
+      //matBin->set_z(0);
+      //matBin->set_rho(0);
+    //}
 
-      matBin->set_thickness(val);
-      matBin->set_x0(0);
-      matBin->set_l0(0);
-      matBin->set_a(0);
-      matBin->set_z(0);
-      matBin->set_rho(0);
-    }
-
-    writeDelimitedTo(matMap, outstream.get());
-    //matMap.Clear();
-  }
+    //writeDelimitedTo(matMap, outstream.get());
+    //// matMap.Clear();
+  //}
 }
 
-void read_map(std::string fname) {
+void
+read_map(std::string fname)
+{
   auto infd = fopen(fname.c_str(), "r");
-  auto instream = std::make_unique<google::protobuf::io::FileInputStream>(fileno(infd));
+  auto instream
+      = std::make_unique<google::protobuf::io::FileInputStream>(fileno(infd));
 
   Acts::protobuf::MaterialMap matMap;
 
-  while(readDelimitedFrom(instream.get(), &matMap)) {
+  while (readDelimitedFrom(instream.get(), &matMap)) {
     std::cout << "read material map" << std::endl;
 
-    size_t rows = matMap.rows();
-    size_t cols = matMap.cols();
+    size_t rows  = matMap.rows();
+    size_t cols  = matMap.cols();
     size_t nBins = rows * cols;
 
     std::cout << "nrows: " << matMap.rows() << std::endl;
@@ -127,29 +127,29 @@ void read_map(std::string fname) {
 
     std::cout << "nbins: " << matMap.bins_size() << std::endl;
 
-    for(int i=0;i<matMap.bins_size();i++) {
+    for (int i = 0; i < matMap.bins_size(); i++) {
 
       int row = i / rows;
       int col = i % rows;
 
-
-      const Acts::protobuf::MaterialMap::MaterialBin &bin = matMap.bins(i);
-      std::cout << " - " << row << "x" << col << " Material(X0=" << bin.x0() << " L0=" << bin.l0() << " A=" << bin.a() << " Z=" << bin.z() << " rho=" << bin.rho() << " t=" << bin.thickness() << ")" << std::endl;
+      const Acts::protobuf::MaterialMap::MaterialProperties& bin = matMap.bins(i);
+      // std::cout << " - " << row << "x" << col << " Material(X0=" << bin.x0()
+      // << " L0=" << bin.l0() << " A=" << bin.a() << " Z=" << bin.z() << "
+      // rho=" << bin.rho() << " t=" << bin.thickness() << ")" << std::endl;
     }
 
     matMap.Clear();
   }
-
 }
 
-int main() {
+int
+main()
+{
   std::cout << "Hallo welt" << std::endl;
 
   GOOGLE_PROTOBUF_VERIFY_VERSION;
-  
+
   write_map("out.pb");
 
-
   read_map("out.pb");
-
 }

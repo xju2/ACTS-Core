@@ -42,12 +42,12 @@ struct TableStruct {
   static const ::google::protobuf::uint32 offsets[];
 };
 void AddDescriptors();
-void InitDefaultsMaterialMap_MaterialBinImpl();
-void InitDefaultsMaterialMap_MaterialBin();
+void InitDefaultsMaterialMap_MaterialPropertiesImpl();
+void InitDefaultsMaterialMap_MaterialProperties();
 void InitDefaultsMaterialMapImpl();
 void InitDefaultsMaterialMap();
 inline void InitDefaults() {
-  InitDefaultsMaterialMap_MaterialBin();
+  InitDefaultsMaterialMap_MaterialProperties();
   InitDefaultsMaterialMap();
 }
 }  // namespace protobuf_MaterialMap_2eproto
@@ -56,9 +56,9 @@ namespace protobuf {
 class MaterialMap;
 class MaterialMapDefaultTypeInternal;
 extern MaterialMapDefaultTypeInternal _MaterialMap_default_instance_;
-class MaterialMap_MaterialBin;
-class MaterialMap_MaterialBinDefaultTypeInternal;
-extern MaterialMap_MaterialBinDefaultTypeInternal _MaterialMap_MaterialBin_default_instance_;
+class MaterialMap_MaterialProperties;
+class MaterialMap_MaterialPropertiesDefaultTypeInternal;
+extern MaterialMap_MaterialPropertiesDefaultTypeInternal _MaterialMap_MaterialProperties_default_instance_;
 }  // namespace protobuf
 }  // namespace Acts
 namespace Acts {
@@ -66,24 +66,24 @@ namespace protobuf {
 
 // ===================================================================
 
-class MaterialMap_MaterialBin : public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:Acts.protobuf.MaterialMap.MaterialBin) */ {
+class MaterialMap_MaterialProperties : public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:Acts.protobuf.MaterialMap.MaterialProperties) */ {
  public:
-  MaterialMap_MaterialBin();
-  virtual ~MaterialMap_MaterialBin();
+  MaterialMap_MaterialProperties();
+  virtual ~MaterialMap_MaterialProperties();
 
-  MaterialMap_MaterialBin(const MaterialMap_MaterialBin& from);
+  MaterialMap_MaterialProperties(const MaterialMap_MaterialProperties& from);
 
-  inline MaterialMap_MaterialBin& operator=(const MaterialMap_MaterialBin& from) {
+  inline MaterialMap_MaterialProperties& operator=(const MaterialMap_MaterialProperties& from) {
     CopyFrom(from);
     return *this;
   }
   #if LANG_CXX11
-  MaterialMap_MaterialBin(MaterialMap_MaterialBin&& from) noexcept
-    : MaterialMap_MaterialBin() {
+  MaterialMap_MaterialProperties(MaterialMap_MaterialProperties&& from) noexcept
+    : MaterialMap_MaterialProperties() {
     *this = ::std::move(from);
   }
 
-  inline MaterialMap_MaterialBin& operator=(MaterialMap_MaterialBin&& from) noexcept {
+  inline MaterialMap_MaterialProperties& operator=(MaterialMap_MaterialProperties&& from) noexcept {
     if (GetArenaNoVirtual() == from.GetArenaNoVirtual()) {
       if (this != &from) InternalSwap(&from);
     } else {
@@ -93,30 +93,30 @@ class MaterialMap_MaterialBin : public ::google::protobuf::Message /* @@protoc_i
   }
   #endif
   static const ::google::protobuf::Descriptor* descriptor();
-  static const MaterialMap_MaterialBin& default_instance();
+  static const MaterialMap_MaterialProperties& default_instance();
 
   static void InitAsDefaultInstance();  // FOR INTERNAL USE ONLY
-  static inline const MaterialMap_MaterialBin* internal_default_instance() {
-    return reinterpret_cast<const MaterialMap_MaterialBin*>(
-               &_MaterialMap_MaterialBin_default_instance_);
+  static inline const MaterialMap_MaterialProperties* internal_default_instance() {
+    return reinterpret_cast<const MaterialMap_MaterialProperties*>(
+               &_MaterialMap_MaterialProperties_default_instance_);
   }
   static PROTOBUF_CONSTEXPR int const kIndexInFileMessages =
     0;
 
-  void Swap(MaterialMap_MaterialBin* other);
-  friend void swap(MaterialMap_MaterialBin& a, MaterialMap_MaterialBin& b) {
+  void Swap(MaterialMap_MaterialProperties* other);
+  friend void swap(MaterialMap_MaterialProperties& a, MaterialMap_MaterialProperties& b) {
     a.Swap(&b);
   }
 
   // implements Message ----------------------------------------------
 
-  inline MaterialMap_MaterialBin* New() const PROTOBUF_FINAL { return New(NULL); }
+  inline MaterialMap_MaterialProperties* New() const PROTOBUF_FINAL { return New(NULL); }
 
-  MaterialMap_MaterialBin* New(::google::protobuf::Arena* arena) const PROTOBUF_FINAL;
+  MaterialMap_MaterialProperties* New(::google::protobuf::Arena* arena) const PROTOBUF_FINAL;
   void CopyFrom(const ::google::protobuf::Message& from) PROTOBUF_FINAL;
   void MergeFrom(const ::google::protobuf::Message& from) PROTOBUF_FINAL;
-  void CopyFrom(const MaterialMap_MaterialBin& from);
-  void MergeFrom(const MaterialMap_MaterialBin& from);
+  void CopyFrom(const MaterialMap_MaterialProperties& from);
+  void MergeFrom(const MaterialMap_MaterialProperties& from);
   void Clear() PROTOBUF_FINAL;
   bool IsInitialized() const PROTOBUF_FINAL;
 
@@ -132,7 +132,7 @@ class MaterialMap_MaterialBin : public ::google::protobuf::Message /* @@protoc_i
   void SharedCtor();
   void SharedDtor();
   void SetCachedSize(int size) const PROTOBUF_FINAL;
-  void InternalSwap(MaterialMap_MaterialBin* other);
+  void InternalSwap(MaterialMap_MaterialProperties* other);
   private:
   inline ::google::protobuf::Arena* GetArenaNoVirtual() const {
     return NULL;
@@ -184,7 +184,7 @@ class MaterialMap_MaterialBin : public ::google::protobuf::Message /* @@protoc_i
   double rho() const;
   void set_rho(double value);
 
-  // @@protoc_insertion_point(class_scope:Acts.protobuf.MaterialMap.MaterialBin)
+  // @@protoc_insertion_point(class_scope:Acts.protobuf.MaterialMap.MaterialProperties)
  private:
 
   ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
@@ -196,7 +196,7 @@ class MaterialMap_MaterialBin : public ::google::protobuf::Message /* @@protoc_i
   double rho_;
   mutable int _cached_size_;
   friend struct ::protobuf_MaterialMap_2eproto::TableStruct;
-  friend void ::protobuf_MaterialMap_2eproto::InitDefaultsMaterialMap_MaterialBinImpl();
+  friend void ::protobuf_MaterialMap_2eproto::InitDefaultsMaterialMap_MaterialPropertiesImpl();
 };
 // -------------------------------------------------------------------
 
@@ -280,20 +280,20 @@ class MaterialMap : public ::google::protobuf::Message /* @@protoc_insertion_poi
 
   // nested types ----------------------------------------------------
 
-  typedef MaterialMap_MaterialBin MaterialBin;
+  typedef MaterialMap_MaterialProperties MaterialProperties;
 
   // accessors -------------------------------------------------------
 
-  // repeated .Acts.protobuf.MaterialMap.MaterialBin bins = 8;
+  // repeated .Acts.protobuf.MaterialMap.MaterialProperties bins = 8;
   int bins_size() const;
   void clear_bins();
   static const int kBinsFieldNumber = 8;
-  const ::Acts::protobuf::MaterialMap_MaterialBin& bins(int index) const;
-  ::Acts::protobuf::MaterialMap_MaterialBin* mutable_bins(int index);
-  ::Acts::protobuf::MaterialMap_MaterialBin* add_bins();
-  ::google::protobuf::RepeatedPtrField< ::Acts::protobuf::MaterialMap_MaterialBin >*
+  const ::Acts::protobuf::MaterialMap_MaterialProperties& bins(int index) const;
+  ::Acts::protobuf::MaterialMap_MaterialProperties* mutable_bins(int index);
+  ::Acts::protobuf::MaterialMap_MaterialProperties* add_bins();
+  ::google::protobuf::RepeatedPtrField< ::Acts::protobuf::MaterialMap_MaterialProperties >*
       mutable_bins();
-  const ::google::protobuf::RepeatedPtrField< ::Acts::protobuf::MaterialMap_MaterialBin >&
+  const ::google::protobuf::RepeatedPtrField< ::Acts::protobuf::MaterialMap_MaterialProperties >&
       bins() const;
 
   // uint32 rows = 1;
@@ -342,7 +342,7 @@ class MaterialMap : public ::google::protobuf::Message /* @@protoc_insertion_poi
  private:
 
   ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
-  ::google::protobuf::RepeatedPtrField< ::Acts::protobuf::MaterialMap_MaterialBin > bins_;
+  ::google::protobuf::RepeatedPtrField< ::Acts::protobuf::MaterialMap_MaterialProperties > bins_;
   ::google::protobuf::uint32 rows_;
   ::google::protobuf::uint32 cols_;
   ::google::protobuf::uint64 geo_id_;
@@ -363,90 +363,90 @@ class MaterialMap : public ::google::protobuf::Message /* @@protoc_insertion_poi
   #pragma GCC diagnostic push
   #pragma GCC diagnostic ignored "-Wstrict-aliasing"
 #endif  // __GNUC__
-// MaterialMap_MaterialBin
+// MaterialMap_MaterialProperties
 
 // double thickness = 1;
-inline void MaterialMap_MaterialBin::clear_thickness() {
+inline void MaterialMap_MaterialProperties::clear_thickness() {
   thickness_ = 0;
 }
-inline double MaterialMap_MaterialBin::thickness() const {
-  // @@protoc_insertion_point(field_get:Acts.protobuf.MaterialMap.MaterialBin.thickness)
+inline double MaterialMap_MaterialProperties::thickness() const {
+  // @@protoc_insertion_point(field_get:Acts.protobuf.MaterialMap.MaterialProperties.thickness)
   return thickness_;
 }
-inline void MaterialMap_MaterialBin::set_thickness(double value) {
+inline void MaterialMap_MaterialProperties::set_thickness(double value) {
   
   thickness_ = value;
-  // @@protoc_insertion_point(field_set:Acts.protobuf.MaterialMap.MaterialBin.thickness)
+  // @@protoc_insertion_point(field_set:Acts.protobuf.MaterialMap.MaterialProperties.thickness)
 }
 
 // double X0 = 2;
-inline void MaterialMap_MaterialBin::clear_x0() {
+inline void MaterialMap_MaterialProperties::clear_x0() {
   x0_ = 0;
 }
-inline double MaterialMap_MaterialBin::x0() const {
-  // @@protoc_insertion_point(field_get:Acts.protobuf.MaterialMap.MaterialBin.X0)
+inline double MaterialMap_MaterialProperties::x0() const {
+  // @@protoc_insertion_point(field_get:Acts.protobuf.MaterialMap.MaterialProperties.X0)
   return x0_;
 }
-inline void MaterialMap_MaterialBin::set_x0(double value) {
+inline void MaterialMap_MaterialProperties::set_x0(double value) {
   
   x0_ = value;
-  // @@protoc_insertion_point(field_set:Acts.protobuf.MaterialMap.MaterialBin.X0)
+  // @@protoc_insertion_point(field_set:Acts.protobuf.MaterialMap.MaterialProperties.X0)
 }
 
 // double L0 = 3;
-inline void MaterialMap_MaterialBin::clear_l0() {
+inline void MaterialMap_MaterialProperties::clear_l0() {
   l0_ = 0;
 }
-inline double MaterialMap_MaterialBin::l0() const {
-  // @@protoc_insertion_point(field_get:Acts.protobuf.MaterialMap.MaterialBin.L0)
+inline double MaterialMap_MaterialProperties::l0() const {
+  // @@protoc_insertion_point(field_get:Acts.protobuf.MaterialMap.MaterialProperties.L0)
   return l0_;
 }
-inline void MaterialMap_MaterialBin::set_l0(double value) {
+inline void MaterialMap_MaterialProperties::set_l0(double value) {
   
   l0_ = value;
-  // @@protoc_insertion_point(field_set:Acts.protobuf.MaterialMap.MaterialBin.L0)
+  // @@protoc_insertion_point(field_set:Acts.protobuf.MaterialMap.MaterialProperties.L0)
 }
 
 // double A = 4;
-inline void MaterialMap_MaterialBin::clear_a() {
+inline void MaterialMap_MaterialProperties::clear_a() {
   a_ = 0;
 }
-inline double MaterialMap_MaterialBin::a() const {
-  // @@protoc_insertion_point(field_get:Acts.protobuf.MaterialMap.MaterialBin.A)
+inline double MaterialMap_MaterialProperties::a() const {
+  // @@protoc_insertion_point(field_get:Acts.protobuf.MaterialMap.MaterialProperties.A)
   return a_;
 }
-inline void MaterialMap_MaterialBin::set_a(double value) {
+inline void MaterialMap_MaterialProperties::set_a(double value) {
   
   a_ = value;
-  // @@protoc_insertion_point(field_set:Acts.protobuf.MaterialMap.MaterialBin.A)
+  // @@protoc_insertion_point(field_set:Acts.protobuf.MaterialMap.MaterialProperties.A)
 }
 
 // double Z = 5;
-inline void MaterialMap_MaterialBin::clear_z() {
+inline void MaterialMap_MaterialProperties::clear_z() {
   z_ = 0;
 }
-inline double MaterialMap_MaterialBin::z() const {
-  // @@protoc_insertion_point(field_get:Acts.protobuf.MaterialMap.MaterialBin.Z)
+inline double MaterialMap_MaterialProperties::z() const {
+  // @@protoc_insertion_point(field_get:Acts.protobuf.MaterialMap.MaterialProperties.Z)
   return z_;
 }
-inline void MaterialMap_MaterialBin::set_z(double value) {
+inline void MaterialMap_MaterialProperties::set_z(double value) {
   
   z_ = value;
-  // @@protoc_insertion_point(field_set:Acts.protobuf.MaterialMap.MaterialBin.Z)
+  // @@protoc_insertion_point(field_set:Acts.protobuf.MaterialMap.MaterialProperties.Z)
 }
 
 // double rho = 6;
-inline void MaterialMap_MaterialBin::clear_rho() {
+inline void MaterialMap_MaterialProperties::clear_rho() {
   rho_ = 0;
 }
-inline double MaterialMap_MaterialBin::rho() const {
-  // @@protoc_insertion_point(field_get:Acts.protobuf.MaterialMap.MaterialBin.rho)
+inline double MaterialMap_MaterialProperties::rho() const {
+  // @@protoc_insertion_point(field_get:Acts.protobuf.MaterialMap.MaterialProperties.rho)
   return rho_;
 }
-inline void MaterialMap_MaterialBin::set_rho(double value) {
+inline void MaterialMap_MaterialProperties::set_rho(double value) {
   
   rho_ = value;
-  // @@protoc_insertion_point(field_set:Acts.protobuf.MaterialMap.MaterialBin.rho)
+  // @@protoc_insertion_point(field_set:Acts.protobuf.MaterialMap.MaterialProperties.rho)
 }
 
 // -------------------------------------------------------------------
@@ -551,31 +551,31 @@ inline void MaterialMap::set_sen_id(::google::protobuf::int32 value) {
   // @@protoc_insertion_point(field_set:Acts.protobuf.MaterialMap.sen_id)
 }
 
-// repeated .Acts.protobuf.MaterialMap.MaterialBin bins = 8;
+// repeated .Acts.protobuf.MaterialMap.MaterialProperties bins = 8;
 inline int MaterialMap::bins_size() const {
   return bins_.size();
 }
 inline void MaterialMap::clear_bins() {
   bins_.Clear();
 }
-inline const ::Acts::protobuf::MaterialMap_MaterialBin& MaterialMap::bins(int index) const {
+inline const ::Acts::protobuf::MaterialMap_MaterialProperties& MaterialMap::bins(int index) const {
   // @@protoc_insertion_point(field_get:Acts.protobuf.MaterialMap.bins)
   return bins_.Get(index);
 }
-inline ::Acts::protobuf::MaterialMap_MaterialBin* MaterialMap::mutable_bins(int index) {
+inline ::Acts::protobuf::MaterialMap_MaterialProperties* MaterialMap::mutable_bins(int index) {
   // @@protoc_insertion_point(field_mutable:Acts.protobuf.MaterialMap.bins)
   return bins_.Mutable(index);
 }
-inline ::Acts::protobuf::MaterialMap_MaterialBin* MaterialMap::add_bins() {
+inline ::Acts::protobuf::MaterialMap_MaterialProperties* MaterialMap::add_bins() {
   // @@protoc_insertion_point(field_add:Acts.protobuf.MaterialMap.bins)
   return bins_.Add();
 }
-inline ::google::protobuf::RepeatedPtrField< ::Acts::protobuf::MaterialMap_MaterialBin >*
+inline ::google::protobuf::RepeatedPtrField< ::Acts::protobuf::MaterialMap_MaterialProperties >*
 MaterialMap::mutable_bins() {
   // @@protoc_insertion_point(field_mutable_list:Acts.protobuf.MaterialMap.bins)
   return &bins_;
 }
-inline const ::google::protobuf::RepeatedPtrField< ::Acts::protobuf::MaterialMap_MaterialBin >&
+inline const ::google::protobuf::RepeatedPtrField< ::Acts::protobuf::MaterialMap_MaterialProperties >&
 MaterialMap::bins() const {
   // @@protoc_insertion_point(field_list:Acts.protobuf.MaterialMap.bins)
   return bins_;

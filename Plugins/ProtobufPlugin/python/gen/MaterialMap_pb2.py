@@ -19,11 +19,55 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='MaterialMap.proto',
   package='Acts.protobuf',
   syntax='proto3',
-  serialized_pb=_b('\n\x11MaterialMap.proto\x12\rActs.protobuf\"\x9a\x02\n\x0bMaterialMap\x12\x0c\n\x04rows\x18\x01 \x01(\r\x12\x0c\n\x04\x63ols\x18\x02 \x01(\r\x12\x0e\n\x06geo_id\x18\x03 \x01(\x04\x12\x0e\n\x06vol_id\x18\x04 \x01(\x05\x12\x0e\n\x06lay_id\x18\x05 \x01(\x05\x12\x0e\n\x06\x61pp_id\x18\x06 \x01(\x05\x12\x0e\n\x06sen_id\x18\x07 \x01(\x05\x12;\n\x04\x62ins\x18\x08 \x03(\x0b\x32-.Acts.protobuf.MaterialMap.MaterialProperties\x1a\x62\n\x12MaterialProperties\x12\x11\n\tthickness\x18\x01 \x01(\x01\x12\n\n\x02X0\x18\x02 \x01(\x01\x12\n\n\x02L0\x18\x03 \x01(\x01\x12\t\n\x01\x41\x18\x04 \x01(\x01\x12\t\n\x01Z\x18\x05 \x01(\x01\x12\x0b\n\x03rho\x18\x06 \x01(\x01\x62\x06proto3')
+  serialized_pb=_b('\n\x11MaterialMap.proto\x12\rActs.protobuf\"\x98\x03\n\x0bMaterialMap\x12\x30\n\x02l0\x18\x01 \x01(\x0b\x32$.Acts.protobuf.MaterialMap.Dimension\x12\x30\n\x02l1\x18\x02 \x01(\x0b\x32$.Acts.protobuf.MaterialMap.Dimension\x12\x0e\n\x06geo_id\x18\x03 \x01(\x04\x12\x0e\n\x06vol_id\x18\x04 \x01(\x05\x12\x0e\n\x06lay_id\x18\x05 \x01(\x05\x12\x0e\n\x06\x61pp_id\x18\x06 \x01(\x05\x12\x0e\n\x06sen_id\x18\x07 \x01(\x05\x12;\n\x04\x62ins\x18\x08 \x03(\x0b\x32-.Acts.protobuf.MaterialMap.MaterialProperties\x1a\x34\n\tDimension\x12\r\n\x05nBins\x18\x01 \x01(\r\x12\x0b\n\x03min\x18\x02 \x01(\x01\x12\x0b\n\x03max\x18\x03 \x01(\x01\x1a\x62\n\x12MaterialProperties\x12\x11\n\tthickness\x18\x01 \x01(\x01\x12\n\n\x02X0\x18\x02 \x01(\x01\x12\n\n\x02L0\x18\x03 \x01(\x01\x12\t\n\x01\x41\x18\x04 \x01(\x01\x12\t\n\x01Z\x18\x05 \x01(\x01\x12\x0b\n\x03rho\x18\x06 \x01(\x01\x62\x06proto3')
 )
 
 
 
+
+_MATERIALMAP_DIMENSION = _descriptor.Descriptor(
+  name='Dimension',
+  full_name='Acts.protobuf.MaterialMap.Dimension',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='nBins', full_name='Acts.protobuf.MaterialMap.Dimension.nBins', index=0,
+      number=1, type=13, cpp_type=3, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='min', full_name='Acts.protobuf.MaterialMap.Dimension.min', index=1,
+      number=2, type=1, cpp_type=5, label=1,
+      has_default_value=False, default_value=float(0),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='max', full_name='Acts.protobuf.MaterialMap.Dimension.max', index=2,
+      number=3, type=1, cpp_type=5, label=1,
+      has_default_value=False, default_value=float(0),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=293,
+  serialized_end=345,
+)
 
 _MATERIALMAP_MATERIALPROPERTIES = _descriptor.Descriptor(
   name='MaterialProperties',
@@ -86,8 +130,8 @@ _MATERIALMAP_MATERIALPROPERTIES = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=221,
-  serialized_end=319,
+  serialized_start=347,
+  serialized_end=445,
 )
 
 _MATERIALMAP = _descriptor.Descriptor(
@@ -98,16 +142,16 @@ _MATERIALMAP = _descriptor.Descriptor(
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='rows', full_name='Acts.protobuf.MaterialMap.rows', index=0,
-      number=1, type=13, cpp_type=3, label=1,
-      has_default_value=False, default_value=0,
+      name='l0', full_name='Acts.protobuf.MaterialMap.l0', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='cols', full_name='Acts.protobuf.MaterialMap.cols', index=1,
-      number=2, type=13, cpp_type=3, label=1,
-      has_default_value=False, default_value=0,
+      name='l1', full_name='Acts.protobuf.MaterialMap.l1', index=1,
+      number=2, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None, file=DESCRIPTOR),
@@ -156,7 +200,7 @@ _MATERIALMAP = _descriptor.Descriptor(
   ],
   extensions=[
   ],
-  nested_types=[_MATERIALMAP_MATERIALPROPERTIES, ],
+  nested_types=[_MATERIALMAP_DIMENSION, _MATERIALMAP_MATERIALPROPERTIES, ],
   enum_types=[
   ],
   options=None,
@@ -166,15 +210,25 @@ _MATERIALMAP = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=37,
-  serialized_end=319,
+  serialized_end=445,
 )
 
+_MATERIALMAP_DIMENSION.containing_type = _MATERIALMAP
 _MATERIALMAP_MATERIALPROPERTIES.containing_type = _MATERIALMAP
+_MATERIALMAP.fields_by_name['l0'].message_type = _MATERIALMAP_DIMENSION
+_MATERIALMAP.fields_by_name['l1'].message_type = _MATERIALMAP_DIMENSION
 _MATERIALMAP.fields_by_name['bins'].message_type = _MATERIALMAP_MATERIALPROPERTIES
 DESCRIPTOR.message_types_by_name['MaterialMap'] = _MATERIALMAP
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 MaterialMap = _reflection.GeneratedProtocolMessageType('MaterialMap', (_message.Message,), dict(
+
+  Dimension = _reflection.GeneratedProtocolMessageType('Dimension', (_message.Message,), dict(
+    DESCRIPTOR = _MATERIALMAP_DIMENSION,
+    __module__ = 'MaterialMap_pb2'
+    # @@protoc_insertion_point(class_scope:Acts.protobuf.MaterialMap.Dimension)
+    ))
+  ,
 
   MaterialProperties = _reflection.GeneratedProtocolMessageType('MaterialProperties', (_message.Message,), dict(
     DESCRIPTOR = _MATERIALMAP_MATERIALPROPERTIES,
@@ -187,6 +241,7 @@ MaterialMap = _reflection.GeneratedProtocolMessageType('MaterialMap', (_message.
   # @@protoc_insertion_point(class_scope:Acts.protobuf.MaterialMap)
   ))
 _sym_db.RegisterMessage(MaterialMap)
+_sym_db.RegisterMessage(MaterialMap.Dimension)
 _sym_db.RegisterMessage(MaterialMap.MaterialProperties)
 
 

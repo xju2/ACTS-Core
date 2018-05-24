@@ -4,8 +4,14 @@ package Acts.protobuf;
 
 message MaterialMap {
   
-  uint32 rows = 1;
-  uint32 cols = 2;
+  message Dimension {
+    uint32 nBins = 1;
+    double min = 2;
+    double max = 3;
+  }
+
+  Dimension l0 = 1;
+  Dimension l1 = 2;
 
   uint64 geo_id = 3;
 

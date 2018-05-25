@@ -116,12 +116,18 @@ read_map(std::string fname)
   while (readDelimitedFrom(instream.get(), &matMap)) {
     std::cout << "read material map" << std::endl;
 
-    size_t rows  = matMap.rows();
-    size_t cols  = matMap.cols();
-    size_t nBins = rows * cols;
+    //size_t rows  = matMap.rows();
+    //size_t cols  = matMap.cols();
+    //size_t nBins = rows * cols;
 
-    std::cout << "nrows: " << matMap.rows() << std::endl;
-    std::cout << "ncols: " << matMap.cols() << std::endl;
+    const Acts::protobuf::MaterialMap::Dimension& l0 = matMap.l0();
+    const Acts::protobuf::MaterialMap::Dimension& l1 = matMap.l1();
+
+    size_t rows = l0.nbins();
+    size_t cols = l1.nbins();
+
+    std::cout << "l0: " << rows << ", " << l0.min() << " - " << l0.max() << std::endl;
+    std::cout << "l1: " << cols << ", " << l1.min() << " - " << l1.max() << std::endl;
     std::cout << "geo_id: " << matMap.geo_id() << std::endl;
     std::cout << "sen_id: " << matMap.sen_id() << std::endl;
 

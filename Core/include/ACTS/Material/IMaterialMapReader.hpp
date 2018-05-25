@@ -12,14 +12,14 @@
 
 namespace Acts {
 
-class SurfaceMaterial;
+class BinnedSurfaceMaterial;
 class GeometryID;
 
 class IMaterialMapReader
 {
 
 public:
-  virtual std::map<GeometryID, SurfaceMaterial*>
-  read() = 0;
-}
+  virtual std::map<GeometryID, BinnedSurfaceMaterial*>
+  read() const = 0;
+};
 }

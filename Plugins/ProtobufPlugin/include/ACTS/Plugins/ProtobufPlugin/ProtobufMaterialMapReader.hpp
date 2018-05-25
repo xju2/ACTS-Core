@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include "ACTS/Material/IMaterialMapReader.hpp"
+
 #include <map>
 #include <string>
 
@@ -22,8 +24,10 @@ class ZeroCopyInputStream;
 }
 
 namespace Acts {
-  class SurfaceMaterial;
-  class GeometryID;
+
+class BinnedSurfaceMaterial;
+class GeometryID;
+class MaterialProperties;
 
 class ProtobufMaterialMapReader : IMaterialMapReader {
 
@@ -33,13 +37,13 @@ public:
     std::string infile;
   };
 
-  ProtobufMaterialMapWriter(const Config& cfg) 
+  ProtobufMaterialMapReader(const Config& cfg) 
     : m_cfg(cfg)
   {
   }
 
-  std::map<GeometryID, SurfaceMaterial*>
-  read() const;
+  std::map<GeometryID, BinnedSurfaceMaterial*>
+  read() const override;
 
 private:
   Config m_cfg;
@@ -48,7 +52,10 @@ private:
   // https://stackoverflow.com/questions/2340730/are-there-c-equivalents-for-the-protocol-buffers-delimited-i-o-functions-in-ja/22927149
   bool
   readDelimitedFrom(google::protobuf::io::ZeroCopyInputStream* rawInput,
-                    google::protobuf::MessageLite*             message);
-}
+                    google::protobuf::MessageLite*             message) const;
+
+  bool
+  checkMaterialProperties(const Acts::MaterialProperties& matProp) const;
+};
 
 }

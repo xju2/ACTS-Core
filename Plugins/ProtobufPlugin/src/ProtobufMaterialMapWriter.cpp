@@ -50,25 +50,49 @@ Acts::ProtobufMaterialMapWriter::write(
     matMapMsg.set_app_id(geo_id.value(GeometryID::approach_mask));
     matMapMsg.set_sen_id(geo_id.value(GeometryID::sensitive_mask));
 
+    // mapped material should only ever be binned,
+    // but have this here to be safe
     auto binnedSrfMat = dynamic_cast<const BinnedSurfaceMaterial*>(srfMat);
     auto homogenousSrfMat = dynamic_cast<const HomogeneousSurfaceMaterial*>(srfMat);
 
     if(binnedSrfMat != nullptr) {
+      // set up dimensions from binutility
       const BinUtility& binUtility = binnedSrfMat->binUtility();
-      size_t rows = binUtility.bins(0);
-      size_t cols = binUtility.bins(1);
-      int nBins = rows*cols;
-      matMapMsg.set_rows(rows);
-      matMapMsg.set_cols(cols);
+      size_t nBins0 = binUtility.bins(0);
+      size_t nBins1 = binUtility.bins(1);
+      int nBins = nBins0*nBins1;
 
-      for (size_t b0 = 0; b0 < rows; ++b0) {
-        for (size_t b1 = 0; b1 < cols; ++b1) {
+      matMapMsg.set_rows(nBins0);
+      matMapMsg.set_cols(nBins1);
+
+      //Acts::protobuf::MaterialMap::Dimension* l0 = matMapMsg.mutable_l0();
+      //l0->set_nbins(nBins0);
+      //l0->set_min(binUtility.binningData().at(0).min);
+      //l0->set_max(binUtility.binningData().at(0).max);
+
+      //Acts::protobuf::MaterialMap::Dimension* l1 = matMapMsg.mutable_l1();
+      //l1->set_nbins(nBins1);
+      //l1->set_min(binUtility.binningData().at(1).min);
+      //l1->set_max(binUtility.binningData().at(1).max);
+
+
+      for (size_t b0 = 0; b0 < nBins0; ++b0) {
+        for (size_t b1 = 0; b1 < nBins1; ++b1) {
           const MaterialProperties* matProp = binnedSrfMat->material(b0, b1);
           //std::cout << "matProp: " << matProp << std::endl;
           Acts::protobuf::MaterialMap::MaterialProperties* matPropMsg = matMapMsg.add_bins();
 
           if (matProp != nullptr) {
             const Material& mat = matProp->material();
+
+            std::cout << "X0;L0;t;rho;A;Z" << std::endl;
+            std::cout << mat.X0() << ";";
+            std::cout << mat.L0() << ";";
+            std::cout << matProp->thickness() << ";";
+            std::cout << mat.rho() << ";";
+            std::cout << mat.A() << ";";
+            std::cout << mat.Z() << "";
+            std::cout << std::endl;
             
             matPropMsg->set_thickness(matProp->thickness());
             matPropMsg->set_x0(mat.X0());
@@ -76,6 +100,7 @@ Acts::ProtobufMaterialMapWriter::write(
             matPropMsg->set_a(mat.A());
             matPropMsg->set_z(mat.Z());
             matPropMsg->set_rho(mat.rho());
+            matPropMsg->set_valid(true);
           }
         }
       }
@@ -86,6 +111,16 @@ Acts::ProtobufMaterialMapWriter::write(
 
       matMapMsg.set_rows(1);
       matMapMsg.set_cols(1);
+      
+      //Acts::protobuf::MaterialMap::Dimension* l0 = matMapMsg.mutable_l0();
+      //l0->set_nbins(1);
+      //l0->set_min(0);
+      //l0->set_max(0);
+
+      //Acts::protobuf::MaterialMap::Dimension* l1 = matMapMsg.mutable_l1();
+      //l1->set_nbins(1);
+      //l1->set_min(0);
+      //l1->set_max(0);
       
       
       const MaterialProperties* matProp = homogenousSrfMat->material(Vector2D(0, 0));
@@ -125,6 +160,7 @@ Acts::ProtobufMaterialMapWriter::writeDelimitedTo(
 
   // Write the size.
   const int size = message.ByteSize();
+  //std::cout << __FUNCTION__ << ": size: " << size << std::endl;
   output.WriteVarint32(size);
 
   uint8_t* buffer = output.GetDirectBufferForNBytesAndAdvance(size);

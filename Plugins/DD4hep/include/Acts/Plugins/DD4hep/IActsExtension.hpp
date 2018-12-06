@@ -96,6 +96,9 @@ class IActsExtension {
   virtual bool isEndcap() const = 0;
   /// Indicates that the DD4hep::DetElement is a layer
   virtual bool isLayer() const = 0;
+  /// Indicates that the DD4hep::DetElement is a volume
+  virtual bool
+  isVolume() const = 0;
   /// Bool returning true if the layers should carry material using material
   /// mapping
   /// @note automatically set when the material bins are set

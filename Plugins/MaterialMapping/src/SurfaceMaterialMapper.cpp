@@ -102,7 +102,6 @@ void
 Acts::SurfaceMaterialMapper::checkAndInsert(State&         mState,
                                             const Surface& surface) const
 {
-
   // check if the surface has a proxy
   if (surface.associatedMaterial() != nullptr) {
     // we need a dynamic_cast to a surface material proxy
@@ -137,7 +136,7 @@ Acts::SurfaceMaterialMapper::mapMaterialTrack(
 {
   // Neutral curvilinear parameters
   NeutralCurvilinearParameters start(
-      nullptr, mTrack.position(), mTrack.direction());
+      nullptr, mTrack.first.first, mTrack.first.second);
 
   // Prepare Action list and abort list
   using DebugOutput              = detail::DebugOutputActor;
@@ -154,15 +153,16 @@ Acts::SurfaceMaterialMapper::mapMaterialTrack(
   auto        mcResult = result.get<MaterialSurfaceCollector::result_type>();
   auto        mappingSurfaces = mcResult.collected;
 
-  // Retrieve the recorded material
-  const auto& rMaterial = mTrack.recordedMaterialProperties();
-
+  // Retrieve the recorded material from the recorded material track
+  const auto& rMaterial = mTrack.second.materialInteractions;
   ACTS_VERBOSE("Retrieved " << rMaterial.size()
                             << " recorded material properties to map.")
 
+  // These should be mapped onto the mapping surfaces found
   ACTS_VERBOSE("Found     " << mappingSurfaces.size()
                             << " mapping surfaces for this track.");
 
+<<<<<<< HEAD
   // Prepare the assignment store
   std::vector<AssignedMaterialProperties> assignedMaterial;
   assignedMaterial.reserve(mappingSurfaces.size());
@@ -180,44 +180,50 @@ Acts::SurfaceMaterialMapper::mapMaterialTrack(
       AssignedMaterialProperties amp(
           mSurface.surface->geoID(), msIntersection.position, pathCorrection);
       assignedMaterial.push_back(std::move(amp));
-    }
-  }
+=======
+  // Run the mapping process, i.e. take the recorded material and map it
+  // onto the mapping surfaces
+  //
+  // The material steps and surfaces are assumed to be ordered along the
+  // mapping ray:
+  auto rmIter = rMaterial.begin();
+  auto sfIter = mappingSurfaces.begin();
 
-  ACTS_VERBOSE("Prepared  " << assignedMaterial.size()
-                            << " assignment stores for this event.");
+  // to minimize the lookup
+  GeometryID lastID    = GeometryID();
+  GeometryID currentID = GeometryID();
+  Vector3D   currentPos(0., 0., 0);
+  double     currentPathCorrection = 0.;
+  auto       currentAccMaterial    = mState.accumulatedMaterial.end();
 
-  if (!assignedMaterial.empty()) {
-    // Match the recorded material to the assigment stores
-    auto aStore = assignedMaterial.begin();
-    // This assumes ordered recorded material
-    for (auto rmp : rMaterial) {
-      // if it's not the last & the next one is closer : switch
-      if (aStore != assignedMaterial.end() - 1) {
-        if ((aStore->assignedPosition - rmp.second).norm()
-            > ((aStore + 1)->assignedPosition - rmp.second).norm()) {
-          ++aStore;
-        }
-      }
-      // Now assign
-      aStore->assignedProperties.push_back(rmp);
+  // Assign the recorded ones, break if you hit an end
+  while (rmIter != rMaterial.end() && sfIter != mappingSurfaces.end()) {
+    // First check if the distance to the next surface is already closer
+    // don't do the check for the last one, stay on the last possible surface
+    if (sfIter != mappingSurfaces.end() - 1
+        && (rmIter->position - sfIter->position).norm()
+            > (rmIter->position - (sfIter + 1)->position).norm()) {
+      // switch to next assignment surface
+      // @TODO: empty hits, i.e. surface is hit but,
+      // has no recorded material assigned
+      ++sfIter;
+>>>>>>> c9007832... remove RecordedMaterialTrack, synchronise MaterialMapping wiht MaterialInteraction
     }
-
-    // Now move the assigned properties into accumulation map
-    for (auto aprop : assignedMaterial) {
-      /// get the according map
-      auto aSurfaceMaterial = mState.accumulatedMaterial.find(aprop.geoID);
-      // you have assigned material
-      if (!aprop.assignedProperties.empty()) {
-        aSurfaceMaterial->second.accumulate(aprop.assignedPosition,
-                                            aprop.assignedProperties,
-                                            1. / aprop.pathCorrection);
-      } else {
-        // assign a single vacuum step to regulate the (correct) averaging
-        aSurfaceMaterial->second.accumulate(aprop.assignedPosition,
-                                            MaterialProperties{1.});
-      }
-      // now average over the event
-      aSurfaceMaterial->second.eventAverage();
+    // get the current Surface ID
+    currentID = sfIter->surface->geoID();
+    // We have work to do: the assignemnt surface has changed
+    if (currentID != lastID) {
+      // Let's (re-)assess the information
+      lastID     = currentID;
+      currentPos = (sfIter)->position;
+      currentPathCorrection
+          = sfIter->surface->pathCorrection(currentPos, sfIter->direction);
+      currentAccMaterial = mState.accumulatedMaterial.find(currentID);
     }
+    // Now assign the material for the accumulation process
+    currentAccMaterial->second.accumulate(
+        currentPos, rmIter->materialProperties, currentPathCorrection);
+    // Switch to next material
+    ++rmIter;
   }
 }

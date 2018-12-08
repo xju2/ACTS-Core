@@ -35,8 +35,8 @@ struct MaterialInteraction
 
   /// The position information of the material hit
   Vector3D position = Vector3D(0., 0., 0);
-  /// The direction information of the material hit
-  Vector3D direction = Vector3D(0., 0., 0);
+  /// The momentum information of the track at the material hit
+  Vector3D momentum = Vector3D(1., 0., 0);
   /// The calculated path & applied path correction factor
   double pathCorrection = 1.;
   /// The (passsed) material properties
@@ -77,7 +77,7 @@ struct MaterialInteractor
     /// The accumulated materialInL0
     double materialInL0 = 0.;
     /// This one is only filled when recordInteractions is switched on
-    std::vector<MaterialInteraction> materialInteractions;
+    std::vector<MaterialInteraction> materialInteractions = {};
   };
 
   using result_type = this_result;
@@ -320,5 +320,14 @@ private:
     }
   }
 };
+
+/// Using some short hands for Recorded Material
+using RecordedMaterial = MaterialInteractor::result_type;
+
+/// And recorded material track
+/// - this is start:  position, start momentum
+///   and the Recorded material
+using RecordedMaterialTrack
+    = std::pair<std::pair<Acts::Vector3D, Acts::Vector3D>, RecordedMaterial>;
 
 }  // end of namespace Acts

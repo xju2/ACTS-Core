@@ -68,12 +68,7 @@ public:
   /// @param tddID is the geometry ID that will be assigned
   GeometryID&
   operator=(const GeometryID& tddID)
-  {
-    if (&tddID != this) {
-      m_value = tddID.m_value;
-    }
-    return (*this);
-  }
+      = default;
 
   /// Add some stuff - a new GeometryID
   ///
@@ -102,6 +97,15 @@ public:
   operator==(const GeometryID& tddID) const
   {
     return (m_value == tddID.value());
+  }
+
+  /// Non-equality operator
+  ///
+  /// @param tddID is the geometry ID that will be compared on equality
+  bool
+  operator!=(const GeometryID& tddID) const
+  {
+    return !operator==(tddID);
   }
 
   /// Add some stuff

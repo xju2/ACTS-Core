@@ -239,7 +239,7 @@ public:
   /// Return method for the associated Material to this surface
   /// @return SurfaceMaterial as plain pointer, can be nullptr
   const SurfaceMaterial*
-  associatedMaterial() const;
+  surfaceMaterial() const;
 
   /// Set Associated Layer
   /// Many surfaces can be associated to a Layer, but it might not be known yet
@@ -252,11 +252,11 @@ public:
   /// Set Associated SurfaceMaterial
   /// The material is usually derived in a complicated way and loaded from
   /// a framework given source. As various srufaces may share the same
+  /// for several components, it is provided as a shared pointer
   ///
-  /// @param material Material description this given and stored as a shared
-  /// pointer
+  /// @param material Material description from external source
   void
-  setAssociatedMaterial(std::shared_ptr<const SurfaceMaterial> material);
+  assignSurfaceMaterial(std::shared_ptr<const SurfaceMaterial> material);
 
   /// The templated Parameters onSurface method
   /// In order to avoid unneccessary geometrical operations, it checks on the

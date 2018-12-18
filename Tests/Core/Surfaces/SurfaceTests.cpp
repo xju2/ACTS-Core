@@ -139,7 +139,7 @@ namespace Test {
     Vector3D zero{0., 0., 0.};
     BOOST_CHECK_EQUAL(zero, normal);
     // pathCorrection is pure virtual
-    // associatedMaterial()
+    // surfaceMaterial()
     MaterialProperties newProperties{0.5, 0.5, 0.5, 20., 10., 5.};
     auto               pNewMaterial
         = std::make_shared<const HomogeneousSurfaceMaterial>(newProperties);

@@ -11,9 +11,11 @@
 ///////////////////////////////////////////////////////////////////
 
 #pragma once
+
 #include "Acts/Utilities/Definitions.hpp"
+#include "Acts/Utilities/GeometryID.hpp"
 #include "Acts/Utilities/GeometrySignature.hpp"
-// STD
+
 #include <functional>
 #include <map>
 #include <memory>
@@ -24,6 +26,7 @@ namespace Acts {
 class TrackingVolume;
 class DetachedTrackingVolume;
 class Surface;
+class SurfaceMaterial;
 class PerigeeSurface;
 class Layer;
 
@@ -31,6 +34,8 @@ using TrackingVolumePtr         = std::shared_ptr<const TrackingVolume>;
 using MutableTrackingVolumePtr  = std::shared_ptr<TrackingVolume>;
 using DetachedTrackingVolumePtr = std::shared_ptr<const DetachedTrackingVolume>;
 using DetachedVolumeVector      = std::vector<DetachedTrackingVolumePtr>;
+using SurfaceMaterialMap
+    = std::map<GeometryID, std::shared_ptr<const SurfaceMaterial>>;
 
 ///  @class TrackingGeometry
 ///
@@ -50,7 +55,10 @@ public:
   /// Constructor
   ///
   /// @param highestVolume is the world volume
-  TrackingGeometry(const MutableTrackingVolumePtr& highestVolume);
+  /// @param surfaceMaterial the loaded material maps to be assigned
+  TrackingGeometry(const MutableTrackingVolumePtr& highestVolume,
+                   const SurfaceMaterialMap&       surfaceMaterialMap
+                   = SurfaceMaterialMap());
 
   /// Destructor
   ~TrackingGeometry();

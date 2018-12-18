@@ -198,15 +198,15 @@ Acts::DD4hepLayerBuilder::negativeLayers() const
 
         // set material surface
         if (layerPos == Acts::LayerMaterialPos::inner) {
-          innerBoundary->setAssociatedMaterial(materialProxy);
+          innerBoundary->assignSurfaceMaterial(materialProxy);
         }
 
         if (layerPos == Acts::LayerMaterialPos::outer) {
-          outerBoundary->setAssociatedMaterial(materialProxy);
+          outerBoundary->assignSurfaceMaterial(materialProxy);
         }
 
         if (layerPos == Acts::LayerMaterialPos::central) {
-          centralSurface->setAssociatedMaterial(materialProxy);
+          centralSurface->assignSurfaceMaterial(materialProxy);
         }
 
         // collect approach surfaces
@@ -267,7 +267,7 @@ Acts::DD4hepLayerBuilder::negativeLayers() const
             materialProperties);
       }
 
-      negativeLayer->surfaceRepresentation().setAssociatedMaterial(
+      negativeLayer->surfaceRepresentation().assignSurfaceMaterial(
           surfMaterial);
       // push back created layer
       layers.push_back(negativeLayer);
@@ -402,15 +402,15 @@ Acts::DD4hepLayerBuilder::centralLayers() const
         // check if the material should be set to the inner or outer boundary
         // and set it in case
         if (layerPos == Acts::LayerMaterialPos::inner) {
-          innerBoundary->setAssociatedMaterial(materialProxy);
+          innerBoundary->assignSurfaceMaterial(materialProxy);
         }
 
         if (layerPos == Acts::LayerMaterialPos::outer) {
-          outerBoundary->setAssociatedMaterial(materialProxy);
+          outerBoundary->assignSurfaceMaterial(materialProxy);
         }
 
         if (layerPos == Acts::LayerMaterialPos::central) {
-          centralSurface->setAssociatedMaterial(materialProxy);
+          centralSurface->assignSurfaceMaterial(materialProxy);
         }
 
         // collect the surfaces
@@ -473,10 +473,10 @@ Acts::DD4hepLayerBuilder::centralLayers() const
         surfMaterial = std::make_shared<const HomogeneousSurfaceMaterial>(
             materialProperties);
 
-        //   innerBoundary->setAssociatedMaterial(surfMaterial);
+        //   innerBoundary->assignSurfaceMaterial(surfMaterial);
       }
 
-      centralLayer->surfaceRepresentation().setAssociatedMaterial(surfMaterial);
+      centralLayer->surfaceRepresentation().assignSurfaceMaterial(surfMaterial);
 
       // push back created layer
       layers.push_back(centralLayer);
@@ -632,15 +632,15 @@ Acts::DD4hepLayerBuilder::positiveLayers() const
 
         // set material surface
         if (layerPos == Acts::LayerMaterialPos::inner) {
-          innerBoundary->setAssociatedMaterial(materialProxy);
+          innerBoundary->assignSurfaceMaterial(materialProxy);
         }
 
         if (layerPos == Acts::LayerMaterialPos::outer) {
-          outerBoundary->setAssociatedMaterial(materialProxy);
+          outerBoundary->assignSurfaceMaterial(materialProxy);
         }
 
         if (layerPos == Acts::LayerMaterialPos::central) {
-          centralSurface->setAssociatedMaterial(materialProxy);
+          centralSurface->assignSurfaceMaterial(materialProxy);
         }
         // collect approach surfaces
         aSurfaces.push_back(innerBoundary);
@@ -699,7 +699,7 @@ Acts::DD4hepLayerBuilder::positiveLayers() const
         surfMaterial = std::make_shared<const HomogeneousSurfaceMaterial>(
             materialProperties);
       }
-      positiveLayer->surfaceRepresentation().setAssociatedMaterial(
+      positiveLayer->surfaceRepresentation().assignSurfaceMaterial(
           surfMaterial);
 
       // push back created layer

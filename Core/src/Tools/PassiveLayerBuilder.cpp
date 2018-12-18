@@ -76,7 +76,7 @@ Acts::PassiveLayerBuilder::constructLayers()
         // create homogeneous material
         material = m_cfg.centralLayerMaterial.at(icl);
         // sign it to the surface
-        cLayer->surfaceRepresentation().setAssociatedMaterial(material);
+        cLayer->surfaceRepresentation().assignSurfaceMaterial(material);
       }
       // push it into the layer vector
       m_cLayers.push_back(cLayer);
@@ -128,8 +128,8 @@ Acts::PassiveLayerBuilder::constructLayers()
         // create homogeneous material
         material = m_cfg.posnegLayerMaterial.at(ipnl);
         // sign it to the surface
-        nLayer->surfaceRepresentation().setAssociatedMaterial(material);
-        pLayer->surfaceRepresentation().setAssociatedMaterial(material);
+        nLayer->surfaceRepresentation().assignSurfaceMaterial(material);
+        pLayer->surfaceRepresentation().assignSurfaceMaterial(material);
       }
       // push it into the layer vector
       m_nLayers.push_back(nLayer);

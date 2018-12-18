@@ -223,7 +223,7 @@ namespace Test {
         std::shared_ptr<Plane_type> mSurface
             = Surface::makeShared<Plane_type>(mModuleTransform, mBounds);
         // let's assign the material
-        mSurface->setAssociatedMaterial(moduleMaterialPtr);
+        mSurface->assignSurfaceMaterial(moduleMaterialPtr);
 
         surface_cache.push_back(mSurface);            // copy
         layerModules.push_back(std::move(mSurface));  // original
@@ -238,7 +238,7 @@ namespace Test {
       auto approachSurfaces = pLayer->approachDescriptor()->containedSurfaces();
       auto mutableOuterSurface
           = const_cast<Acts::Surface*>(approachSurfaces.at(1));
-      mutableOuterSurface->setAssociatedMaterial(layerMaterialPtr);
+      mutableOuterSurface->assignSurfaceMaterial(layerMaterialPtr);
       /// now push back the layer
       pLayers.push_back(pLayer);
 

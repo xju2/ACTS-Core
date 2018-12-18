@@ -12,15 +12,22 @@
 
 #pragma once
 #include <list>
+#include <map>
 #include <memory>
 #include "Acts/Tools/ITrackingGeometryBuilder.hpp"
 #include "Acts/Tools/ITrackingVolumeBuilder.hpp"
 #include "Acts/Tools/ITrackingVolumeHelper.hpp"
 #include "Acts/Utilities/Definitions.hpp"
+#include "Acts/Utilities/GeometryID.hpp"
 #include "Acts/Utilities/Logger.hpp"
 
 namespace Acts {
+
 class TrackingGeometry;
+class SurfaceMaterial;
+
+using SurfaceMaterialMap
+    = std::map<GeometryID, std::shared_ptr<const SurfaceMaterial>>;
 
 /// @class GeometryBuilder
 ///
@@ -42,11 +49,14 @@ public:
   struct Config
   {
 
-    /// the list of tracking volume builders
+    /// The list of tracking volume builders
     std::list<std::shared_ptr<const ITrackingVolumeBuilder>>
         trackingVolumeBuilders{};
 
-    /// the tracking volume helper for detector construction
+    /// The surface Material map for assigning geometry
+    SurfaceMaterialMap surfaceMaterialMap = SurfaceMaterialMap();
+
+    /// The tracking volume helper for detector construction
     std::shared_ptr<const ITrackingVolumeHelper> trackingVolumeHelper = nullptr;
   };
 

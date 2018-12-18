@@ -391,6 +391,7 @@ Acts::TrackingVolume::interlinkLayers()
 
 void
 Acts::TrackingVolume::closeGeometry(
+    const SurfaceMaterialMap& surfaceMaterialMap,
     std::map<std::string, const TrackingVolume*>& volumeMap,
     size_t& vol)
 {
@@ -404,6 +405,16 @@ Acts::TrackingVolume::closeGeometry(
   auto thisVolume = const_cast<TrackingVolume*>(this);
   thisVolume->assignGeoID(volumeID);
 
+  // This functor checks and assigns the material for a given
+  auto assignSurfaceMaterial
+      = [&surfaceMaterialMap](Surface& sf, GeometryID geoID) -> void {
+    // Try to find the surface in the map
+    auto sMaterial = surfaceMaterialMap.find(geoID);
+    if (sMaterial != surfaceMaterialMap.end()) {
+      sf.assignSurfaceMaterial(std::move(sMaterial->second));
+    }
+  };
+
   // loop over the boundary surfaces
   geo_id_value iboundary = 0;
   // loop over the boundary surfaces
@@ -416,6 +427,7 @@ Acts::TrackingVolume::closeGeometry(
     // now assign to the boundary surface
     auto& mutableBSurface = *(const_cast<Surface*>(&bSurface));
     mutableBSurface.assignGeoID(boundaryID);
+    assignSurfaceMaterial(mutableBSurface, boundaryID);
   }
 
   // A) this is NOT a container volume, volumeID is already incremented
@@ -430,7 +442,7 @@ Acts::TrackingVolume::closeGeometry(
         layerID.add(++ilayer, GeometryID::layer_mask);
         // now close the geometry
         auto mutableLayerPtr = std::const_pointer_cast<Layer>(layerPtr);
-        mutableLayerPtr->closeGeometry(layerID);
+        mutableLayerPtr->closeGeometry(surfaceMaterialMap, layerID);
       }
     }
   } else {
@@ -439,26 +451,9 @@ Acts::TrackingVolume::closeGeometry(
     for (auto& volumesIter : m_confinedVolumes->arrayObjects()) {
       auto mutableVolumesIter
           = std::const_pointer_cast<TrackingVolume>(volumesIter);
-      mutableVolumesIter->closeGeometry(volumeMap, vol);
+      mutableVolumesIter->closeGeometry(surfaceMaterialMap, volumeMap, vol);
     }
   }
-
-  // @todo update that
-  // auto confinedDenseVolumes= tvol.confinedDenseVolumes();
-  // if (!confinedDenseVolumes.empty()) {
-  //   for (auto& volumesIter : confinedDenseVolumes)
-  //     if (volumesIter) closeGeometry(*volumesIter, &tvol, ++cCounter);
-  // }
-  //
-  // // should detached tracking volumes be part of the tracking geometry ? */
-  // auto confinedDetachedVolumes = tvol.confinedDetachedVolumes();
-  // if (!confinedDetachedVolumes.empty()) {
-  //   for (auto& volumesIter : confinedDetachedVolumes)
-  //     if (volumesIter
-  //         && tvol.inside(volumesIter->trackingVolume()->center(), 0.))
-  //       closeGeometry(*(volumesIter->trackingVolume()), &tvol, ++cCounter);
-  // }
-  //
 }
 
 void

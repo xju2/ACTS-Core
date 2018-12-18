@@ -38,6 +38,10 @@ class ApproachDescriptor;
 // Simple surface intersection
 using SurfaceIntersection = ObjectIntersection<Surface>;
 
+// Material assignment
+using SurfaceMaterialMap
+    = std::map<GeometryID, std::shared_ptr<const SurfaceMaterial>>;
+
 // master typedef
 class Layer;
 using LayerPtr        = std::shared_ptr<const Layer>;
@@ -378,10 +382,13 @@ private:
   /// Private helper method to close the geometry
   /// - it will set the layer geometry ID for a unique identification
   /// - it will also register the internal sub strucutre
+  ///
+  /// @param surfaceMaterialMap The material description from external source
   /// @param layerID is the geometry id of the volume
   ///                as calculated by the TrackingGeometry
   void
-  closeGeometry(const GeometryID& layerID);
+  closeGeometry(const SurfaceMaterialMap& surfaceMaterialMap,
+                const GeometryID&         layerID);
 };
 
 /// Layers are constructedd with shared_ptr factories, hence the layer array is

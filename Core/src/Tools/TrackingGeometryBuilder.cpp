@@ -44,20 +44,21 @@ Acts::TrackingGeometryBuilder::setLogger(
 std::unique_ptr<const Acts::TrackingGeometry>
 Acts::TrackingGeometryBuilder::trackingGeometry() const
 {
-  // the return geometry with the highest volume
+  // The return geometry with the highest volume
   std::unique_ptr<const TrackingGeometry> trackingGeometry;
   MutableTrackingVolumePtr                highestVolume = nullptr;
-  // loop over the builders and wrap one around the other
+  // Loop over the builders and wrap one around the other
   // -----------------------------
   for (auto& volumeBuilder : m_cfg.trackingVolumeBuilders) {
-    // assign a new highest volume (and potentially wrap around the given
+    // Assign a new highest volume (and potentially wrap around the given
     // highest volume so far)
     highestVolume = volumeBuilder->trackingVolume(highestVolume);
   }  // --------------------------------------------------------------------------------
 
-  // create the TrackingGeometry
+  // Create the TrackingGeoemtry with the provided material map for surfaces
   if (highestVolume) {
-    trackingGeometry.reset(new TrackingGeometry(highestVolume));
+    trackingGeometry.reset(
+        new TrackingGeometry(highestVolume, m_cfg.surfaceMaterialMap));
   }
   // return the geometry to the service
   return (trackingGeometry);

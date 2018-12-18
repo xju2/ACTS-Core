@@ -32,6 +32,7 @@ class DetachedTrackingVolume;
 class GlueVolumesDescriptor;
 class VolumeBounds;
 class Material;
+class SurfaceMaterial;
 
 using TrackingVolumeBoundaryPtr
     = std::shared_ptr<const BoundarySurfaceT<TrackingVolume>>;
@@ -47,6 +48,9 @@ using TrackingVolumeVector = std::vector<TrackingVolumePtr>;
 using LayerArray           = BinnedArray<LayerPtr>;
 using LayerVector          = std::vector<LayerPtr>;
 using DetachedVolumeVector = std::vector<DetachedTrackingVolumePtr>;
+
+using SurfaceMaterialMap
+    = std::map<GeometryID, std::shared_ptr<const SurfaceMaterial>>;
 
 // full intersection with Layer
 using LayerIntersection = FullIntersection<Layer, Surface>;
@@ -446,15 +450,18 @@ private:
   void
   synchronizeLayers(double envelope = 1.) const;
 
-  /// close the Geometry, i.e. set the TDD_ID
+  /// Close the Geometry, i.e. set the GeometryID
   ///
+  /// @param surfaceMaterialMap The map for the surface material
+  ///        to be assigned to the geometry surfaces
   /// @param volumeMap is a map to find the a volume
   ///        by a given name
   /// @param vol is the geometry id of the volume
   ///        as calculated by the TrackingGeometry
   ///
   void
-  closeGeometry(std::map<std::string, const TrackingVolume*>& volumeMap,
+  closeGeometry(const SurfaceMaterialMap& surfaceMaterialMap,
+                std::map<std::string, const TrackingVolume*>& volumeMap,
                 size_t& vol);
 
   /// interlink the layers in this TrackingVolume

@@ -20,13 +20,14 @@
 #include "Acts/Surfaces/Surface.hpp"
 
 Acts::TrackingGeometry::TrackingGeometry(
-    const MutableTrackingVolumePtr& highestVolume)
+    const MutableTrackingVolumePtr& highestVolume,
+    const SurfaceMaterialMap&       surfaceMaterialMap)
   : m_world(highestVolume)
   , m_beam(Surface::makeShared<PerigeeSurface>(s_origin))
 {
-  // close up the geometry
+  // Close up the geometry, this sets the geometry ID and assigns material
   size_t volumeID = 0;
-  highestVolume->closeGeometry(m_trackingVolumes, volumeID);
+  highestVolume->closeGeometry(surfaceMaterialMap, m_trackingVolumes, volumeID);
 }
 
 Acts::TrackingGeometry::~TrackingGeometry() = default;

@@ -116,7 +116,7 @@ struct MaterialInteractor
     // A current surface has been already assigned by the navigator
     // check for material
     if (state.navigation.currentSurface
-        && state.navigation.currentSurface->associatedMaterial()) {
+        && state.navigation.currentSurface->surfaceMaterial()) {
       // Let's set the pre/full/post update stage
       MaterialUpdateStage mStage = fullUpdate;
       // We are at the start surface
@@ -141,7 +141,7 @@ struct MaterialInteractor
       // Get the surface material & properties from them and continue if you
       // found some
       const SurfaceMaterial* sMaterial
-          = state.navigation.currentSurface->associatedMaterial();
+          = state.navigation.currentSurface->surfaceMaterial();
       MaterialProperties mProperties = sMaterial->materialProperties(
           stepper.position(state.stepping), state.stepping.navDir, mStage);
       // Material properties (non-zero) have been found for this configuration

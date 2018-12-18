@@ -13,12 +13,14 @@
 #include "Acts/Plugins/MaterialMapping/SurfaceMaterialMapper.hpp"
 #include "Acts/EventData/NeutralParameters.hpp"
 #include "Acts/Extrapolator/Navigator.hpp"
+#include "Acts/Material/BinnedSurfaceMaterial.hpp"
 #include "Acts/Material/SurfaceMaterialProxy.hpp"
 #include "Acts/Propagator/ActionList.hpp"
 #include "Acts/Propagator/Propagator.hpp"
 #include "Acts/Propagator/StraightLineStepper.hpp"
 #include "Acts/Propagator/detail/DebugOutputActor.hpp"
 #include "Acts/Propagator/detail/StandardAborters.hpp"
+#include "Acts/Utilities/BinUtility.hpp"
 
 Acts::SurfaceMaterialMapper::SurfaceMaterialMapper(
     const Config&                 cfg,
@@ -38,6 +40,7 @@ Acts::SurfaceMaterialMapper::createState(
 {
   // Parse the geometry and find all surfaces with material proxies
   auto world = tGeometry.highestTrackingVolume();
+
   // The Surface material mapping state
   State mState(gctx, mctx);
   resolveMaterialSurfaces(mState, *world);
@@ -102,19 +105,36 @@ void
 Acts::SurfaceMaterialMapper::checkAndInsert(State&         mState,
                                             const Surface& surface) const
 {
+
+  auto surfaceMaterial = surface.surfaceMaterial();
   // check if the surface has a proxy
-  if (surface.associatedMaterial() != nullptr) {
-    // we need a dynamic_cast to a surface material proxy
-    auto smp = dynamic_cast<const SurfaceMaterialProxy*>(
-        surface.associatedMaterial());
-    if (smp != nullptr) {
+  if (surfaceMaterial != nullptr) {
+
+    // We need a dynamic_cast to either a surface material proxy or
+    // proper surface material
+    auto smp = dynamic_cast<const SurfaceMaterialProxy*>(surfaceMaterial);
+
+    // Get the bin utility: try proxy material first
+    const BinUtility* bu = (smp != nullptr) ? (&smp->binUtility()) : nullptr;
+
+    // Second attempt: binned material
+    if (bu != nullptr) {
+      auto bmp = dynamic_cast<const BinnedSurfaceMaterial*>(surfaceMaterial);
+      bu       = (bmp != nullptr) ? (&bmp->binUtility()) : nullptr;
+    }
+
+    auto   geoID    = surface.geoID();
+    size_t volumeID = geoID.value(GeometryID::volume_mask);
+    ACTS_VERBOSE("Material surface found with volumeID " << volumeID);
+    ACTS_VERBOSE("       - surfaceID is " << geoID.value());
+
+    // Creaete a binned type of material
+    if (bu != nullptr) {
       // get the geo id
-      auto   geoID    = surface.geoID();
-      size_t volumeID = geoID.value(GeometryID::volume_mask);
-      ACTS_VERBOSE("Material surface found with volumeID " << volumeID);
-      ACTS_VERBOSE("       - surfaceID is " << geoID.value());
-      mState.accumulatedMaterial[geoID]
-          = AccumulatedSurfaceMaterial(smp->binUtility());
+      mState.accumulatedMaterial[geoID] = AccumulatedSurfaceMaterial(*bu);
+    } else {
+      // Create a homogeneous type of material
+      mState.accumulatedMaterial[geoID] = AccumulatedSurfaceMaterial();
     }
   }
 }
@@ -162,25 +182,6 @@ Acts::SurfaceMaterialMapper::mapMaterialTrack(
   ACTS_VERBOSE("Found     " << mappingSurfaces.size()
                             << " mapping surfaces for this track.");
 
-<<<<<<< HEAD
-  // Prepare the assignment store
-  std::vector<AssignedMaterialProperties> assignedMaterial;
-  assignedMaterial.reserve(mappingSurfaces.size());
-  for (auto& mSurface : mappingSurfaces) {
-    // The material mapping intersection with the surface
-    Intersection msIntersection
-        = mSurface.surface->intersectionEstimate(mState.mappingContext,
-                                                 mTrack.position(),
-                                                 mTrack.direction(),
-                                                 forward,
-                                                 true);
-    if (msIntersection) {
-      double pathCorrection = mSurface.surface->pathCorrection(
-          mState.mappingContext, msIntersection.position, mTrack.direction());
-      AssignedMaterialProperties amp(
-          mSurface.surface->geoID(), msIntersection.position, pathCorrection);
-      assignedMaterial.push_back(std::move(amp));
-=======
   // Run the mapping process, i.e. take the recorded material and map it
   // onto the mapping surfaces
   //
@@ -189,12 +190,17 @@ Acts::SurfaceMaterialMapper::mapMaterialTrack(
   auto rmIter = rMaterial.begin();
   auto sfIter = mappingSurfaces.begin();
 
-  // to minimize the lookup
+  // Use those to minimize the lookup
   GeometryID lastID    = GeometryID();
   GeometryID currentID = GeometryID();
   Vector3D   currentPos(0., 0., 0);
   double     currentPathCorrection = 0.;
   auto       currentAccMaterial    = mState.accumulatedMaterial.end();
+
+  // To remember the bins of this event
+  using MapBin = std::pair<AccumulatedSurfaceMaterial*, std::array<size_t, 3>>;
+  std::multimap<AccumulatedSurfaceMaterial*, std::array<size_t, 3>>
+      touchedMapBins;
 
   // Assign the recorded ones, break if you hit an end
   while (rmIter != rMaterial.end() && sfIter != mappingSurfaces.end()) {
@@ -207,7 +213,6 @@ Acts::SurfaceMaterialMapper::mapMaterialTrack(
       // @TODO: empty hits, i.e. surface is hit but,
       // has no recorded material assigned
       ++sfIter;
->>>>>>> c9007832... remove RecordedMaterialTrack, synchronise MaterialMapping wiht MaterialInteraction
     }
     // get the current Surface ID
     currentID = sfIter->surface->geoID();
@@ -221,9 +226,15 @@ Acts::SurfaceMaterialMapper::mapMaterialTrack(
       currentAccMaterial = mState.accumulatedMaterial.find(currentID);
     }
     // Now assign the material for the accumulation process
-    currentAccMaterial->second.accumulate(
+    auto tBin = currentAccMaterial->second.accumulate(
         currentPos, rmIter->materialProperties, currentPathCorrection);
+    touchedMapBins.insert(MapBin(&(currentAccMaterial->second), tBin));
     // Switch to next material
     ++rmIter;
+  }
+
+  // After mapping this track, average the touched bins
+  for (auto tmapBin : touchedMapBins) {
+    tmapBin.first->trackAverage({tmapBin.second});
   }
 }

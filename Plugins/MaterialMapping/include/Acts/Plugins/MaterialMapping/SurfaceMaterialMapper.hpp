@@ -35,7 +35,7 @@ struct MaterialSurface
   bool
   operator()(const Surface& sf) const
   {
-    return (sf.associatedMaterial() != nullptr);
+    return (sf.surfaceMaterial() != nullptr);
   }
 };
 
@@ -68,36 +68,6 @@ class SurfaceMaterialMapper
 {
 public:
   using StraightLinePropagator = Propagator<StraightLineStepper, Navigator>;
-
-  ///  /// @struct Assigned material
-  ///  ///
-  ///  /// The assgined material properties class is a helper struct, which
-  ///  /// holds:
-  ///  /// - the geometry identification
-  ///  /// - the assigned position from the intersection with the matrix
-  ///
-  ///  ///
-  ///  struct AssignedMaterialProperties
-  ///  {
-  ///    /// GeometryID of object were recorded material properties is assigned
-  ///    GeometryID geoID{0};
-  ///    /// Projected position of the assigned material
-  ///    Vector3D assignedPosition{0., 0., 0.};
-  ///    /// The material information that is assigned (can be multiple steps)
-  ///    std::vector<MaterialProperties> assignedProperties;
-  ///    /// The incident angle correction due to particle incident
-  ///    double pathCorrection{0.};
-  ///
-  ///    /// @brief Constructor for AssignedMaterialProperties
-  ///    ///
-  ///    /// @param gid The GeometryID of the surface
-  ///    /// @param pos The position of the assignment/intersection
-  ///    /// @param pc The pathCorrection to be applied (inverse)
-  ///    AssignedMaterialProperties(GeometryID gid, Vector3D pos, double pc)
-  ///      : geoID(gid), assignedPosition(std::move(pos)), pathCorrection(pc)
-  ///    {
-  ///    }
-  ///  };
 
   /// @struct Config
   ///

@@ -11,18 +11,32 @@
 ///////////////////////////////////////////////////////////////////
 
 #pragma once
+<<<<<<< HEAD
 #include <functional>
+=======
+#include <list>
+#include <map>
+>>>>>>> d7fd59b7... enable SurfaceMaterialMap loading
 #include <memory>
 #include <vector>
 #include "Acts/Tools/ITrackingGeometryBuilder.hpp"
 #include "Acts/Tools/ITrackingVolumeBuilder.hpp"
 #include "Acts/Tools/ITrackingVolumeHelper.hpp"
 #include "Acts/Utilities/Definitions.hpp"
+<<<<<<< HEAD
 #include "Acts/Utilities/GeometryContext.hpp"
+=======
+#include "Acts/Utilities/GeometryID.hpp"
+>>>>>>> d7fd59b7... enable SurfaceMaterialMap loading
 #include "Acts/Utilities/Logger.hpp"
 
 namespace Acts {
+
 class TrackingGeometry;
+class SurfaceMaterial;
+
+using SurfaceMaterialMap
+    = std::map<GeometryID, std::shared_ptr<const SurfaceMaterial>>;
 
 /// @class GeometryBuilder
 ///
@@ -44,14 +58,23 @@ public:
   struct Config
   {
 
+<<<<<<< HEAD
     /// the list of tracking volume builders
     std::vector<std::function<std::shared_ptr<TrackingVolume>(
         const GeometryContext& gctx,
         const TrackingVolumePtr&,
         const VolumeBoundsPtr&)>>
         trackingVolumeBuilders;
+=======
+    /// The list of tracking volume builders
+    std::list<std::shared_ptr<const ITrackingVolumeBuilder>>
+        trackingVolumeBuilders{};
+>>>>>>> d7fd59b7... enable SurfaceMaterialMap loading
 
-    /// the tracking volume helper for detector construction
+    /// The surface Material map for assigning geometry
+    SurfaceMaterialMap surfaceMaterialMap = SurfaceMaterialMap();
+
+    /// The tracking volume helper for detector construction
     std::shared_ptr<const ITrackingVolumeHelper> trackingVolumeHelper = nullptr;
   };
 

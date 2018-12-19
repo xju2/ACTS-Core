@@ -72,7 +72,7 @@ Acts::AccumulatedSurfaceMaterial::trackAverage(
 {
 
   // The touched bins are known, so you can access them directly
-  if (trackBins.size()) {
+  if (not trackBins.empty()) {
     for (auto bin : trackBins) {
       m_accumulatedMaterial[bin[1]][bin[0]].trackAverage();
     }

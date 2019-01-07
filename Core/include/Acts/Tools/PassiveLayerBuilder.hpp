@@ -34,16 +34,17 @@ public:
   /// This nested struct is used to configure the layer building
   struct Config
   {
-    /// string based identification
+    /// String based identification
     std::string layerIdentification;
 
+    // The layer in central position
     std::vector<double> centralLayerRadii;        ///< central layer specs
     std::vector<double> centralLayerHalflengthZ;  ///< central layer specs
     std::vector<double> centralLayerThickness;    ///< central layer specs
     std::vector<std::shared_ptr<const SurfaceMaterial>>
         centralLayerMaterial;  ///< central layer specs
 
-    // the layers at p/e side
+    // The layers at p/e side
     std::vector<double> posnegLayerPositionZ;  ///< p/n layer specs
     std::vector<double> posnegLayerRmin;       ///< p/n layer specs
     std::vector<double> posnegLayerRmax;       ///< p/n layer specs

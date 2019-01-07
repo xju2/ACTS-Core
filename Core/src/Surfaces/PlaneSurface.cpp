@@ -18,6 +18,7 @@
 
 #include "Acts/Surfaces/InfiniteBounds.hpp"
 #include "Acts/Surfaces/RectangleBounds.hpp"
+#include "Acts/Utilities/InstanceFactory.hpp"
 #include "Acts/Utilities/ThrowAssert.hpp"
 
 Acts::PlaneSurface::PlaneSurface(const PlaneSurface& other)

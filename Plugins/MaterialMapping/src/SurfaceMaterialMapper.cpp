@@ -14,12 +14,13 @@
 #include "Acts/EventData/NeutralParameters.hpp"
 #include "Acts/Extrapolator/Navigator.hpp"
 #include "Acts/Material/BinnedSurfaceMaterial.hpp"
-#include "Acts/Material/SurfaceMaterialProxy.hpp"
+#include "Acts/Material/ProtoSurfaceMaterial.hpp"
 #include "Acts/Propagator/ActionList.hpp"
 #include "Acts/Propagator/Propagator.hpp"
 #include "Acts/Propagator/StraightLineStepper.hpp"
 #include "Acts/Propagator/detail/DebugOutputActor.hpp"
 #include "Acts/Propagator/detail/StandardAborters.hpp"
+#include "Acts/Utilities/BinAdjustment.hpp"
 #include "Acts/Utilities/BinUtility.hpp"
 
 Acts::SurfaceMaterialMapper::SurfaceMaterialMapper(
@@ -110,30 +111,40 @@ Acts::SurfaceMaterialMapper::checkAndInsert(State&         mState,
   // check if the surface has a proxy
   if (surfaceMaterial != nullptr) {
 
+    auto   geoID    = surface.geoID();
+    size_t volumeID = geoID.value(GeometryID::volume_mask);
+    ACTS_INFO("Material surface found with volumeID " << volumeID);
+    ACTS_INFO("       - surfaceID is " << geoID.toString());
+
     // We need a dynamic_cast to either a surface material proxy or
     // proper surface material
-    auto smp = dynamic_cast<const SurfaceMaterialProxy*>(surfaceMaterial);
+    auto smp = dynamic_cast<const ProtoSurfaceMaterial*>(surfaceMaterial);
 
     // Get the bin utility: try proxy material first
     const BinUtility* bu = (smp != nullptr) ? (&smp->binUtility()) : nullptr;
-
-    // Second attempt: binned material
-    if (bu != nullptr) {
-      auto bmp = dynamic_cast<const BinnedSurfaceMaterial*>(surfaceMaterial);
-      bu       = (bmp != nullptr) ? (&bmp->binUtility()) : nullptr;
+    if (bu) {
+      // Screen output for Binned Surface material
+      ACTS_INFO("       - (proto) binning is " << *bu);
+      // Now update
+      BinUtility buAdjusted = adjustBinUtility(*bu, surface);
+      // Screen output for Binned Surface material
+      ACTS_INFO("       - adjusted binning is " << buAdjusted);
+      mState.accumulatedMaterial[geoID]
+          = AccumulatedSurfaceMaterial(buAdjusted);
+      return;
     }
 
-    auto   geoID    = surface.geoID();
-    size_t volumeID = geoID.value(GeometryID::volume_mask);
-    ACTS_VERBOSE("Material surface found with volumeID " << volumeID);
-    ACTS_VERBOSE("       - surfaceID is " << geoID.value());
-
+    // Second attempt: binned material
+    auto bmp = dynamic_cast<const BinnedSurfaceMaterial*>(surfaceMaterial);
+    bu       = (bmp != nullptr) ? (&bmp->binUtility()) : nullptr;
     // Creaete a binned type of material
     if (bu != nullptr) {
-      // get the geo id
+      // Screen output for Binned Surface material
+      ACTS_INFO("       - binning is " << *bu);
       mState.accumulatedMaterial[geoID] = AccumulatedSurfaceMaterial(*bu);
     } else {
       // Create a homogeneous type of material
+      ACTS_INFO("       - this is homogeneous material.");
       mState.accumulatedMaterial[geoID] = AccumulatedSurfaceMaterial();
     }
   }

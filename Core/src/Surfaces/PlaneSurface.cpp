@@ -54,7 +54,7 @@ Acts::PlaneSurface::PlaneSurface(const Vector3D& center, const Vector3D& normal)
   // curvilinear surfaces are boundless
   Transform3D transform{curvilinearRotation};
   transform.pretranslate(center);
-  Surface::m_transform = std::make_shared<const Transform3D>(transform);
+  Surface::m_transform = make_shared_transform(transform);
 }
 
 Acts::PlaneSurface::PlaneSurface(
@@ -95,7 +95,7 @@ Acts::PlaneSurface::PlaneSurface(const variant_data& vardata)
 
   if (payload.count("transform") != 0u) {
     // we have a transform
-    auto trf = std::make_shared<const Transform3D>(
+    auto trf = make_shared_transform(
         from_variant<Transform3D>(payload.get<variant_map>("transform")));
     m_transform = trf;
   }

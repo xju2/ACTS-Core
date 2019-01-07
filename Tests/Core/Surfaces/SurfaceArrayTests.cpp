@@ -64,7 +64,7 @@ namespace Test {
 
         auto bounds = std::make_shared<const RectangleBounds>(2, 1);
 
-        auto transptr = std::make_shared<const Transform3D>(trans);
+        auto                           transptr = make_shared_transform(trans);
         std::shared_ptr<const Surface> srf
             = Surface::makeShared<PlaneSurface>(transptr, bounds);
 
@@ -101,7 +101,7 @@ namespace Test {
 
         auto bounds = std::make_shared<const RectangleBounds>(w, h);
 
-        auto transptr = std::make_shared<const Transform3D>(trans);
+        auto                           transptr = make_shared_transform(trans);
         std::shared_ptr<const Surface> srf
             = Surface::makeShared<PlaneSurface>(transptr, bounds);
 
@@ -131,7 +131,7 @@ namespace Test {
 
         auto bounds = std::make_shared<const RectangleBounds>(2, 1.5);
 
-        auto transptr = std::make_shared<const Transform3D>(trans);
+        auto                           transptr = make_shared_transform(trans);
         std::shared_ptr<const Surface> srf
             = Surface::makeShared<PlaneSurface>(transptr, bounds);
 
@@ -265,10 +265,9 @@ namespace Test {
   BOOST_AUTO_TEST_CASE(SurfaceArray_singleElement)
   {
     double w = 3, h = 4;
-    auto   bounds = std::make_shared<const RectangleBounds>(w, h);
-    auto   transptr
-        = std::make_shared<const Transform3D>(Transform3D::Identity());
-    auto srf = Surface::makeShared<PlaneSurface>(transptr, bounds);
+    auto   bounds   = std::make_shared<const RectangleBounds>(w, h);
+    auto   transptr = make_shared_transform(Transform3D::Identity());
+    auto   srf      = Surface::makeShared<PlaneSurface>(transptr, bounds);
 
     SurfaceArray sa(srf);
 

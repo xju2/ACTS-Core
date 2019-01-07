@@ -103,7 +103,7 @@ Acts::DiscSurface::DiscSurface(const variant_data& vardata) : GeometryObject()
 
   if (payload.count("transform") != 0u) {
     // we have a transform
-    auto trf = std::make_shared<const Transform3D>(
+    auto trf = make_shared_transform(
         from_variant<Transform3D>(payload.get<variant_map>("transform")));
     m_transform = trf;
   }

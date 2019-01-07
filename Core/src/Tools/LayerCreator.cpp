@@ -95,8 +95,7 @@ Acts::LayerCreator::cylinderLayer(
   // correctly defined using the halflength
   if (!transform) {
     // double shift = -(layerZ + envZShift);
-    transform
-        = std::make_shared<const Transform3D>(Translation3D(0., 0., -layerZ));
+    transform = make_shared_transform(Translation3D(0., 0., -layerZ));
     ACTS_VERBOSE(" - layer z shift  = " << -layerZ);
   }
 
@@ -181,8 +180,7 @@ Acts::LayerCreator::cylinderLayer(
   // we need to transform in case layerZ != 0, so that the layer will be
   // correctly defined using the halflength
   if (!transform && bTypeZ == equidistant) {
-    transform
-        = std::make_shared<const Transform3D>(Translation3D(0., 0., -layerZ));
+    transform = make_shared_transform(Translation3D(0., 0., -layerZ));
     ACTS_VERBOSE(" - layer z shift    = " << -layerZ);
   }
 
@@ -260,8 +258,7 @@ Acts::LayerCreator::discLayer(
 
   // create the layer transforms if not given
   if (!transform) {
-    transform
-        = std::make_shared<const Transform3D>(Translation3D(0., 0., layerZ));
+    transform = make_shared_transform(Translation3D(0., 0., layerZ));
   }
   // create the surface array
   std::unique_ptr<SurfaceArray> sArray;
@@ -331,8 +328,7 @@ Acts::LayerCreator::discLayer(
 
   // create the layer transforms if not given
   if (!transform) {
-    transform
-        = std::make_shared<const Transform3D>(Translation3D(0., 0., layerZ));
+    transform = make_shared_transform(Translation3D(0., 0., layerZ));
   }
 
   // create the surface array
@@ -420,8 +416,8 @@ Acts::LayerCreator::planeLayer(
   // layer will be correctly defined
   if (!transform) {
     // double shift = -(layerZ + envZShift);
-    transform = std::make_shared<const Transform3D>(
-        Translation3D(-centerX, -centerY, -centerZ));
+    transform
+        = make_shared_transform(Translation3D(-centerX, -centerY, -centerZ));
     ACTS_VERBOSE(" - layer shift  = "
                  << "("
                  << -centerX

@@ -73,7 +73,7 @@ namespace Test {
         trafo.translation() = translations[i];
         // Create the detector element
         auto detElement = std::make_unique<const DetectorElementStub>(
-            std::make_shared<const Transform3D>(trafo),
+            make_shared_transform(trafo),
             rBounds,
             1. * units::_um,
             surfaceMaterial);
@@ -91,11 +91,10 @@ namespace Test {
 
         std::unique_ptr<SurfaceArray> surArray(new SurfaceArray(surfaces[i]));
 
-        layers[i]
-            = PlaneLayer::create(std::make_shared<const Transform3D>(trafo),
-                                 rBounds,
-                                 std::move(surArray),
-                                 1. * units::_mm);
+        layers[i] = PlaneLayer::create(make_shared_transform(trafo),
+                                       rBounds,
+                                       std::move(surArray),
+                                       1. * units::_mm);
 
         auto mutableSurface = const_cast<Surface*>(surfaces[i].get());
         mutableSurface->associateLayer(*layers[i]);
@@ -120,15 +119,15 @@ namespace Test {
                                    BinningType::arbitrary,
                                    BinningValue::binX));
 
-      auto trackVolume1 = TrackingVolume::create(
-          std::make_shared<const Transform3D>(trafoVol1),
-          boundsVol,
-          nullptr,
-          std::move(layArr1),
-          layVec,
-          {},
-          {},
-          "Volume 1");
+      auto trackVolume1
+          = TrackingVolume::create(make_shared_transform(trafoVol1),
+                                   boundsVol,
+                                   nullptr,
+                                   std::move(layArr1),
+                                   layVec,
+                                   {},
+                                   {},
+                                   "Volume 1");
       trackVolume1->sign(GeometrySignature::Global);
 
       // Build volume for surfaces with positive x-values
@@ -144,15 +143,15 @@ namespace Test {
                                    BinningType::arbitrary,
                                    BinningValue::binX));
 
-      auto trackVolume2 = TrackingVolume::create(
-          std::make_shared<const Transform3D>(trafoVol2),
-          boundsVol,
-          nullptr,
-          std::move(layArr2),
-          layVec,
-          {},
-          {},
-          "Volume 2");
+      auto trackVolume2
+          = TrackingVolume::create(make_shared_transform(trafoVol2),
+                                   boundsVol,
+                                   nullptr,
+                                   std::move(layArr2),
+                                   layVec,
+                                   {},
+                                   {},
+                                   "Volume 2");
       trackVolume2->sign(GeometrySignature::Global);
 
       // Glue volumes
@@ -188,10 +187,7 @@ namespace Test {
           new BinnedArrayXD<TrackingVolumePtr>(tapVec, std::move(bu)));
 
       MutableTrackingVolumePtr mtvpWorld(TrackingVolume::create(
-          std::make_shared<const Transform3D>(trafoWorld),
-          worldVol,
-          trVolArr,
-          "World"));
+          make_shared_transform(trafoWorld), worldVol, trVolArr, "World"));
 
       mtvpWorld->sign(GeometrySignature::Global);
 

@@ -42,8 +42,8 @@ namespace Test {
     /// Constructor with transform pointer, null or valid, alpha and symmetry
     /// indicator
     Translation3D translation{0., 1., 2.};
-    auto          pTransform = std::make_shared<const Transform3D>(translation);
-    auto          pNullTransform = std::make_shared<const Transform3D>();
+    auto          pTransform     = make_shared_transform(translation);
+    auto          pNullTransform = make_shared_transform();
     // constructor with nullptr transform
     BOOST_TEST(
         Surface::makeShared<PlaneSurface>(pNullTransform, rBounds)->type()
@@ -79,8 +79,8 @@ namespace Test {
     auto rBounds = std::make_shared<const RectangleBounds>(3., 4.);
     /// Test clone method
     Translation3D translation{0., 1., 2.};
-    auto          pTransform = std::make_shared<const Transform3D>(translation);
-    // auto pNullTransform = std::make_shared<const Transform3D>();
+    auto          pTransform = make_shared_transform(translation);
+    // auto pNullTransform = make_shared_transform();
     auto planeSurfaceObject
         = Surface::makeShared<PlaneSurface>(pTransform, rBounds);
     //
@@ -93,8 +93,8 @@ namespace Test {
     BOOST_TEST(pClonedShiftedPlaneSurface->type() == Surface::Plane);
     // Is it in the right place?
     Translation3D translation2{0., 2., 4.};
-    auto pTransform2 = std::make_shared<const Transform3D>(translation2);
-    auto planeSurfaceObject2
+    auto          pTransform2 = make_shared_transform(translation2);
+    auto          planeSurfaceObject2
         = Surface::makeShared<PlaneSurface>(pTransform2, rBounds);
     // these two surfaces should be equivalent now (prematurely testing equality
     // also)
@@ -189,7 +189,7 @@ namespace Test {
     // rectangle bounds
     auto          rBounds = std::make_shared<const RectangleBounds>(3., 4.);
     Translation3D translation{0., 1., 2.};
-    auto          pTransform = std::make_shared<const Transform3D>(translation);
+    auto          pTransform = make_shared_transform(translation);
     auto          planeSurfaceObject
         = Surface::makeShared<PlaneSurface>(pTransform, rBounds);
     auto planeSurfaceObject2
@@ -212,10 +212,9 @@ namespace Test {
   {
     // build
     auto rectBounds = std::make_shared<const RectangleBounds>(5, 10);
-    auto idTrf = std::make_shared<const Transform3D>(Transform3D::Identity());
-    auto rot   = std::make_shared<const Transform3D>(
-        AngleAxis3D(M_PI / 4., Vector3D::UnitZ()));
-    auto         rectSrf = Surface::makeShared<PlaneSurface>(rot, rectBounds);
+    auto idTrf      = make_shared_transform(Transform3D::Identity());
+    auto rot = make_shared_transform(AngleAxis3D(M_PI / 4., Vector3D::UnitZ()));
+    auto rectSrf = Surface::makeShared<PlaneSurface>(rot, rectBounds);
     variant_data rectVariant = rectSrf->toVariantData();
     std::cout << rectVariant << std::endl;
 

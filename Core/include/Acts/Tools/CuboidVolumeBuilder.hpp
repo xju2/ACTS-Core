@@ -184,13 +184,11 @@ CuboidVolumeBuilder::buildSurface(const SurfaceConfig& cfg) const
   if (cfg.detElementConstructor) {
     surface = Surface::makeShared<PlaneSurface>(
         cfg.rBounds,
-        *(cfg.detElementConstructor(
-            std::make_tuple(std::make_shared<const Transform3D>(trafo),
-                            cfg.rBounds,
-                            cfg.thickness))));
+        *(cfg.detElementConstructor(std::make_tuple(
+            make_shared_transform(trafo), cfg.rBounds, cfg.thickness))));
   } else {
-    surface = Surface::makeShared<PlaneSurface>(
-        std::make_shared<const Transform3D>(trafo), cfg.rBounds);
+    surface = Surface::makeShared<PlaneSurface>(make_shared_transform(trafo),
+                                                cfg.rBounds);
   }
   surface->setAssociatedMaterial(cfg.surMat);
   return surface;
@@ -216,7 +214,7 @@ CuboidVolumeBuilder::buildLayer(LayerConfig& cfg) const
                                  cfg.binsZ,
                                  BinningValue::binX,
                                  boost::none,
-                                 std::make_shared<const Transform3D>(trafo));
+                                 make_shared_transform(trafo));
 }
 
 std::pair<double, double>
@@ -296,15 +294,14 @@ CuboidVolumeBuilder::buildVolume(VolumeConfig& cfg) const
                                BinningValue::binX));
 
   // Build TrackingVolume
-  auto trackVolume
-      = TrackingVolume::create(std::make_shared<const Transform3D>(trafo),
-                               bounds,
-                               cfg.material,
-                               std::move(layArr),
-                               layVec,
-                               {},
-                               {},
-                               cfg.name);
+  auto trackVolume = TrackingVolume::create(make_shared_transform(trafo),
+                                            bounds,
+                                            cfg.material,
+                                            std::move(layArr),
+                                            layVec,
+                                            {},
+                                            {},
+                                            cfg.name);
   trackVolume->sign(GeometrySignature::Global);
 
   return trackVolume;
@@ -365,7 +362,7 @@ MutableTrackingVolumePtr
 
   // Create world volume
   MutableTrackingVolumePtr mtvp(TrackingVolume::create(
-      std::make_shared<const Transform3D>(trafo), volume, trVolArr, "World"));
+      make_shared_transform(trafo), volume, trVolArr, "World"));
 
   mtvp->sign(GeometrySignature::Global);
   return mtvp;

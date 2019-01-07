@@ -75,9 +75,9 @@ Acts::CartesianSegmentation::createSegmentationSurfaces(
                           m_activeBounds->boundingBox().halflengthY()));
   // - they are separated by half a thickness in z
   auto mutableReadoutPlaneTransform
-      = std::make_shared<Transform3D>(Transform3D::Identity());
+      = make_shared_transform(Transform3D::Identity());
   auto mutableCounterPlaneTransform
-      = std::make_shared<Transform3D>(Transform3D::Identity());
+      = make_shared_transform(Transform3D::Identity());
   // readout and counter readout bounds, the bounds of the readout plane are
   // like the active ones
   std::shared_ptr<const PlanarBounds> readoutPlaneBounds = moduleBounds;
@@ -171,7 +171,7 @@ Acts::CartesianSegmentation::createSegmentationSurfaces(
       const RotationMatrix3D& boundaryXRotation
           = boundaryStraight ? xBinRotationMatrix : lorentzPlaneRotationMatrix;
       // build the rotation from it
-      auto boundaryXTransform = std::make_shared<const Transform3D>(
+      auto boundaryXTransform = make_shared_transform(
           Translation3D(boundaryXPosition) * boundaryXRotation);
       // the correct bounds for this
       std::shared_ptr<const PlanarBounds> boundaryXBounds
@@ -184,7 +184,7 @@ Acts::CartesianSegmentation::createSegmentationSurfaces(
       // shift by the lorentz angle
       Vector3D lorentzPlanePosition(
           cPosX - readoutDirection * lorentzPlaneShiftX, 0., 0.);
-      auto lorentzPlaneTransform = std::make_shared<const Transform3D>(
+      auto lorentzPlaneTransform = make_shared_transform(
           Translation3D(lorentzPlanePosition) * lorentzPlaneRotationMatrix);
       // lorentz plane surfaces
       segmentationSurfacesX.push_back(Surface::makeShared<PlaneSurface>(
@@ -214,8 +214,8 @@ Acts::CartesianSegmentation::createSegmentationSurfaces(
         = -m_activeBounds->boundingBox().halflengthY() + ibiny * pitchY;
     Vector3D binSurfaceCenter(0., binPosY, 0.);
     // the binning transform
-    auto binTransform = std::make_shared<const Transform3D>(
-        Translation3D(binSurfaceCenter) * yBinRotationMatrix);
+    auto binTransform = make_shared_transform(Translation3D(binSurfaceCenter)
+                                              * yBinRotationMatrix);
     // these are the boundaries
     if (ibiny == 0 || ibiny == m_binUtility->bins(1)) {
       boundarySurfaces.push_back(

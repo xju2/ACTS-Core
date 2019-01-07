@@ -43,10 +43,11 @@ namespace Test {
     // Default ctor is deleted
     // LineSurfaceStub l;
     // ctor with translation, radius, halfz
-    Translation3D translation{0., 1., 2.};
-    Transform3D   transform(translation);
-    auto          pTransform = std::make_shared<const Transform3D>(translation);
-    const double  radius{2.0}, halfz{20.};
+    Translation3D                      translation{0., 1., 2.};
+    Transform3D                        transform(translation);
+    std::shared_ptr<const Transform3D> pTransform
+        = make_shared_transform(translation);
+    const double radius{2.0}, halfz{20.};
     BOOST_CHECK(LineSurfaceStub(pTransform, radius, halfz).constructedOk());
     // ctor with nullptr for LineBounds
     BOOST_CHECK(LineSurfaceStub(pTransform).constructedOk());
@@ -77,9 +78,9 @@ namespace Test {
   BOOST_AUTO_TEST_CASE(LineSurface_allNamedMethods_test)
   {
     // binningPosition()
-    Translation3D translation{0., 1., 2.};
-    Transform3D   transform(translation);
-    auto          pTransform = std::make_shared<const Transform3D>(translation);
+    Translation3D   translation{0., 1., 2.};
+    Transform3D     transform(translation);
+    auto            pTransform = make_shared_transform(translation);
     LineSurfaceStub line(pTransform, 2.0, 20.);
     Vector3D        referencePosition{0., 1., 2.};
     checkCloseVec3D(referencePosition, line.binningPosition(binX));
@@ -158,9 +159,9 @@ namespace Test {
   /// Unit test for testing LineSurface assignment
   BOOST_AUTO_TEST_CASE(LineSurface_assignment_test)
   {
-    Translation3D translation{0., 1., 2.};
-    Transform3D   transform(translation);
-    auto          pTransform = std::make_shared<const Transform3D>(translation);
+    Translation3D   translation{0., 1., 2.};
+    Transform3D     transform(translation);
+    auto            pTransform = make_shared_transform(translation);
     LineSurfaceStub originalLine(pTransform, 2.0, 20.);
     LineSurfaceStub assignedLine(pTransform, 1.0, 1.0);
     BOOST_TEST(assignedLine != originalLine,
@@ -174,10 +175,10 @@ namespace Test {
 
   BOOST_AUTO_TEST_CASE(LineSurface_toVariantData)
   {
-    double        radius = 2.0, hlZ = 20;
-    Translation3D translation{0., 1., 2.};
-    Transform3D   transform(translation);
-    auto          pTransform = std::make_shared<const Transform3D>(translation);
+    double          radius = 2.0, hlZ = 20;
+    Translation3D   translation{0., 1., 2.};
+    Transform3D     transform(translation);
+    auto            pTransform = make_shared_transform(translation);
     LineSurfaceStub line(pTransform, radius, hlZ);
     variant_data    var_line = line.toVariantData();
     std::cout << var_line << std::endl;

@@ -73,7 +73,7 @@ namespace Test {
     Transform3D   transform(translation);
     BOOST_TEST(Surface::Other == SurfaceStub(original, transform).type());
     // need some cruft to make the next one work
-    auto pTransform = std::make_shared<const Transform3D>(translation);
+    auto pTransform = make_shared_transform(translation);
     std::shared_ptr<const Acts::PlanarBounds> p
         = std::make_shared<const RectangleBounds>(5., 10.);
     DetectorElementStub detElement{pTransform, p, 0.2, nullptr};
@@ -86,10 +86,10 @@ namespace Test {
     // build a test object , 'surface'
     std::shared_ptr<const Acts::PlanarBounds> pPlanarBound
         = std::make_shared<const RectangleBounds>(5., 10.);
-    Vector3D      reference{0., 1., 2.};
-    Translation3D translation{0., 1., 2.};
-    auto          pTransform = std::make_shared<const Transform3D>(translation);
-    auto          pLayer     = PlaneLayer::create(pTransform, pPlanarBound);
+    Vector3D           reference{0., 1., 2.};
+    Translation3D      translation{0., 1., 2.};
+    auto               pTransform = make_shared_transform(translation);
+    auto               pLayer = PlaneLayer::create(pTransform, pPlanarBound);
     MaterialProperties properties{0.2, 0.2, 0.2, 20., 10, 5.};
     auto               pMaterial
         = std::make_shared<const HomogeneousSurfaceMaterial>(properties);
@@ -162,12 +162,12 @@ namespace Test {
     // build some test objects
     std::shared_ptr<const Acts::PlanarBounds> pPlanarBound
         = std::make_shared<const RectangleBounds>(5., 10.);
-    Vector3D      reference{0., 1., 2.};
-    Translation3D translation1{0., 1., 2.};
-    Translation3D translation2{1., 1., 2.};
-    auto pTransform1 = std::make_shared<const Transform3D>(translation1);
-    auto pTransform2 = std::make_shared<const Transform3D>(translation2);
-    auto pLayer      = PlaneLayer::create(pTransform1, pPlanarBound);
+    Vector3D           reference{0., 1., 2.};
+    Translation3D      translation1{0., 1., 2.};
+    Translation3D      translation2{1., 1., 2.};
+    auto               pTransform1 = make_shared_transform(translation1);
+    auto               pTransform2 = make_shared_transform(translation2);
+    auto               pLayer = PlaneLayer::create(pTransform1, pPlanarBound);
     MaterialProperties properties{1., 1., 1., 20., 10, 5.};
     auto               pMaterial
         = std::make_shared<const HomogeneousSurfaceMaterial>(properties);

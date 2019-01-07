@@ -71,7 +71,7 @@ namespace Test {
 
     // Build Digitization
     const DigitizationModule digMod(segmentation, 1., 1., 0.);
-    DetectorElementStub      detElem(std::make_shared<const Transform3D>(t3d));
+    DetectorElementStub      detElem(make_shared_transform(t3d));
     auto pSur = Surface::makeShared<PlaneSurface>(recBounds, detElem);
     ActsSymMatrixD<2> cov;
     cov << 0., 0., 0., 0.;
@@ -102,7 +102,7 @@ namespace Test {
     Transform3D t3d2(Transform3D::Identity() * rotationNeg);
     t3d2.translation() = Vector3D(0., 0., 10.005 * units::_m);
 
-    DetectorElementStub detElem2(std::make_shared<const Transform3D>(t3d2));
+    DetectorElementStub detElem2(make_shared_transform(t3d2));
 
     auto pSur2 = Surface::makeShared<PlaneSurface>(recBounds, detElem2);
 
@@ -143,7 +143,7 @@ namespace Test {
     Transform3D t3d3(Transform3D::Identity() * rotationNeg);
     t3d3.translation() = Vector3D(0., 0., 10.005 * units::_m);
 
-    DetectorElementStub detElem3(std::make_shared<const Transform3D>(t3d3));
+    DetectorElementStub detElem3(make_shared_transform(t3d3));
     auto pSur3 = Surface::makeShared<PlaneSurface>(recBounds, detElem3);
 
     PlanarModuleCluster* pmc3

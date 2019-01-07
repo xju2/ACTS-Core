@@ -44,8 +44,8 @@ namespace Test {
     double alpha{M_PI / 8.}, halfPhiSector{M_PI / 16.}, zMin{1.0}, zMax{10.};
     bool   symmetric(false);
     Translation3D translation{0., 1., 2.};
-    auto          pTransform = std::make_shared<const Transform3D>(translation);
-    auto          pNullTransform = std::make_shared<const Transform3D>();
+    auto          pTransform     = make_shared_transform(translation);
+    auto          pNullTransform = make_shared_transform();
     BOOST_TEST(
         Surface::makeShared<ConeSurface>(pNullTransform, alpha, symmetric)
             ->type()
@@ -97,8 +97,8 @@ namespace Test {
     double alpha{M_PI / 8.} /*,halfPhiSector{M_PI/16.}, zMin{1.0}, zMax{10.}*/;
     bool   symmetric(false);
     Translation3D translation{0., 1., 2.};
-    auto          pTransform = std::make_shared<const Transform3D>(translation);
-    // auto pNullTransform = std::make_shared<const Transform3D>();
+    auto          pTransform = make_shared_transform(translation);
+    // auto pNullTransform = make_shared_transform();
     auto coneSurfaceObject
         = Surface::makeShared<ConeSurface>(pTransform, alpha, symmetric);
     //
@@ -205,7 +205,7 @@ namespace Test {
     double alpha{M_PI / 8.} /*, halfPhiSector{M_PI/16.}, zMin{1.0}, zMax{10.}*/;
     bool   symmetric(false);
     Translation3D translation{0., 1., 2.};
-    auto          pTransform = std::make_shared<const Transform3D>(translation);
+    auto          pTransform = make_shared_transform(translation);
     auto          coneSurfaceObject
         = Surface::makeShared<ConeSurface>(pTransform, alpha, symmetric);
     //
@@ -229,7 +229,7 @@ namespace Test {
   {
     double        alpha = M_PI / 2., zMin = 1, zMax = 5, halfPhi = M_PI;
     Translation3D translation{0., 1., 2.};
-    auto          pTransform = std::make_shared<const Transform3D>(translation);
+    auto          pTransform = make_shared_transform(translation);
     auto          cone       = Surface::makeShared<ConeSurface>(
         pTransform, alpha, zMin, zMax, halfPhi);
 

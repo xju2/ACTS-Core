@@ -206,8 +206,7 @@ namespace Test {
           moduleRotation.col(2) = moduleLocalZ;
           // Get the moduleTransform
           std::shared_ptr<Transform3D> mModuleTransform
-              = std::make_shared<Transform3D>(Translation3D(mCenter)
-                                              * moduleRotation);
+              = make_shared_transform(Translation3D(mCenter) * moduleRotation);
           // Create the detector element
           auto detElement = std::make_unique<const DetectorElementStub>(
               mModuleTransform,

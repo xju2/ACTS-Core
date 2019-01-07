@@ -69,7 +69,7 @@ namespace Test {
   {
     (void)index;
     Vector3D center{x, y, z};
-    auto     transform = std::make_shared<Transform3D>();
+    auto     transform = make_shared_transform();
     transform->setIdentity();
     RotationMatrix3D rot;
     rot = AngleAxis3D(a, Vector3D::UnitX()) * AngleAxis3D(b, Vector3D::UnitY())
@@ -180,7 +180,7 @@ namespace Test {
   {
     (void)index;
     Vector3D center{x, y, z};
-    auto     transform = std::make_shared<Transform3D>();
+    auto     transform = make_shared_transform();
     transform->setIdentity();
     RotationMatrix3D rot;
     rot = AngleAxis3D(a, Vector3D::UnitX()) * AngleAxis3D(b, Vector3D::UnitY())
@@ -268,7 +268,7 @@ namespace Test {
     (void)index;
 
     Vector3D center{x, y, z};
-    auto     transform = std::make_shared<Transform3D>();
+    auto     transform = make_shared_transform();
     transform->setIdentity();
     RotationMatrix3D rot;
     rot = AngleAxis3D(a, Vector3D::UnitX()) * AngleAxis3D(b, Vector3D::UnitY())
@@ -366,7 +366,7 @@ namespace Test {
   {
     (void)index;
     Vector3D center{x, y, z};
-    auto     transform = std::make_shared<Transform3D>();
+    auto     transform = make_shared_transform();
     transform->setIdentity();
     RotationMatrix3D rot;
     rot = AngleAxis3D(a, Vector3D::UnitX()) * AngleAxis3D(b, Vector3D::UnitY());
@@ -374,9 +374,10 @@ namespace Test {
     transform->pretranslate(center);
 
     // the straw surface
+    std::shared_ptr<const Transform3D> shared_trf
+        = make_shared_transform(*transform);
     std::shared_ptr<const Surface> pSurface
-        = Surface::makeShared<PerigeeSurface>(
-            std::make_shared<const Transform3D>(*transform));
+        = Surface::makeShared<PerigeeSurface>(shared_trf);
 
     // now create parameters on this surface
     // d0, z0, phi, theta, q/p (1/p)
@@ -444,7 +445,7 @@ namespace Test {
     (void)index;
 
     Vector3D center{x, y, z};
-    auto     transform = std::make_shared<Transform3D>();
+    auto     transform = make_shared_transform();
     transform->setIdentity();
     RotationMatrix3D rot;
     rot = AngleAxis3D(a, Vector3D::UnitX()) * AngleAxis3D(b, Vector3D::UnitY())

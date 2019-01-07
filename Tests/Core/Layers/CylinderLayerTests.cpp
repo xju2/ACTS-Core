@@ -44,16 +44,16 @@ namespace Test {
       // minimally need a Transform3D and a PlanarBounds object (e.g.
       // CylinderBounds) to construct
       Translation3D translation{0., 1., 2.};
-      auto   pTransform = std::make_shared<const Transform3D>(translation);
-      double radius(0.5), halfz(10.);
-      auto   pCylinder = std::make_shared<const CylinderBounds>(radius, halfz);
-      auto   pCylinderLayer = CylinderLayer::create(pTransform, pCylinder);
+      auto          pTransform = make_shared_transform(translation);
+      double        radius(0.5), halfz(10.);
+      auto pCylinder = std::make_shared<const CylinderBounds>(radius, halfz);
+      auto pCylinderLayer = CylinderLayer::create(pTransform, pCylinder);
       BOOST_TEST(pCylinderLayer->layerType() == LayerType::passive);
       // next level: need an array of Surfaces;
       // bounds object, rectangle type
       auto rBounds = std::make_shared<const RectangleBounds>(1., 1.);
       /// Constructor with transform pointer
-      auto pNullTransform = std::make_shared<const Transform3D>();
+      auto pNullTransform = make_shared_transform();
       const std::vector<std::shared_ptr<const Surface>> aSurfaces{
           Surface::makeShared<PlaneSurface>(pNullTransform, rBounds),
           Surface::makeShared<PlaneSurface>(pNullTransform, rBounds)};
@@ -91,10 +91,10 @@ namespace Test {
         CylinderLayerProperties /*, *utf::expected_failures(1)*/)
     {
       Translation3D translation{0., 1., 2.};
-      auto   pTransform = std::make_shared<const Transform3D>(translation);
-      double radius(0.5), halfz(10.);
-      auto   pCylinder = std::make_shared<const CylinderBounds>(radius, halfz);
-      auto   pCylinderLayer = CylinderLayer::create(pTransform, pCylinder);
+      auto          pTransform = make_shared_transform(translation);
+      double        radius(0.5), halfz(10.);
+      auto pCylinder = std::make_shared<const CylinderBounds>(radius, halfz);
+      auto pCylinderLayer = CylinderLayer::create(pTransform, pCylinder);
       // auto planeSurface = pCylinderLayer->surfaceRepresentation();
       BOOST_TEST(pCylinderLayer->surfaceRepresentation().name()
                  == std::string("Acts::CylinderSurface"));
@@ -106,7 +106,7 @@ namespace Test {
       Transform3D   rot;
       rot = AngleAxis3D(M_PI / 4, Vector3D::UnitZ());
 
-      auto pTransform = std::make_shared<const Transform3D>(translation * rot);
+      auto   pTransform = make_shared_transform(translation * rot);
       double radius(0.5), halfz(10.);
       auto   pCylinder = std::make_shared<const CylinderBounds>(radius, halfz);
       auto   pCylinderLayer = std::dynamic_pointer_cast<CylinderLayer>(

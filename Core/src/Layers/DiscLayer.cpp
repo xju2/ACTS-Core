@@ -67,7 +67,7 @@ Acts::DiscLayer::create(const variant_data& vardata)
 
   variant_map payload = data.get<variant_map>("payload");
 
-  auto trf = std::make_shared<const Transform3D>(
+  auto trf = make_shared_transform(
       from_variant<Transform3D>(payload.get<variant_map>("transform")));
 
   LayerType   laytyp;
@@ -109,10 +109,7 @@ Acts::DiscLayer::create(const variant_data& vardata)
     };
 
     sArray = std::make_unique<SurfaceArray>(
-        payload.at("surfacearray"),
-        g2l,
-        l2g,
-        std::make_shared<const Transform3D>(sa_trf));
+        payload.at("surfacearray"), g2l, l2g, make_shared_transform(sa_trf));
   }
 
   // @TODO: Implement ApproachDescriptor serialization
@@ -162,10 +159,8 @@ Acts::DiscLayer::buildApproachDescriptor()
                          + 0.5 * thickness() * Surface::normal(center()));
     Vector3D asnPosition(center()
                          - 0.5 * thickness() * Surface::normal(center()));
-    auto asnTransform
-        = std::make_shared<const Transform3D>(Translation3D(asnPosition));
-    auto aspTransform
-        = std::make_shared<const Transform3D>(Translation3D(aspPosition));
+    auto asnTransform = make_shared_transform(Translation3D(asnPosition));
+    auto aspTransform = make_shared_transform(Translation3D(aspPosition));
     // create the vector
     std::vector<std::shared_ptr<const Surface>> aSurfaces;
     aSurfaces.push_back(

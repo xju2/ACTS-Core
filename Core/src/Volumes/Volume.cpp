@@ -43,7 +43,7 @@ Acts::Volume::Volume(const Volume& vol, const Transform3D* shift)
 {
   // applyt he shift if it exists
   if (shift != nullptr) {
-    m_transform = std::make_shared<const Transform3D>(transform() * (*shift));
+    m_transform = make_shared_transform(transform() * (*shift));
   }
   // now set the center
   m_center = transform().translation();

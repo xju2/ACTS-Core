@@ -69,7 +69,7 @@ namespace Test {
       // bounds object, rectangle type
       auto rBounds = std::make_shared<const RectangleBounds>(1., 1.);
       /// Constructor with transform pointer
-      auto pNullTransform = std::make_shared<const Transform3D>();
+      auto pNullTransform = make_shared_transform();
       const std::vector<std::shared_ptr<const Surface>> aSurfaces{
           Surface::makeShared<PlaneSurface>(pNullTransform, rBounds),
           Surface::makeShared<PlaneSurface>(pNullTransform, rBounds)};

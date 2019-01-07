@@ -44,8 +44,8 @@ namespace Test {
       // minimally need a Transform3D and a PlanarBounds object (e.g.
       // RectangleBounds) to construct
       Translation3D translation{0., 1., 2.};
-      auto pTransform = std::make_shared<const Transform3D>(translation);
-      const double halfX(10.), halfY(5.);  // 20 x 10 rectangle
+      auto          pTransform = make_shared_transform(translation);
+      const double  halfX(10.), halfY(5.);  // 20 x 10 rectangle
       auto pRectangle  = std::make_shared<const RectangleBounds>(halfX, halfY);
       auto pPlaneLayer = PlaneLayer::create(pTransform, pRectangle);
       BOOST_TEST(pPlaneLayer->layerType() == LayerType::active);
@@ -53,7 +53,7 @@ namespace Test {
       // bounds object, rectangle type
       auto rBounds = std::make_shared<const RectangleBounds>(1., 1.);
       /// Constructor with transform pointer
-      auto pNullTransform = std::make_shared<const Transform3D>();
+      auto pNullTransform = make_shared_transform();
       const std::vector<std::shared_ptr<const Surface>> aSurfaces{
           Surface::makeShared<PlaneSurface>(pNullTransform, rBounds),
           Surface::makeShared<PlaneSurface>(pNullTransform, rBounds)};
@@ -95,8 +95,8 @@ namespace Test {
     BOOST_AUTO_TEST_CASE(PlaneLayerProperties /*, *utf::expected_failures(1)*/)
     {
       Translation3D translation{0., 1., 2.};
-      auto pTransform = std::make_shared<const Transform3D>(translation);
-      const double halfX(10.), halfY(5.);  // 20 x 10 rectangle
+      auto          pTransform = make_shared_transform(translation);
+      const double  halfX(10.), halfY(5.);  // 20 x 10 rectangle
       auto pRectangle  = std::make_shared<const RectangleBounds>(halfX, halfY);
       auto pPlaneLayer = PlaneLayer::create(pTransform, pRectangle);
       // auto planeSurface = pPlaneLayer->surfaceRepresentation();

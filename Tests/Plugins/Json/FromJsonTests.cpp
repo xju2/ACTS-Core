@@ -48,7 +48,7 @@ namespace Test {
 
       auto bounds = std::make_shared<const RectangleBounds>(2, 1);
 
-      auto transptr = std::make_shared<const Transform3D>(trans);
+      auto                           transptr = make_shared_transform(trans);
       std::shared_ptr<const Surface> srf
           = Surface::makeShared<PlaneSurface>(transptr, bounds);
 

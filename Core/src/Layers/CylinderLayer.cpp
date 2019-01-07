@@ -63,7 +63,7 @@ Acts::CylinderLayer::create(const variant_data& vardata)
 
   variant_map payload = data.get<variant_map>("payload");
 
-  auto trf = std::make_shared<const Transform3D>(
+  auto trf = make_shared_transform(
       from_variant<Transform3D>(payload.get<variant_map>("transform")));
 
   LayerType   laytyp;
@@ -109,10 +109,7 @@ Acts::CylinderLayer::create(const variant_data& vardata)
     };
 
     sArray = std::make_unique<SurfaceArray>(
-        payload.at("surfacearray"),
-        g2l,
-        l2g,
-        std::make_shared<const Transform3D>(sa_trf));
+        payload.at("surfacearray"), g2l, l2g, make_shared_transform(sa_trf));
   }
 
   // @TODO: Implement ApproachDescriptor serialization

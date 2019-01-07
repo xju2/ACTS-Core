@@ -46,9 +46,10 @@ namespace Test {
                == Surface::Perigee);
     //
     /// Constructor with transform pointer, null or valid
-    Translation3D translation{0., 1., 2.};
-    auto          pTransform = std::make_shared<const Transform3D>(translation);
-    auto          pNullTransform = std::make_shared<const Transform3D>();
+    Translation3D                      translation{0., 1., 2.};
+    std::shared_ptr<const Transform3D> pTransform
+        = make_shared_transform(translation);
+    std::shared_ptr<const Transform3D> pNullTransform = nullptr;
     BOOST_TEST(Surface::makeShared<PerigeeSurface>(pNullTransform)->type()
                == Surface::Perigee);
     BOOST_TEST(Surface::makeShared<PerigeeSurface>(pTransform)->type()

@@ -50,8 +50,7 @@ namespace Test {
     // create the cylinder bounds
     CylinderVolumeBounds cylBounds(1., 2., 3.);
     // create the transformation matrix
-    auto mutableTransformPtr
-        = std::make_shared<Transform3D>(Translation3D(pos));
+    auto mutableTransformPtr = make_shared_transform(Translation3D(pos));
     (*mutableTransformPtr) *= rotZ;
     (*mutableTransformPtr) *= rotY;
     (*mutableTransformPtr) *= rotX;

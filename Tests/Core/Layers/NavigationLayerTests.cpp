@@ -81,7 +81,7 @@ namespace Test {
       const double thickness = 0.1;
       double       w = 5, h = 10;
       auto         rbounds = std::make_shared<const RectangleBounds>(w, h);
-      auto trf = std::make_shared<const Transform3D>(Translation3D(0, 0, 5));
+      auto         trf     = make_shared_transform(Translation3D(0, 0, 5));
       std::shared_ptr<const Surface> pSurface
           = Surface::makeShared<PlaneSurface>(trf, rbounds);
       auto pNavigationLayer = std::dynamic_pointer_cast<const NavigationLayer>(

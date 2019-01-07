@@ -142,7 +142,7 @@ namespace Test {
 
         auto bounds = std::make_shared<const RectangleBounds>(2, 1);
 
-        auto transptr = std::make_shared<const Transform3D>(trans);
+        auto                          transptr = make_shared_transform(trans);
         std::shared_ptr<PlaneSurface> srf
             = Surface::makeShared<PlaneSurface>(transptr, bounds);
 
@@ -179,7 +179,7 @@ namespace Test {
 
         auto bounds = std::make_shared<const RectangleBounds>(w, h);
 
-        auto transptr = std::make_shared<const Transform3D>(trans);
+        auto                          transptr = make_shared_transform(trans);
         std::shared_ptr<PlaneSurface> srf
             = Surface::makeShared<PlaneSurface>(transptr, bounds);
 
@@ -236,7 +236,7 @@ namespace Test {
 
           auto bounds = std::make_shared<const RectangleBounds>(w, h);
 
-          auto transAptr = std::make_shared<const Transform3D>(trans);
+          auto transAptr = make_shared_transform(trans);
 
           std::shared_ptr<PlaneSurface> srfA
               = Surface::makeShared<PlaneSurface>(transAptr, bounds);
@@ -244,7 +244,7 @@ namespace Test {
           Vector3D    nrm    = srfA->normal();
           Transform3D transB = trans;
           transB.pretranslate(nrm * 0.1);
-          auto transBptr = std::make_shared<const Transform3D>(transB);
+          auto transBptr = make_shared_transform(transB);
           std::shared_ptr<PlaneSurface> srfB
               = Surface::makeShared<PlaneSurface>(transBptr, bounds);
 

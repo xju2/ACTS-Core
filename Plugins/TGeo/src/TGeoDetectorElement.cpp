@@ -82,8 +82,7 @@ Acts::TGeoDetectorElement::TGeoDetectorElement(
   TGeoTubeSeg* tube
       = dynamic_cast<TGeoTubeSeg*>(m_detElement->GetVolume()->GetShape());
   if (tube != nullptr) {
-    m_transform = std::make_shared<const Transform3D>(
-        makeTransform(colX, colY, colZ, colT));
+    m_transform  = make_shared_transform(makeTransform(colX, colY, colZ, colT));
     double rMin  = tube->GetRmin() * scalor;
     double rMax  = tube->GetRmax() * scalor;
     double halfZ = tube->GetDz() * scalor;
@@ -122,8 +121,8 @@ Acts::TGeoDetectorElement::TGeoDetectorElement(
       colX *= signX;
       colY *= signY;
       colZ *= signZ;
-      m_transform = std::make_shared<const Transform3D>(
-          makeTransform(colX, colY, colZ, colT));
+      m_transform
+          = make_shared_transform(makeTransform(colX, colY, colZ, colT));
       if (trapezoid != nullptr) {
         // bounds with x/y
         auto trapezoidBounds = std::make_shared<const TrapezoidBounds>(
@@ -166,8 +165,8 @@ Acts::TGeoDetectorElement::TGeoDetectorElement(
       colX *= signX;
       colY *= signY;
       colZ *= signZ;
-      m_transform = std::make_shared<const Transform3D>(
-          makeTransform(colX, colZ, colY, colT));
+      m_transform
+          = make_shared_transform(makeTransform(colX, colZ, colY, colT));
       if (trapezoid != nullptr) {
         // bounds with x/z
         auto trapezoidBounds = std::make_shared<const TrapezoidBounds>(
@@ -212,8 +211,8 @@ Acts::TGeoDetectorElement::TGeoDetectorElement(
       colX *= signX;
       colY *= signY;
       colZ *= signZ;
-      m_transform = std::make_shared<const Transform3D>(
-          makeTransform(colY, colZ, colX, colT));
+      m_transform
+          = make_shared_transform(makeTransform(colY, colZ, colX, colT));
       if (trapezoid != nullptr) {
         // bounds with y/z
         auto trapezoidBounds = std::make_shared<const TrapezoidBounds>(
@@ -257,8 +256,8 @@ Acts::TGeoDetectorElement::TGeoDetectorElement(
       colX *= signX;
       colY *= signY;
       colZ *= signZ;
-      m_transform = std::make_shared<const Transform3D>(
-          makeTransform(colY, colX, colZ, colT));
+      m_transform
+          = make_shared_transform(makeTransform(colY, colX, colZ, colT));
       if (trapezoid != nullptr) {
         // bounds with y/x
         auto trapezoidBounds = std::make_shared<const TrapezoidBounds>(
@@ -301,8 +300,8 @@ Acts::TGeoDetectorElement::TGeoDetectorElement(
       colX *= signX;
       colY *= signY;
       colZ *= signZ;
-      m_transform = std::make_shared<const Transform3D>(
-          makeTransform(colZ, colY, colX, colT));
+      m_transform
+          = make_shared_transform(makeTransform(colZ, colY, colX, colT));
       if (trapezoid != nullptr) {
         // bounds with z/y
         auto trapezoidBounds = std::make_shared<const TrapezoidBounds>(
@@ -347,8 +346,8 @@ Acts::TGeoDetectorElement::TGeoDetectorElement(
       colX *= signX;
       colY *= signY;
       colZ *= signZ;
-      m_transform = std::make_shared<const Transform3D>(
-          makeTransform(colZ, colX, colY, colT));
+      m_transform
+          = make_shared_transform(makeTransform(colZ, colX, colY, colT));
       if (trapezoid != nullptr) {
         // bounds with z/x
         auto trapezoidBounds = std::make_shared<const TrapezoidBounds>(
@@ -427,8 +426,7 @@ Acts::TGeoDetectorElement::TGeoDetectorElement(
   TGeoTubeSeg* tube
       = dynamic_cast<TGeoTubeSeg*>(m_detElement->GetVolume()->GetShape());
   if (tube != nullptr) {
-    m_transform = std::make_shared<const Transform3D>(
-        makeTransform(colX, colY, colZ, colT));
+    m_transform  = make_shared_transform(makeTransform(colX, colY, colZ, colT));
     double rMin  = tube->GetRmin() * scalor;
     double rMax  = tube->GetRmax() * scalor;
     double halfZ = tube->GetDz() * scalor;
@@ -467,8 +465,8 @@ Acts::TGeoDetectorElement::TGeoDetectorElement(
       colX *= signX;
       colY *= signY;
       colZ *= signZ;
-      m_transform = std::make_shared<const Transform3D>(
-          makeTransform(colX, colY, colZ, colT));
+      m_transform
+          = make_shared_transform(makeTransform(colX, colY, colZ, colT));
       if (trapezoid != nullptr) {
         // bounds with x/y
         auto trapezoidBounds = std::make_shared<const TrapezoidBounds>(
@@ -511,8 +509,8 @@ Acts::TGeoDetectorElement::TGeoDetectorElement(
       colX *= signX;
       colY *= signY;
       colZ *= signZ;
-      m_transform = std::make_shared<const Transform3D>(
-          makeTransform(colX, colZ, colY, colT));
+      m_transform
+          = make_shared_transform(makeTransform(colX, colZ, colY, colT));
       if (trapezoid != nullptr) {
         // bounds with x/z
         auto trapezoidBounds = std::make_shared<const TrapezoidBounds>(
@@ -557,8 +555,8 @@ Acts::TGeoDetectorElement::TGeoDetectorElement(
       colX *= signX;
       colY *= signY;
       colZ *= signZ;
-      m_transform = std::make_shared<const Transform3D>(
-          makeTransform(colY, colZ, colX, colT));
+      m_transform
+          = make_shared_transform(makeTransform(colY, colZ, colX, colT));
       if (trapezoid != nullptr) {
         // bounds with y/z
         auto trapezoidBounds = std::make_shared<const TrapezoidBounds>(
@@ -602,8 +600,8 @@ Acts::TGeoDetectorElement::TGeoDetectorElement(
       colX *= signX;
       colY *= signY;
       colZ *= signZ;
-      m_transform = std::make_shared<const Transform3D>(
-          makeTransform(colY, colX, colZ, colT));
+      m_transform
+          = make_shared_transform(makeTransform(colY, colX, colZ, colT));
       if (trapezoid != nullptr) {
         // bounds with y/x
         auto trapezoidBounds = std::make_shared<const TrapezoidBounds>(
@@ -646,8 +644,8 @@ Acts::TGeoDetectorElement::TGeoDetectorElement(
       colX *= signX;
       colY *= signY;
       colZ *= signZ;
-      m_transform = std::make_shared<const Transform3D>(
-          makeTransform(colZ, colY, colX, colT));
+      m_transform
+          = make_shared_transform(makeTransform(colZ, colY, colX, colT));
       if (trapezoid != nullptr) {
         // bounds with z/y
         auto trapezoidBounds = std::make_shared<const TrapezoidBounds>(
@@ -692,8 +690,8 @@ Acts::TGeoDetectorElement::TGeoDetectorElement(
       colX *= signX;
       colY *= signY;
       colZ *= signZ;
-      m_transform = std::make_shared<const Transform3D>(
-          makeTransform(colZ, colX, colY, colT));
+      m_transform
+          = make_shared_transform(makeTransform(colZ, colX, colY, colT));
       if (trapezoid != nullptr) {
         // bounds with z/x
         auto trapezoidBounds = std::make_shared<const TrapezoidBounds>(

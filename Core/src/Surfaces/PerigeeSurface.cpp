@@ -20,8 +20,8 @@
 Acts::PerigeeSurface::PerigeeSurface(const Vector3D& gp)
   : LineSurface(nullptr, nullptr)
 {
-  Surface::m_transform = std::make_shared<const Transform3D>(
-      Translation3D(gp.x(), gp.y(), gp.z()));
+  Surface::m_transform
+      = make_shared_transform(Translation3D(gp.x(), gp.y(), gp.z()));
 }
 
 Acts::PerigeeSurface::PerigeeSurface(
@@ -57,7 +57,7 @@ Acts::PerigeeSurface::PerigeeSurface(const variant_data& vardata)
 
   if (payload.count("transform") != 0u) {
     // we have a transform
-    auto trf = std::make_shared<const Transform3D>(
+    auto trf = make_shared_transform(
         from_variant<Transform3D>(payload.get<variant_map>("transform")));
     m_transform = trf;
   }

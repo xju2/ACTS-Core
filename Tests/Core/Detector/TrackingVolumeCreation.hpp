@@ -33,12 +33,12 @@ constructCylinderVolume(double             surfaceHalfLengthZ,
   ///  the surface transforms
   auto sfnPosition
       = Vector3D(0., 0., -3 * surfaceHalfLengthZ - surfaceZoverlap);
-  auto sfnTransform
-      = std::make_shared<const Transform3D>(Translation3D(sfnPosition));
+  std::shared_ptr<const Transform3D> sfnTransform
+      = make_shared_transform(Translation3D(sfnPosition));
   auto sfcTransform = nullptr;
   auto sfpPosition = Vector3D(0., 0., 3 * surfaceHalfLengthZ - surfaceZoverlap);
-  auto sfpTransform
-      = std::make_shared<const Transform3D>(Translation3D(sfpPosition));
+  std::shared_ptr<const Transform3D> sfpTransform
+      = make_shared_transform(Translation3D(sfpPosition));
   ///  the surfaces
   auto sfn = Surface::makeShared<CylinderSurface>(
       sfnTransform, surfaceRadius - 0.5 * surfaceRstagger, surfaceHalfLengthZ);

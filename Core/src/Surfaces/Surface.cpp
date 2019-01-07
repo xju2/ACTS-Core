@@ -36,8 +36,7 @@ Acts::Surface::Surface(const Surface& other)
 
 Acts::Surface::Surface(const Surface& other, const Transform3D& shift)
   : GeometryObject()
-  , m_transform(std::make_shared<const Transform3D>(
-        Transform3D(shift * other.transform())))
+  , m_transform(make_shared_transform(Transform3D(shift * other.transform())))
   , m_associatedLayer(other.m_associatedLayer)
   , m_associatedMaterial(other.m_associatedMaterial)
 {

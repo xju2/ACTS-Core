@@ -139,8 +139,7 @@ public:
       // combine two existing transform
       // note that this might lead to undesired behaviour of the combined
       // BinUtility
-      m_transform = std::make_shared<const Transform3D>((*m_transform)
-                                                        * (*gbu.transform()));
+      m_transform = make_shared_transform((*m_transform) * (*gbu.transform()));
       m_itransform
           = std::make_unique<const Transform3D>(m_transform->inverse());
     }  // else {

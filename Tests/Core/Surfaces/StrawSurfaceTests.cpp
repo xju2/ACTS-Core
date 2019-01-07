@@ -41,8 +41,8 @@ namespace Test {
     /// Constructor with transform pointer, null or valid, radius and halfZ
     double        radius(1.0), halfZ(10.);
     Translation3D translation{0., 1., 2.};
-    auto          pTransform = std::make_shared<const Transform3D>(translation);
-    auto          pNullTransform = std::make_shared<const Transform3D>();
+    auto          pTransform     = make_shared_transform(translation);
+    auto          pNullTransform = make_shared_transform();
     BOOST_TEST(
         Surface::makeShared<StrawSurface>(pNullTransform, radius, halfZ)->type()
         == Surface::Straw);
@@ -84,8 +84,8 @@ namespace Test {
     /// Test clone method
     double        radius(1.0), halfZ(10.);
     Translation3D translation{0., 1., 2.};
-    auto          pTransform = std::make_shared<const Transform3D>(translation);
-    // auto pNullTransform = std::make_shared<const Transform3D>();
+    auto          pTransform = make_shared_transform(translation);
+    // auto pNullTransform = make_shared_transform();
     auto strawSurfaceObject
         = Surface::makeShared<StrawSurface>(pTransform, radius, halfZ);
     //
@@ -113,7 +113,7 @@ namespace Test {
   {
     double        radius(1.0), halfZ(10.);
     Translation3D translation{0., 1., 2.};
-    auto          pTransform = std::make_shared<const Transform3D>(translation);
+    auto          pTransform = make_shared_transform(translation);
     auto          strawSurfaceObject
         = Surface::makeShared<StrawSurface>(pTransform, radius, halfZ);
     //
@@ -138,7 +138,7 @@ namespace Test {
     double        radius = 2.0, hlZ = 20;
     Translation3D translation{0., 1., 2.};
     Transform3D   transform(translation);
-    auto          pTransform = std::make_shared<const Transform3D>(translation);
+    auto          pTransform = make_shared_transform(translation);
     auto straw = Surface::makeShared<StrawSurface>(pTransform, radius, hlZ);
     variant_data var_straw = straw->toVariantData();
     std::cout << var_straw << std::endl;

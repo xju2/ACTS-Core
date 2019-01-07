@@ -50,7 +50,7 @@ namespace IntegrationTest {
     ctransform.prerotate(AngleAxis3D(angleT, T));
     ctransform.prerotate(AngleAxis3D(angleU, U));
     //
-    return std::make_shared<Transform3D>(ctransform);
+    return make_shared_transform(ctransform);
   }
 
   /// Helper method to create a transform for a plane
@@ -70,7 +70,7 @@ namespace IntegrationTest {
     ctransform.pretranslate(nposition);
     ctransform.prerotate(AngleAxis3D(angleX, Vector3D::UnitX()));
     ctransform.prerotate(AngleAxis3D(angleY, Vector3D::UnitY()));
-    return std::make_shared<Transform3D>(ctransform);
+    return make_shared_transform(ctransform);
   }
 
   template <typename Propagator_type>

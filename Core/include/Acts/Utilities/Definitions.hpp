@@ -7,6 +7,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #pragma once
+#include <memory>
 
 // for GNU: ignore this specific warning, otherwise just include Eigen/Dense
 #if defined(__GNUC__) && !defined(__clang__) && !defined(__INTEL_COMPILER)
@@ -131,5 +132,13 @@ enum AxisDefs : int {
   ePY = 1,
   ePZ = 2
 };
+
+template <typename... Args>
+std::shared_ptr<Transform3D>
+make_shared_transform(Args&&... args)
+{
+  return std::allocate_shared<Transform3D>(
+      Eigen::aligned_allocator<Transform3D>(), std::forward<Args>(args)...);
+}
 
 }  // namespace Acts

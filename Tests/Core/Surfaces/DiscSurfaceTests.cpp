@@ -54,7 +54,7 @@ namespace Test {
     //
     /// Test DiscSurface constructor with a transform specified
     Translation3D translation{0., 1., 2.};
-    auto          pTransform = std::make_shared<const Transform3D>(translation);
+    auto          pTransform = make_shared_transform(translation);
     BOOST_CHECK_NO_THROW(Surface::makeShared<DiscSurface>(
         pTransform, rMin, rMax, halfPhiSector));
     //
@@ -225,8 +225,7 @@ namespace Test {
         = std::make_shared<const RadialBounds>(minR, maxR, avgPhi, phiSec);
 
     Transform3D rot(AngleAxis3D(M_PI / 4., Vector3D::UnitZ()));
-    auto        trf
-        = std::make_shared<const Transform3D>(Translation3D(0, 0, 2) * rot);
+    auto        trf = make_shared_transform(Translation3D(0, 0, 2) * rot);
 
     auto rdisc = Surface::makeShared<DiscSurface>(trf, rbounds);
 

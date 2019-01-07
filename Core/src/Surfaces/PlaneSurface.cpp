@@ -18,10 +18,9 @@
 
 #include "Acts/Surfaces/InfiniteBounds.hpp"
 #include "Acts/Surfaces/RectangleBounds.hpp"
+#include "Acts/Utilities/InstanceFactory.hpp"
 #include "Acts/Utilities/ThrowAssert.hpp"
 #include "Acts/Utilities/VariantData.hpp"
-
-#include "Acts/Utilities/InstanceFactory.hpp"
 
 Acts::PlaneSurface::PlaneSurface(const PlaneSurface& other)
   : GeometryObject(), Surface(other), m_bounds(other.m_bounds)

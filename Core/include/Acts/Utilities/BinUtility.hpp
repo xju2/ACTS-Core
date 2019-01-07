@@ -34,7 +34,7 @@ namespace Acts {
 class BinUtility
 {
 public:
-  /// Constructor for equidistant
+  /// Default Constructor
   BinUtility() : m_binningData(), m_transform(nullptr), m_itransform(nullptr)
   {
     m_binningData.reserve(3);
@@ -156,6 +156,7 @@ public:
 
   /// Virtual Destructor
   ~BinUtility() = default;
+
   /// Implizit Constructor
   BinUtility*
   clone() const

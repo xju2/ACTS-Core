@@ -15,6 +15,7 @@
 #include "Acts/Layers/DiscLayer.hpp"
 #include "Acts/Material/HomogeneousSurfaceMaterial.hpp"
 #include "Acts/Material/MaterialProperties.hpp"
+#include "Acts/Material/ProtoSurfaceMaterial.hpp"
 #include "Acts/Surfaces/CylinderBounds.hpp"
 #include "Acts/Surfaces/RadialBounds.hpp"
 #include "Acts/Utilities/Definitions.hpp"
@@ -53,19 +54,19 @@ Acts::PassiveLayerBuilder::constructLayers()
   // the central layers
   size_t numcLayers = m_cfg.centralLayerRadii.size();
   if (numcLayers != 0u) {
-    ACTS_DEBUG("Configured to build " << numcLayers
-                                      << " passive central layers.");
+    ACTS_VERBOSE("Configured to build " << numcLayers
+                                        << " passive central layers.");
     m_cLayers.reserve(numcLayers);
     // loop through
     for (size_t icl = 0; icl < numcLayers; ++icl) {
+      double cR  = m_cfg.centralLayerRadii.at(icl);
+      double cHz = m_cfg.centralLayerHalflengthZ.at(icl);
       // some screen output
-      ACTS_VERBOSE("- build layer " << icl << " with radius = "
-                                    << m_cfg.centralLayerRadii.at(icl)
+      ACTS_VERBOSE("- build layer " << icl << " with radius = " << cR
                                     << " and halfZ = "
-                                    << m_cfg.centralLayerHalflengthZ.at(icl));
-      // create the layer and push it back
-      auto cBounds = std::make_shared<const CylinderBounds>(
-          m_cfg.centralLayerRadii[icl], m_cfg.centralLayerHalflengthZ.at(icl));
+                                    << cHz);
+      // create the surface bounds of the layer
+      auto cBounds = std::make_shared<const CylinderBounds>(cR, cHz);
       // create the layer
       MutableLayerPtr cLayer = CylinderLayer::create(
           nullptr, cBounds, nullptr, m_cfg.centralLayerThickness.at(icl));

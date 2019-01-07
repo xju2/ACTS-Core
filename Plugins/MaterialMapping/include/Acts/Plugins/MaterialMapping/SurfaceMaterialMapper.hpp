@@ -46,7 +46,7 @@ struct MaterialSurface
 /// The process runs as such:
 ///
 ///  1) TrackingGeometry is parsed and for each Surface with
-///     SurfaceMaterialProxy a local store is initialized
+///     ProtoSurfaceMaterial a local store is initialized
 ///     the identification is done hereby through the Surface::GeometryID
 ///
 ///  2) A Cache is generated that is used to keep the filling thread local,
@@ -135,7 +135,7 @@ public:
   mapMaterialTrack(State& mState, const RecordedMaterialTrack& mTrack) const;
 
 private:
-  /// @brief finds all surfaces with SurfaceMaterialProxy of a volume
+  /// @brief finds all surfaces with ProtoSurfaceMaterial of a volume
   ///
   /// @param mState The state to be filled
   /// @param tVolume is current TrackingVolume

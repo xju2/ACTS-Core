@@ -56,29 +56,23 @@ Acts::SurfaceArrayCreator::surfaceArrayOnCylinder(
 
   double R = protoLayer.maxR - protoLayer.minR;
 
-  Transform3D itransform = transform.inverse();
   // transform lambda captures the transform matrix
-  auto globalToLocal = [transform](const Vector3D& pos) {
-    Vector3D loc = transform * pos;
-    return Vector2D(phi(loc), loc.z());
-  };
-  auto localToGlobal = [itransform, R](const Vector2D& loc) {
-    return itransform
-        * Vector3D(R * std::cos(loc[0]), R * std::sin(loc[0]), loc[1]);
+  auto globalToLocal
+      = [](const Vector3D& pos) { return Vector2D(phi(pos), pos.z()); };
+  auto localToGlobal = [R](const Vector2D& loc) {
+    return Vector3D(R * std::cos(loc[0]), R * std::sin(loc[0]), loc[1]);
   };
 
   std::unique_ptr<SurfaceArray::ISurfaceGridLookup> sl
       = makeSurfaceGridLookup2D<detail::AxisBoundaryType::Closed,
                                 detail::AxisBoundaryType::Bound>(
-          globalToLocal, localToGlobal, pAxisPhi, pAxisZ);
+          globalToLocal, localToGlobal, transform, pAxisPhi, pAxisZ);
 
   sl->fill(surfacesRaw);
   completeBinning(*sl, surfacesRaw);
 
   return std::make_unique<SurfaceArray>(
-      std::move(sl),
-      std::move(surfaces),
-      std::make_shared<const Transform3D>(transform));
+      std::move(sl), std::move(surfaces), make_shared_transform(transform));
 }
 
 std::unique_ptr<Acts::SurfaceArray>
@@ -114,20 +108,17 @@ Acts::SurfaceArrayCreator::surfaceArrayOnCylinder(
     pAxisZ = createVariableAxis(surfacesRaw, binZ, protoLayer, transform);
   }
 
-  Transform3D itransform = transform.inverse();
-  auto globalToLocal     = [transform](const Vector3D& pos) {
-    Vector3D loc = transform * pos;
-    return Vector2D(phi(loc), loc.z());
+  auto globalToLocal = [transform](const Vector3D& pos) {
+    return Vector2D(phi(pos), pos.z());
   };
-  auto localToGlobal = [itransform, R](const Vector2D& loc) {
-    return itransform
-        * Vector3D(R * std::cos(loc[0]), R * std::sin(loc[0]), loc[1]);
+  auto localToGlobal = [R](const Vector2D& loc) {
+    return Vector3D(R * std::cos(loc[0]), R * std::sin(loc[0]), loc[1]);
   };
 
   std::unique_ptr<SurfaceArray::ISurfaceGridLookup> sl
       = makeSurfaceGridLookup2D<detail::AxisBoundaryType::Closed,
                                 detail::AxisBoundaryType::Bound>(
-          globalToLocal, localToGlobal, pAxisPhi, pAxisZ);
+          globalToLocal, localToGlobal, transform, pAxisPhi, pAxisZ);
 
   sl->fill(surfacesRaw);
   completeBinning(*sl, surfacesRaw);
@@ -144,9 +135,7 @@ Acts::SurfaceArrayCreator::surfaceArrayOnCylinder(
                                       << " bins.");
 
   return std::make_unique<SurfaceArray>(
-      std::move(sl),
-      std::move(surfaces),
-      std::make_shared<const Transform3D>(transform));
+      std::move(sl), std::move(surfaces), make_shared_transform(transform));
 }
 
 std::unique_ptr<Acts::SurfaceArray>
@@ -175,21 +164,16 @@ Acts::SurfaceArrayCreator::surfaceArrayOnDisc(
   double Z = 0.5 * (protoLayer.minZ + protoLayer.maxZ);
   ACTS_VERBOSE("- z-position of disk estimated as " << Z);
 
-  Transform3D itransform = transform.inverse();
-  // transform lambda captures the transform matrix
-  auto globalToLocal = [transform](const Vector3D& pos) {
-    Vector3D loc = transform * pos;
-    return Vector2D(perp(loc), phi(loc));
-  };
-  auto localToGlobal = [itransform, Z](const Vector2D& loc) {
-    return itransform
-        * Vector3D(loc[0] * std::cos(loc[1]), loc[0] * std::sin(loc[1]), Z);
+  auto globalToLocal
+      = [](const Vector3D& pos) { return Vector2D(perp(pos), phi(pos)); };
+  auto localToGlobal = [Z](const Vector2D& loc) {
+    return Vector3D(loc[0] * std::cos(loc[1]), loc[0] * std::sin(loc[1]), Z);
   };
 
   std::unique_ptr<SurfaceArray::ISurfaceGridLookup> sl
       = makeSurfaceGridLookup2D<detail::AxisBoundaryType::Bound,
                                 detail::AxisBoundaryType::Closed>(
-          globalToLocal, localToGlobal, pAxisR, pAxisPhi);
+          globalToLocal, localToGlobal, transform, pAxisR, pAxisPhi);
 
   // get the number of bins
   auto   axes  = sl->getAxes();
@@ -204,9 +188,7 @@ Acts::SurfaceArrayCreator::surfaceArrayOnDisc(
   completeBinning(*sl, surfacesRaw);
 
   return std::make_unique<SurfaceArray>(
-      std::move(sl),
-      std::move(surfaces),
-      std::make_shared<const Transform3D>(transform));
+      std::move(sl), std::move(surfaces), make_shared_transform(transform));
 }
 
 std::unique_ptr<Acts::SurfaceArray>
@@ -286,21 +268,16 @@ Acts::SurfaceArrayCreator::surfaceArrayOnDisc(
   double Z = 0.5 * (protoLayer.minZ + protoLayer.maxZ);
   ACTS_VERBOSE("- z-position of disk estimated as " << Z);
 
-  Transform3D itransform = transform.inverse();
-  // transform lambda captures the transform matrix
-  auto globalToLocal = [transform](const Vector3D& pos) {
-    Vector3D loc = transform * pos;
-    return Vector2D(perp(loc), phi(loc));
-  };
-  auto localToGlobal = [itransform, Z](const Vector2D& loc) {
-    return itransform
-        * Vector3D(loc[0] * std::cos(loc[1]), loc[0] * std::sin(loc[1]), Z);
+  auto globalToLocal
+      = [](const Vector3D& pos) { return Vector2D(perp(pos), phi(pos)); };
+  auto localToGlobal = [Z](const Vector2D& loc) {
+    return Vector3D(loc[0] * std::cos(loc[1]), loc[0] * std::sin(loc[1]), Z);
   };
 
   std::unique_ptr<SurfaceArray::ISurfaceGridLookup> sl
       = makeSurfaceGridLookup2D<detail::AxisBoundaryType::Bound,
                                 detail::AxisBoundaryType::Closed>(
-          globalToLocal, localToGlobal, pAxisR, pAxisPhi);
+          globalToLocal, localToGlobal, transform, pAxisR, pAxisPhi);
 
   // get the number of bins
   auto   axes  = sl->getAxes();
@@ -316,9 +293,7 @@ Acts::SurfaceArrayCreator::surfaceArrayOnDisc(
   completeBinning(*sl, surfacesRaw);
 
   return std::make_unique<SurfaceArray>(
-      std::move(sl),
-      std::move(surfaces),
-      std::make_shared<const Transform3D>(transform));
+      std::move(sl), std::move(surfaces), make_shared_transform(transform));
 }
 
 /// SurfaceArrayCreator interface method - create an array on a plane
@@ -345,15 +320,10 @@ Acts::SurfaceArrayCreator::surfaceArrayOnPlane(
   Transform3D transform
       = transformOpt != nullptr ? *transformOpt : Transform3D::Identity();
 
-  Transform3D itransform = transform.inverse();
-  // transform lambda captures the transform matrix
-  auto globalToLocal = [transform](const Vector3D& pos) {
-    Vector3D loc = transform * pos;
-    return Vector2D(loc.x(), loc.y());
-  };
-  auto localToGlobal = [itransform](const Vector2D& loc) {
-    return itransform * Vector3D(loc.x(), loc.y(), 0.);
-  };
+  auto globalToLocal
+      = [](const Vector3D& pos) { return Vector2D(pos.x(), pos.y()); };
+  auto                     localToGlobal
+      = [](const Vector2D& loc) { return Vector3D(loc.x(), loc.y(), 0.); };
   // Build the grid
   std::unique_ptr<SurfaceArray::ISurfaceGridLookup> sl;
 
@@ -366,7 +336,7 @@ Acts::SurfaceArrayCreator::surfaceArrayOnPlane(
         surfacesRaw, binZ, protoLayer, transform, bins2);
     sl = makeSurfaceGridLookup2D<detail::AxisBoundaryType::Bound,
                                  detail::AxisBoundaryType::Bound>(
-        globalToLocal, localToGlobal, pAxis1, pAxis2);
+        globalToLocal, localToGlobal, transform, pAxis1, pAxis2);
     break;
   }
   case BinningValue::binY: {
@@ -376,7 +346,7 @@ Acts::SurfaceArrayCreator::surfaceArrayOnPlane(
         surfacesRaw, binZ, protoLayer, transform, bins2);
     sl = makeSurfaceGridLookup2D<detail::AxisBoundaryType::Bound,
                                  detail::AxisBoundaryType::Bound>(
-        globalToLocal, localToGlobal, pAxis1, pAxis2);
+        globalToLocal, localToGlobal, transform, pAxis1, pAxis2);
     break;
   }
   case BinningValue::binZ: {
@@ -386,7 +356,7 @@ Acts::SurfaceArrayCreator::surfaceArrayOnPlane(
         surfacesRaw, binY, protoLayer, transform, bins2);
     sl = makeSurfaceGridLookup2D<detail::AxisBoundaryType::Bound,
                                  detail::AxisBoundaryType::Bound>(
-        globalToLocal, localToGlobal, pAxis1, pAxis2);
+        globalToLocal, localToGlobal, transform, pAxis1, pAxis2);
     break;
   }
   default: {
@@ -400,9 +370,7 @@ Acts::SurfaceArrayCreator::surfaceArrayOnPlane(
   completeBinning(*sl, surfacesRaw);
 
   return std::make_unique<SurfaceArray>(
-      std::move(sl),
-      std::move(surfaces),
-      std::make_shared<const Transform3D>(transform));
+      std::move(sl), std::move(surfaces), make_shared_transform(transform));
   //!< @todo implement - take from ATLAS complex TRT builder
 }
 

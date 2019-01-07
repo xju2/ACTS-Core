@@ -135,6 +135,9 @@ public:
     static constexpr size_t DIM = sizeof...(Axes);
 
   public:
+    // Eigen members
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
     /// @brief Specifies the local coordinate type.
     /// This resolves to @c ActsVector<DIM> for DIM > 1, else @c
     /// std::array<double, 1>
@@ -152,10 +155,13 @@ public:
     ///       @c std::array<double, 1>.
     SurfaceGridLookup(std::function<point_t(const Vector3D&)> globalToLocal,
                       std::function<Vector3D(const point_t&)> localToGlobal,
+                      const Transform3D&                      transform,
                       std::tuple<Axes...>                     axes)
       : m_globalToLocal(std::move(globalToLocal))
       , m_localToGlobal(std::move(localToGlobal))
       , m_grid(std::move(axes))
+      , m_transform(transform)
+      , m_itransform(m_transform.inverse())
     {
       m_neighborMap.resize(m_grid.size());
     }
@@ -229,7 +235,7 @@ public:
     SurfaceVector&
     lookup(const Vector3D& pos) override
     {
-      return m_grid.at(m_globalToLocal(pos));
+      return m_grid.at(globalToLocal(pos));
     }
 
     /// @brief Performs lookup at @c pos and returns bin content as const
@@ -239,7 +245,7 @@ public:
     const SurfaceVector&
     lookup(const Vector3D& pos) const override
     {
-      return m_grid.at(m_globalToLocal(pos));
+      return m_grid.at(globalToLocal(pos));
     }
 
     /// @brief Performs lookup at global bin and returns bin content as
@@ -269,7 +275,7 @@ public:
     const SurfaceVector&
     neighbors(const Vector3D& pos) const override
     {
-      auto loc = m_globalToLocal(pos);
+      auto loc = globalToLocal(pos);
       return m_neighborMap.at(m_grid.getGlobalBinIndex(loc));
     }
 
@@ -352,6 +358,18 @@ public:
       }
     }
 
+    point_t
+    globalToLocal(const Vector3D& gpos) const
+    {
+      return m_globalToLocal(m_transform * gpos);
+    }
+
+    Vector3D
+    localToGlobal(const point_t& lpos) const
+    {
+      return m_itransform * m_localToGlobal(lpos);
+    }
+
     /// Internal method.
     /// This is here, because apparently Eigen doesn't like Vector1D.
     /// So SurfaceGridLookup internally uses std::array<double, 1> instead
@@ -366,7 +384,7 @@ public:
     Vector3D
     getBinCenterImpl(size_t bin) const
     {
-      return m_localToGlobal(ActsVectorD<DIM>(
+      return localToGlobal(ActsVectorD<DIM>(
           m_grid.getBinCenter(m_grid.getLocalBinIndices(bin)).data()));
     }
 
@@ -377,13 +395,16 @@ public:
     getBinCenterImpl(size_t bin) const
     {
       point_t pos = m_grid.getBinCenter(m_grid.getLocalBinIndices(bin));
-      return m_localToGlobal(pos);
+      return localToGlobal(pos);
     }
 
     std::function<point_t(const Vector3D&)> m_globalToLocal;
     std::function<Vector3D(const point_t&)> m_localToGlobal;
     Grid_t                                  m_grid;
     std::vector<SurfaceVector>              m_neighborMap;
+
+    Transform3D m_transform;
+    Transform3D m_itransform;
   };
 
   /// @brief Lookup implementation which wraps one element and always returns
@@ -660,9 +681,11 @@ private:
   // this vector is returned, so that (expensive) copying of the shared_ptr
   // vector does not happen by default
   SurfaceVector m_surfacesRawPointers;
-  // this is only used to keep info on transform applied
-  // by l2g and g2l
+
+  // g2l and l2g need access to transform. Transform must be aligned
+  // so cannot be accessed by value, lifetime needs to be same as SA.
   std::shared_ptr<const Transform3D> m_transform;
+  std::shared_ptr<const Transform3D> m_itransform;
 
   variant_data
   surfaceGridLookupToVariantData(const ISurfaceGridLookup& sgl) const;

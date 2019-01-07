@@ -92,20 +92,16 @@ Acts::CylinderLayer::create(const variant_data& vardata)
     // get surface array transform
     const Transform3D& sa_trf = from_variant<Transform3D>(
         payload.get<variant_map>("surfacearray_transform"));
-    const Transform3D& sa_itrf = sa_trf.inverse();
-
     // we need to reproduce the coordinate conversions
     double R      = cbounds->r();
     double avgPhi = cbounds->averagePhi();
-    auto g2l      = [sa_trf, avgPhi](const Vector3D& pos) -> Vector2D {
+    auto g2l      = [avgPhi](const Vector3D& pos) -> Vector2D {
       // @TODO: Check if - is right here, might be the other way round
-      Vector3D loc = sa_trf * pos;
-      return Vector2D(phi(loc) - avgPhi, loc.z());
+      return Vector2D(phi(pos) - avgPhi, pos.z());
     };
-    auto l2g = [sa_itrf, R, avgPhi](const Vector2D& loc) -> Vector3D {
-      return sa_itrf * Vector3D(R * std::cos(loc[0] + avgPhi),
-                                R * std::sin(loc[0] + avgPhi),
-                                loc[1]);
+    auto l2g = [R, avgPhi](const Vector2D& loc) -> Vector3D {
+      return Vector3D(
+          R * std::cos(loc[0] + avgPhi), R * std::sin(loc[0] + avgPhi), loc[1]);
     };
 
     sArray = std::make_unique<SurfaceArray>(

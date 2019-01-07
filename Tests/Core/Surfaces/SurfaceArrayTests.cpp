@@ -224,6 +224,7 @@ namespace Test {
                                                            decltype(zAxis)>>(
             transform,
             itransform,
+            Transform3D::Identity(),
             std::make_tuple(std::move(phiAxis), std::move(zAxis)));
     sl->fill(brlRaw);
     SurfaceArray sa(std::move(sl), brl);
@@ -248,6 +249,7 @@ namespace Test {
                                                            decltype(zAxis)>>(
             transform,
             itransform,
+            Transform3D::Identity(),
             std::make_tuple(std::move(phiAxis), std::move(zAxis)));
     // do NOT fill, only completebinning
     sl2->completeBinning(brlRaw);
@@ -305,6 +307,7 @@ namespace Test {
                                                            decltype(zAxis)>>(
             transform,
             itransform,
+            Transform3D::Identity(),
             std::make_tuple(std::move(phiAxis), std::move(zAxis)));
     sl->fill(brlRaw);
     SurfaceArray sa(std::move(sl), brl);
@@ -367,7 +370,10 @@ namespace Test {
     };
     auto sl
         = std::make_unique<SurfaceArray::SurfaceGridLookup<decltype(zAxis)>>(
-            transform, itransform, std::make_tuple(zAxis));
+            transform,
+            itransform,
+            Transform3D::Identity(),
+            std::make_tuple(zAxis));
 
     // same thing in 1D
     SrfVec                      line    = straightLineSurfaces();

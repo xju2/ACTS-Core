@@ -620,6 +620,7 @@ namespace Test {
                                                            decltype(zAxis)>>(
             globalToLocal,
             localToGlobal,
+            Transform3D::Identity(),
             std::make_tuple(std::move(phiAxis), std::move(zAxis)));
     sl->fill(brlRaw);
     SurfaceArray sa(std::move(sl), brl);
@@ -651,20 +652,18 @@ namespace Test {
     auto pAxisPhi = createEquidistantAxis(brlRaw, BinningValue::binPhi, pl, tr);
     auto pAxisZ   = createEquidistantAxis(brlRaw, BinningValue::binZ, pl, tr);
 
-    double      R   = 10.;
-    Transform3D itr = tr.inverse();
+    double R = 10.;
+    // Transform3D itr = tr.inverse();
 
-    auto globalToLocal = [tr](const Vector3D& pos) {
-      Vector3D rot = tr * pos;
-      return Vector2D(phi(rot), rot.z());
-    };
-    auto localToGlobal = [R, itr](const Vector2D& loc) {
-      return itr * Vector3D(R * std::cos(loc[0]), R * std::sin(loc[0]), loc[1]);
+    auto globalToLocal
+        = [](const Vector3D& pos) { return Vector2D(phi(pos), pos.z()); };
+    auto localToGlobal = [R](const Vector2D& loc) {
+      return Vector3D(R * std::cos(loc[0]), R * std::sin(loc[0]), loc[1]);
     };
 
     auto sl = makeSurfaceGridLookup2D<detail::AxisBoundaryType::Closed,
                                       detail::AxisBoundaryType::Bound>(
-        globalToLocal, localToGlobal, pAxisPhi, pAxisZ);
+        globalToLocal, localToGlobal, tr, pAxisPhi, pAxisZ);
 
     sl->fill(brlRaw);
     SurfaceArray sa(std::move(sl), brl);
@@ -700,20 +699,15 @@ namespace Test {
           = createVariableAxis(brlRaw, BinningValue::binPhi, pl, tr);
       auto pAxisZVar = createVariableAxis(brlRaw, BinningValue::binZ, pl, tr);
 
-      itr = tr.inverse();
-
-      auto globalToLocalVar = [tr](const Vector3D& pos) {
-        Vector3D rot = tr * pos;
-        return Vector2D(phi(rot), rot.z());
-      };
-      auto localToGlobalVar = [R, itr](const Vector2D& loc) {
-        return itr
-            * Vector3D(R * std::cos(loc[0]), R * std::sin(loc[0]), loc[1]);
+      auto globalToLocalVar
+          = [](const Vector3D& pos) { return Vector2D(phi(pos), pos.z()); };
+      auto localToGlobalVar = [R](const Vector2D& loc) {
+        return Vector3D(R * std::cos(loc[0]), R * std::sin(loc[0]), loc[1]);
       };
 
       auto sl2 = makeSurfaceGridLookup2D<detail::AxisBoundaryType::Closed,
                                          detail::AxisBoundaryType::Bound>(
-          globalToLocalVar, localToGlobalVar, pAxisPhiVar, pAxisZVar);
+          globalToLocalVar, localToGlobalVar, tr, pAxisPhiVar, pAxisZVar);
 
       sl2->fill(brlRaw);
       SurfaceArray sa2(std::move(sl2), brl);

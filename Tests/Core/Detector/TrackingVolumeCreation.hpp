@@ -65,7 +65,7 @@ constructCylinderVolume(double             surfaceHalfLengthZ,
   auto l2g
       = [](const std::array<double, 1>& loc) { return Vector3D(0, 0, loc[0]); };
   auto sl = std::make_unique<SurfaceArray::SurfaceGridLookup<decltype(axis)>>(
-      g2l, l2g, std::make_tuple(axis));
+      g2l, l2g, Transform3D::Identity(), std::make_tuple(axis));
   sl->fill(surfaces_only_raw);
   auto bArray = std::make_unique<SurfaceArray>(std::move(sl), surfaces_only);
 

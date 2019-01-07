@@ -368,10 +368,11 @@ private:
             typename F1,
             typename F2>
   static std::unique_ptr<SurfaceArray::ISurfaceGridLookup>
-  makeSurfaceGridLookup2D(F1        globalToLocal,
-                          F2        localToGlobal,
-                          ProtoAxis pAxisA,
-                          ProtoAxis pAxisB)
+  makeSurfaceGridLookup2D(F1                 globalToLocal,
+                          F2                 localToGlobal,
+                          const Transform3D& transform,
+                          ProtoAxis          pAxisA,
+                          ProtoAxis          pAxisB)
   {
 
     using ISGL = SurfaceArray::ISurfaceGridLookup;
@@ -386,7 +387,7 @@ private:
 
       using SGL = SurfaceArray::SurfaceGridLookup<decltype(axisA), decltype(axisB)>;
       ptr = std::unique_ptr<ISGL>(static_cast<ISGL*>(
-            new SGL(globalToLocal, localToGlobal, std::make_tuple(axisA, axisB))));
+            new SGL(globalToLocal, localToGlobal, transform, std::make_tuple(axisA, axisB))));
 
     } else if (pAxisA.bType == equidistant && pAxisB.bType == arbitrary) {
 
@@ -395,7 +396,7 @@ private:
 
       using SGL = SurfaceArray::SurfaceGridLookup<decltype(axisA), decltype(axisB)>;
       ptr = std::unique_ptr<ISGL>(static_cast<ISGL*>(
-            new SGL(globalToLocal, localToGlobal, std::make_tuple(axisA, axisB))));
+            new SGL(globalToLocal, localToGlobal, transform, std::make_tuple(axisA, axisB))));
       
     } else if (pAxisA.bType == arbitrary && pAxisB.bType == equidistant) {
 
@@ -404,7 +405,7 @@ private:
 
       using SGL = SurfaceArray::SurfaceGridLookup<decltype(axisA), decltype(axisB)>;
       ptr = std::unique_ptr<ISGL>(static_cast<ISGL*>(
-            new SGL(globalToLocal, localToGlobal, std::make_tuple(axisA, axisB))));
+            new SGL(globalToLocal, localToGlobal, transform, std::make_tuple(axisA, axisB))));
 
     } else /*if (pAxisA.bType == arbitrary && pAxisB.bType == arbitrary)*/ {
 
@@ -413,7 +414,7 @@ private:
 
       using SGL = SurfaceArray::SurfaceGridLookup<decltype(axisA), decltype(axisB)>;
       ptr = std::unique_ptr<ISGL>(static_cast<ISGL*>(
-            new SGL(globalToLocal, localToGlobal, std::make_tuple(axisA, axisB))));
+            new SGL(globalToLocal, localToGlobal, transform, std::make_tuple(axisA, axisB))));
     }
     // clang-format on
 

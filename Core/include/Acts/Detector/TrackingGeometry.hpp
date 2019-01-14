@@ -15,7 +15,7 @@
 #include "Acts/Utilities/Definitions.hpp"
 #include "Acts/Utilities/GeometryID.hpp"
 #include "Acts/Utilities/GeometrySignature.hpp"
-
+#include "Acts/Material/SurfaceMaterial.hpp"
 #include <functional>
 #include <map>
 #include <memory>
@@ -26,7 +26,6 @@ namespace Acts {
 class TrackingVolume;
 class DetachedTrackingVolume;
 class Surface;
-class SurfaceMaterial;
 class PerigeeSurface;
 class Layer;
 
@@ -34,8 +33,6 @@ using TrackingVolumePtr         = std::shared_ptr<const TrackingVolume>;
 using MutableTrackingVolumePtr  = std::shared_ptr<TrackingVolume>;
 using DetachedTrackingVolumePtr = std::shared_ptr<const DetachedTrackingVolume>;
 using DetachedVolumeVector      = std::vector<DetachedTrackingVolumePtr>;
-using SurfaceMaterialMap
-    = std::map<GeometryID, std::shared_ptr<const SurfaceMaterial>>;
 
 ///  @class TrackingGeometry
 ///

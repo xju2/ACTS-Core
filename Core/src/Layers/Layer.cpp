@@ -81,6 +81,11 @@ Acts::Layer::closeGeometry(const SurfaceMaterialMap& surfaceMaterialMap,
 
   // set the volumeID of this
   assignGeoID(layerID);
+  
+  // assign to the representing surface
+  Surface* rSurface = const_cast<Surface*>(&surfaceRepresentation());
+  assignSurfaceMaterial(rSurface, layerID);
+  
 
   // also find out how the sub structure is defined
   if (surfaceRepresentation().surfaceMaterial() != nullptr) {

@@ -159,5 +159,5 @@ namespace Test {
         = std::move(mCompositionMoved);
     BOOST_CHECK_EQUAL(mCompositionMovedAssigned.size(), elements.size());
   }
-}
-}
+}  // namespace Test
+}  // namespace Acts

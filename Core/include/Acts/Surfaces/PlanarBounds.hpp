@@ -44,4 +44,4 @@ public:
   toVariantData() const override = 0;
 };
 
-}  // namespace
+}  // namespace Acts

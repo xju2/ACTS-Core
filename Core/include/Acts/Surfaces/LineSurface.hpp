@@ -287,4 +287,4 @@ private:
 
 #include "Acts/Surfaces/detail/LineSurface.ipp"
 
-}  // namespace
+}  // namespace Acts

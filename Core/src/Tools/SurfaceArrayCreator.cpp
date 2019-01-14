@@ -24,8 +24,8 @@
 #include "Acts/Utilities/Units.hpp"
 #include "Acts/Utilities/detail/Axis.hpp"
 
-using Acts::VectorHelpers::phi;
 using Acts::VectorHelpers::perp;
+using Acts::VectorHelpers::phi;
 
 std::unique_ptr<Acts::SurfaceArray>
 Acts::SurfaceArrayCreator::surfaceArrayOnCylinder(

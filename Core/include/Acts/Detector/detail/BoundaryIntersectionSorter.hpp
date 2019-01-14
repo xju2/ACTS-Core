@@ -224,4 +224,4 @@ private:
         bsIntersection.intersection, boundary, surface, options.navDir);
   }
 };
-}  // end of Acts namespace
+}  // namespace Acts

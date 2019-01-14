@@ -151,4 +151,4 @@ AccumulatedSurfaceMaterial::splitFactor() const
 {
   return m_splitFactor;
 }
-}
+}  // namespace Acts

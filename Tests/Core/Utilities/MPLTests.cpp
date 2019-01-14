@@ -91,7 +91,7 @@ namespace Test {
     {
       using action_type = float;
     };
-  }
+  }  // namespace
 
   BOOST_AUTO_TEST_CASE(type_collector_test)
   {

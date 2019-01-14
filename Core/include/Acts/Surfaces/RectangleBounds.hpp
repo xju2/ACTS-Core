@@ -123,4 +123,4 @@ RectangleBounds::type() const
   return SurfaceBounds::Rectangle;
 }
 
-}  // namespace
+}  // namespace Acts

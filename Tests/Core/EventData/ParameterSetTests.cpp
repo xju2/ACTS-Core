@@ -240,7 +240,7 @@ namespace Test {
         }
       }
     }
-  }
+  }  // namespace
   /// @endcond
 
   /**

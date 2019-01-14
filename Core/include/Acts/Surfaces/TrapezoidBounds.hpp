@@ -179,4 +179,4 @@ TrapezoidBounds::halflengthY() const
   return m_halfY;
 }
 
-}  // namespace
+}  // namespace Acts

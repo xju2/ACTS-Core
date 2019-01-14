@@ -330,6 +330,6 @@ namespace Seeding {
       return i1.first < i2.first;
     }
   };
-}  // end of Seeding namespace
-}  // end of Acts namespace
+}  // namespace Seeding
+}  // namespace Acts
 #include "Acts/Seeding/ATL_Seedmaker.ipp"

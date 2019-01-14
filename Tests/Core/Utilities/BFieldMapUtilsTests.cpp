@@ -385,5 +385,5 @@ namespace Test {
     CHECK_CLOSE_REL(value0_xyz, value3_xyz, 1e-10);
     CHECK_CLOSE_REL(value0_xyz, value4_xyz, 1e-10);
   }
-}
-}
+}  // namespace Test
+}  // namespace Acts

@@ -326,4 +326,4 @@ CylinderVolumeHelper::getConfiguration() const
 {
   return m_cfg;
 }
-}
+}  // namespace Acts

@@ -39,4 +39,4 @@ static const Vector3D s_origin(0, 0, 0);  //!< origin position
 static const double helper[9] = {0., 1., 0., 1., 0., 0., 0., 0., -1.};
 
 static const RotationMatrix3D s_idRotationZinverse(helper);
-}
+}  // namespace Acts

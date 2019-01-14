@@ -55,4 +55,4 @@ public:
                  VolumeBoundsPtr   outsideBounds = nullptr) const = 0;
 };
 
-}  // namespace
+}  // namespace Acts

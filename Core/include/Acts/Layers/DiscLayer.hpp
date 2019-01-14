@@ -118,4 +118,4 @@ protected:
   DiscLayer(const DiscLayer& cla, const Transform3D& tr);
 };
 
-}  // namespace
+}  // namespace Acts

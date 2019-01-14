@@ -148,4 +148,4 @@ PassiveLayerBuilder::centralLayers() const
   return m_cLayers;
 }
 
-}  // namespace
+}  // namespace Acts

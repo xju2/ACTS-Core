@@ -311,5 +311,5 @@ namespace Seeding {
     }
   }
 
-}  // end of Seeding namespace
-}  // end of Acts namespace
+}  // namespace Seeding
+}  // namespace Acts

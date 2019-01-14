@@ -114,4 +114,4 @@ constructContainerVolume(TrackingVolumePtr  iVolume,
   // return the container
   return hVolume;
 }
-}
+}  // namespace Acts

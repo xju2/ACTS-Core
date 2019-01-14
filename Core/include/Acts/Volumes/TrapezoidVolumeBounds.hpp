@@ -235,4 +235,4 @@ TrapezoidVolumeBounds::dumpT(T& dt) const
      << ")";
   return dt;
 }
-}
+}  // namespace Acts

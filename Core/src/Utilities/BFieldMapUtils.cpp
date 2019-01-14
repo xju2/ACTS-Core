@@ -13,8 +13,8 @@
 #include "Acts/Utilities/detail/Axis.hpp"
 #include "Acts/Utilities/detail/Grid.hpp"
 
-using Acts::VectorHelpers::phi;
 using Acts::VectorHelpers::perp;
+using Acts::VectorHelpers::phi;
 
 Acts::InterpolatedBFieldMap::FieldMapper<2, 2>
 Acts::fieldMapperRZ(const std::function<size_t(std::array<size_t, 2> binsRZ,

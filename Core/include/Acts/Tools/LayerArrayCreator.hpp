@@ -97,4 +97,4 @@ private:
                           double       offset) const;
 };
 
-}  // namespace
+}  // namespace Acts

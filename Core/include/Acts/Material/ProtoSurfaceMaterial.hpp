@@ -116,7 +116,7 @@ private:
   /// Dummy material properties
   MaterialProperties m_materialProperties;
 };
-}
+}  // namespace Acts
 
 inline const Acts::MaterialProperties&
 Acts::ProtoSurfaceMaterial::materialProperties(const Vector2D& /*lp*/) const

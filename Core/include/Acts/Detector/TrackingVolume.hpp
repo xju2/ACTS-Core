@@ -598,4 +598,4 @@ TrackingVolume::setMotherVolume(const TrackingVolume* mvol)
 
 #include "detail/TrackingVolume.ipp"
 
-}  // namespace
+}  // namespace Acts

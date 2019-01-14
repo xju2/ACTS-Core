@@ -185,5 +185,5 @@ namespace Test {
     accJacobian = swlJacobian * accJacobian;
     CHECK_CLOSE_OR_SMALL(pJacobian, accJacobian, 1e-6, 1e-9);
   }
-}
-}
+}  // namespace Test
+}  // namespace Acts

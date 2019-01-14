@@ -211,4 +211,4 @@ DigitizationModule::digitizationStep(const Vector3D& start,
   return m_segmentation->digitizationStep(
       start, end, m_halfThickness, m_readoutDirection, m_lorentzAngle);
 }
-}
+}  // namespace Acts

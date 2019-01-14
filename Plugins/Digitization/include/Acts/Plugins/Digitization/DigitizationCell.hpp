@@ -107,4 +107,4 @@ struct DigitizationStep
   {
   }
 };
-}
+}  // namespace Acts

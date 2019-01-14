@@ -98,5 +98,5 @@ namespace Test {
                                   xEdgeCheck.begin(),
                                   xEdgeCheck.end());
   }
-}
-}
+}  // namespace Test
+}  // namespace Acts

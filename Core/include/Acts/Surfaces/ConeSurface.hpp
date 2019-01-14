@@ -253,4 +253,4 @@ private:
 
 #include "Acts/Surfaces/detail/ConeSurface.ipp"
 
-}  // namespace
+}  // namespace Acts

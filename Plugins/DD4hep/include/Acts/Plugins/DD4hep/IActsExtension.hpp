@@ -21,7 +21,7 @@ class DetElement;
 class Segmentation;
 class Volume;
 class Material;
-}
+}  // namespace dd4hep
 
 namespace Acts {
 
@@ -146,4 +146,4 @@ protected:
   /// Protected constructor
   IActsExtension() = default;
 };
-}
+}  // namespace Acts

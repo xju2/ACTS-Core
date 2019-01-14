@@ -178,4 +178,4 @@ CylinderBounds::halflengthZ() const
 {
   return m_halfZ;
 }
-}
+}  // namespace Acts

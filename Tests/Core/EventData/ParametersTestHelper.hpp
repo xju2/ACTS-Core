@@ -35,5 +35,5 @@ namespace Test {
     CHECK_CLOSE_REL(pars.momentum(), momentum, 1e-6);
     BOOST_CHECK_EQUAL(pars.charge(), charge);
   }
-}
-}
+}  // namespace Test
+}  // namespace Acts

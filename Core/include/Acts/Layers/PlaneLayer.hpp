@@ -107,4 +107,4 @@ protected:
   PlaneLayer(const PlaneLayer& pla, const Transform3D& shift);
 };
 
-}  // namespace
+}  // namespace Acts

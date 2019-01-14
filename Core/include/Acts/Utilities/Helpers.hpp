@@ -67,7 +67,7 @@ namespace VectorHelpers {
                                   double,
                                   boost::mpl::vector<>,
                                   boost::function_types::const_qualified>;
-  }
+  }  // namespace detail
 
   // default call on Eigen types, calculate radius
   template <typename Derived>
@@ -132,7 +132,7 @@ namespace VectorHelpers {
 
     return r;
   }
-}
+}  // namespace VectorHelpers
 
 namespace detail {
 
@@ -144,7 +144,7 @@ namespace detail {
     }
     return val;
   }
-}
+}  // namespace detail
 
 inline std::string
 toString(const ActsMatrixXd& matrix,
@@ -237,4 +237,4 @@ unpack_shared_vector(const std::vector<std::shared_ptr<const T>>& items)
   return rawPtrs;
 }
 
-}  // end of Acts namespace
+}  // namespace Acts

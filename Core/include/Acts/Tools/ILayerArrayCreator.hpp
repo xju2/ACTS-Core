@@ -55,4 +55,4 @@ public:
              BinningType        btype  = arbitrary,
              BinningValue       bvalue = binX) const = 0;
 };
-}  // namespace
+}  // namespace Acts

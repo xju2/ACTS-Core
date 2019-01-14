@@ -204,4 +204,4 @@ Material::operator!=(const Material& mat) const
 {
   return !operator==(mat);
 }
-}
+}  // namespace Acts

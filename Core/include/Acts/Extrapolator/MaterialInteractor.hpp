@@ -66,7 +66,7 @@ struct MaterialInteractor
 
   /// Record material in detail
   bool recordInteractions = false;
-  
+
   /// Simple result struct to be returned
   /// It mainly acts as an internal state which is
   /// created for every propagation/extrapolation step

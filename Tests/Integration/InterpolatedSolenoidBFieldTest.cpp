@@ -27,8 +27,8 @@
 #include "Acts/Utilities/detail/Axis.hpp"
 #include "Acts/Utilities/detail/Grid.hpp"
 
-using Acts::VectorHelpers::phi;
 using Acts::VectorHelpers::perp;
+using Acts::VectorHelpers::phi;
 
 namespace bdata = boost::unit_test::data;
 namespace tt    = boost::test_tools;

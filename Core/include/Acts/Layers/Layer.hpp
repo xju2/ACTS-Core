@@ -395,6 +395,6 @@ private:
 /// describes as:
 using LayerArray = BinnedArray<LayerPtr>;
 
-}  // namespace
+}  // namespace Acts
 
 #include "Acts/Layers/detail/Layer.ipp"

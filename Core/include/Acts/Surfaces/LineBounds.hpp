@@ -105,4 +105,4 @@ LineBounds::halflengthZ() const
   return m_halfZ;
 }
 
-}  // namespace
+}  // namespace Acts

@@ -86,5 +86,5 @@ namespace Test {
       return nullptr;
     }
   };
-}  // end of ns
-}
+}  // namespace Test
+}  // namespace Acts

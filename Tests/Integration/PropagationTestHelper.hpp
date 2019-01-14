@@ -528,5 +528,5 @@ namespace IntegrationTest {
 
     CHECK_CLOSE_COVARIANCE(calculated_cov, obtained_cov, reltol);
   }
-}
-}
+}  // namespace IntegrationTest
+}  // namespace Acts

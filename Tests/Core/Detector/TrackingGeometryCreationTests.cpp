@@ -31,5 +31,5 @@ namespace Test {
     BOOST_CHECK_NE(tGeometry, nullptr);
   }
 
-}  // namespace Acts
 }  // namespace Test
+}  // namespace Acts

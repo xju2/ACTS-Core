@@ -209,4 +209,4 @@ TGeoLayerBuilder::match(const char* first, const char* second) const
   }
   return false;
 }
-}
+}  // namespace Acts

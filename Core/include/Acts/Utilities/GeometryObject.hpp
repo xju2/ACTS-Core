@@ -123,4 +123,4 @@ GeometryObject::binningPositionValue(BinningValue bValue) const
     return 0.;
   }
 }
-}
+}  // namespace Acts

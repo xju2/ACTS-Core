@@ -22,8 +22,8 @@
 #include "Acts/Utilities/ThrowAssert.hpp"
 #include "Acts/Utilities/VariantData.hpp"
 
-using Acts::VectorHelpers::phi;
 using Acts::VectorHelpers::perp;
+using Acts::VectorHelpers::phi;
 
 Acts::CylinderSurface::CylinderSurface(const CylinderSurface& other)
   : GeometryObject(), Surface(other), m_bounds(other.m_bounds)

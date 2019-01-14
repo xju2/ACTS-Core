@@ -182,5 +182,5 @@ namespace Test {
     BOOST_CHECK_EQUAL(mat, matFwdPre);
     BOOST_CHECK_EQUAL(vacuum, matBwdPre);
   }
-}
-}
+}  // namespace Test
+}  // namespace Acts

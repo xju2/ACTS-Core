@@ -302,4 +302,4 @@ CylinderVolumeBounds::dumpT(T& tstream) const
           << m_valueStore.at(bv_halfZ);
   return tstream;
 }
-}
+}  // namespace Acts

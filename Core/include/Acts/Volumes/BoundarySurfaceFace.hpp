@@ -95,4 +95,4 @@ operator<<(std::ostream& os, BoundarySurfaceFace& face)
 
   return os;
 }
-}
+}  // namespace Acts

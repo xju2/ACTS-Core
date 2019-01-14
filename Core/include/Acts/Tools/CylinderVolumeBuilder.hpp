@@ -612,4 +612,4 @@ CylinderVolumeBuilder::getConfiguration() const
   return m_cfg;
 }
 
-}  // namespace
+}  // namespace Acts

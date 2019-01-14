@@ -53,4 +53,4 @@ public:
   identification() const = 0;
 };
 
-}  // namespace
+}  // namespace Acts

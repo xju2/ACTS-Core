@@ -179,4 +179,4 @@ DetachedTrackingVolume::constituents() const
   return m_constituents;
 }
 
-}  // namespace
+}  // namespace Acts

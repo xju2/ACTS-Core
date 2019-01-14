@@ -76,4 +76,4 @@ private:
   /// logging instance
   std::unique_ptr<const Logger> m_logger;
 };
-}
+}  // namespace Acts

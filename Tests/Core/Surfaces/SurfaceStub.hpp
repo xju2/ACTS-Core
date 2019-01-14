@@ -152,4 +152,4 @@ private:
     return nullptr;
   }
 };
-}
+}  // namespace Acts

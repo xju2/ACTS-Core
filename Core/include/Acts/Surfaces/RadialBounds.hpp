@@ -152,4 +152,4 @@ RadialBounds::halfPhiSector() const
   return m_halfPhi;
 }
 
-}  // namespace
+}  // namespace Acts

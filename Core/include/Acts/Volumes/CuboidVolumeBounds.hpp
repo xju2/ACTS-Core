@@ -183,4 +183,4 @@ CuboidVolumeBounds::dumpT(T& dt) const
      << ", " << m_valueStore.at(bv_halfZ) << ")";
   return dt;
 }
-}
+}  // namespace Acts

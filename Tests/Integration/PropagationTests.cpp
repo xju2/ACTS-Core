@@ -133,6 +133,6 @@ namespace IntegrationTest {
 // template inside template definition through boost
 #include "PropagationTestBase.hpp"
 
-}  // namespace Test
+}  // namespace IntegrationTest
 
 }  // namespace Acts

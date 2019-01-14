@@ -22,8 +22,8 @@
 #include "Acts/Utilities/VariantData.hpp"
 #include "Acts/Utilities/detail/RealQuadraticEquation.hpp"
 
-using Acts::VectorHelpers::phi;
 using Acts::VectorHelpers::perp;
+using Acts::VectorHelpers::phi;
 
 Acts::ConeSurface::ConeSurface(const ConeSurface& other)
   : GeometryObject(), Surface(other), m_bounds(other.m_bounds)

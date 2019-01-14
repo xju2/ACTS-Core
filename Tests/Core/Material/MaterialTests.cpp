@@ -69,5 +69,5 @@ namespace Test {
     Material moveAssignedSilicon = std::move(assignedSilicon);
     BOOST_CHECK_EQUAL(silicon, moveAssignedSilicon);
   }
-}
-}
+}  // namespace Test
+}  // namespace Acts

@@ -63,6 +63,6 @@ fillCluster(std::vector<std::vector<cell_t>>& mergedCells,
             size_t nBins0,
             bool   commonCorner = true,
             double energyCut    = 0.);
-}
+}  // namespace Acts
 
 #include "Acts/Plugins/Digitization/detail/Clusterization.ipp"

@@ -86,4 +86,4 @@ private:
   /// DD4hep segmentation
   dd4hep::Segmentation m_segmentation;
 };
-}
+}  // namespace Acts

@@ -217,4 +217,4 @@ ConeBounds::halfPhiSector() const
 {
   return m_halfPhi;
 }
-}
+}  // namespace Acts

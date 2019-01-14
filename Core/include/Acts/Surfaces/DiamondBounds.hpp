@@ -163,4 +163,4 @@ DiamondBounds::halflengthY2() const
   return m_maxY;
 }
 
-}  // namespace
+}  // namespace Acts

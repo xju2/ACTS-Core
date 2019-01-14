@@ -84,4 +84,4 @@ GlueVolumesDescriptor::glueFaces() const
 
 std::ostream&
 operator<<(std::ostream& sl, const GlueVolumesDescriptor& gvd);
-}
+}  // namespace Acts

@@ -173,4 +173,4 @@ DetectorElementStub::thickness() const
   return m_elementThickness;
 }
 
-}  // end of ns
+}  // namespace Acts

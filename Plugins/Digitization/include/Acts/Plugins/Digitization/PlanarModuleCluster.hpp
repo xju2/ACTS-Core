@@ -82,4 +82,4 @@ PlanarModuleCluster::digitizationModule() const
 {
   return m_digitizationModule;
 }
-}
+}  // namespace Acts

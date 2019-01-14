@@ -538,5 +538,5 @@ namespace Test {
     }
     CHECK_CLOSE_REL(data9, (nClustersNoTouch * 2) * 2, 1e-5);
   }
-}
-}
+}  // namespace Test
+}  // namespace Acts

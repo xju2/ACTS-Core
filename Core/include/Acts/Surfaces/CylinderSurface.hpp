@@ -274,4 +274,4 @@ private:
 
 #include "Acts/Surfaces/detail/CylinderSurface.ipp"
 
-}  // namespace
+}  // namespace Acts

@@ -206,6 +206,6 @@ namespace detail {
     using type         = typename converter<permutations>::type;
   };
   /// @endcond
-}  // namespace details
+}  // namespace detail
 /// @endcond
 }  // namespace Acts

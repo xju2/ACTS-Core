@@ -63,4 +63,4 @@ public:
   /// Other methods have implementation in baseclass
   /// templated 'onLayer()' from baseclass ?
 };
-}
+}  // namespace Acts

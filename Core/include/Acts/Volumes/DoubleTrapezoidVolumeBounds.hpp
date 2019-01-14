@@ -273,4 +273,4 @@ DoubleTrapezoidVolumeBounds::dumpT(T& dT) const
      << ", " << m_valueStore.at(bv_halfZ) << ")";
   return dT;
 }
-}
+}  // namespace Acts

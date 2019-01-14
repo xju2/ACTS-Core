@@ -178,4 +178,4 @@ collectCompounds_dd4hep(dd4hep::DetElement&              detElement,
 void
 collectLayers_dd4hep(dd4hep::DetElement&              detElement,
                      std::vector<dd4hep::DetElement>& layers);
-}
+}  // namespace Acts

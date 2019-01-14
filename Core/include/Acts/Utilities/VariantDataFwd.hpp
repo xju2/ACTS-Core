@@ -28,4 +28,4 @@ using variant_data = boost::variant<int,
                                     bool,
                                     boost::recursive_wrapper<variant_map>,
                                     boost::recursive_wrapper<variant_vector>>;
-}
+}  // namespace Acts

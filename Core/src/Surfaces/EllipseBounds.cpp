@@ -20,8 +20,8 @@
 #include "Acts/Utilities/VariantData.hpp"
 #include "Acts/Utilities/detail/periodic.hpp"
 
-using Acts::VectorHelpers::phi;
 using Acts::VectorHelpers::perp;
+using Acts::VectorHelpers::phi;
 
 Acts::EllipseBounds::EllipseBounds(double minRadius0,
                                    double minRadius1,

@@ -42,5 +42,5 @@ namespace Test {
   {
     checkCloseImpl(m1, m2);
   }
-}
-}
+}  // namespace Test
+}  // namespace Acts

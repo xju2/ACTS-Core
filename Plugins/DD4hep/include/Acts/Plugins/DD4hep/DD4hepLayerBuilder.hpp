@@ -173,4 +173,4 @@ DD4hepLayerBuilder::getConfiguration() const
   return m_cfg;
 }
 
-}  // namespace
+}  // namespace Acts

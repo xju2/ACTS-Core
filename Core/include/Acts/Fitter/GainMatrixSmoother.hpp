@@ -97,4 +97,4 @@ public:
     return prev_ts.parameter.smoothed;
   }
 };
-}
+}  // namespace Acts

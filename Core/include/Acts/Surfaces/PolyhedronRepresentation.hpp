@@ -51,4 +51,4 @@ struct PolyhedronRepresentation
   std::string
   objString(size_t vtxOffset = 0) const;
 };
-}
+}  // namespace Acts

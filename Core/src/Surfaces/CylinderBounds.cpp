@@ -20,8 +20,8 @@
 #include "Acts/Utilities/VariantData.hpp"
 #include "Acts/Utilities/detail/periodic.hpp"
 
-using Acts::VectorHelpers::phi;
 using Acts::VectorHelpers::perp;
+using Acts::VectorHelpers::phi;
 
 Acts::CylinderBounds::CylinderBounds(double radius, double halfZ)
   : CylinderBounds(radius, 0, M_PI, halfZ)

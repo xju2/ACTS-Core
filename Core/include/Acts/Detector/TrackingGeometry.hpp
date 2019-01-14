@@ -12,14 +12,14 @@
 
 #pragma once
 
-#include "Acts/Utilities/Definitions.hpp"
-#include "Acts/Utilities/GeometryID.hpp"
-#include "Acts/Utilities/GeometrySignature.hpp"
-#include "Acts/Material/SurfaceMaterial.hpp"
 #include <functional>
 #include <map>
 #include <memory>
 #include <vector>
+#include "Acts/Material/SurfaceMaterial.hpp"
+#include "Acts/Utilities/Definitions.hpp"
+#include "Acts/Utilities/GeometryID.hpp"
+#include "Acts/Utilities/GeometrySignature.hpp"
 
 namespace Acts {
 
@@ -143,4 +143,4 @@ private:
   std::map<std::string, const TrackingVolume*> m_trackingVolumes;
 };
 
-}  // namespace
+}  // namespace Acts

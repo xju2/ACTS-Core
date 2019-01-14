@@ -36,9 +36,9 @@ public:
   bool
   operator()(T one, T two) const
   {
+    using Acts::VectorHelpers::eta;
     using Acts::VectorHelpers::perp;
     using Acts::VectorHelpers::phi;
-    using Acts::VectorHelpers::eta;
     // switch the binning value
     // - binX, binY, binZ, binR, binPhi, binRPhi, binH, binEta
     switch (m_binningValue) {
@@ -112,9 +112,9 @@ public:
   bool
   operator()(T one, T two) const
   {
+    using Acts::VectorHelpers::eta;
     using Acts::VectorHelpers::perp;
     using Acts::VectorHelpers::phi;
-    using Acts::VectorHelpers::eta;
     // switch the binning value
     // - binX, binY, binZ, binR, binPhi, binRPhi, binH, binEta
     switch (m_binningValue) {
@@ -213,4 +213,4 @@ protected:
   ObjectSorterT<Vector3D>            m_objectSorter;
   std::shared_ptr<const Transform3D> m_transform;
 };
-}
+}  // namespace Acts

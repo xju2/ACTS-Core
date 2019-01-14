@@ -23,8 +23,8 @@
 #include "Acts/Volumes/BoundarySurfaceFace.hpp"
 #include "Acts/Volumes/CylinderVolumeBounds.hpp"
 
-using Acts::VectorHelpers::phi;
 using Acts::VectorHelpers::perp;
+using Acts::VectorHelpers::phi;
 
 Acts::DiscLayer::DiscLayer(const std::shared_ptr<const Transform3D>& transform,
                            const std::shared_ptr<const DiscBounds>&  dbounds,

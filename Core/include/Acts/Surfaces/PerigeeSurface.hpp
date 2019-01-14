@@ -104,4 +104,4 @@ private:
   clone_impl(const Transform3D* shift = nullptr) const override;
 };
 
-}  // namespace
+}  // namespace Acts

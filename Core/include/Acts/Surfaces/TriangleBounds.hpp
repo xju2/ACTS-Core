@@ -105,4 +105,4 @@ private:
   RectangleBounds m_boundingBox;  ///< internal bounding box cache
 };
 
-}  // namespace
+}  // namespace Acts

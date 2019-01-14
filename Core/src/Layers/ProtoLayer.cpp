@@ -15,8 +15,8 @@
 #include "Acts/Surfaces/PolyhedronRepresentation.hpp"
 #include "Acts/Utilities/Helpers.hpp"
 
-using Acts::VectorHelpers::phi;
 using Acts::VectorHelpers::perp;
+using Acts::VectorHelpers::phi;
 
 namespace Acts {
 

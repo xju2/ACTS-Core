@@ -38,4 +38,4 @@ public:
   virtual std::unique_ptr<const TrackingGeometry>
   trackingGeometry() const = 0;
 };
-}  // namespace
+}  // namespace Acts

@@ -74,8 +74,8 @@ inline const RotationMatrix3D
                                      const Vector3D& gpos,
                                      const Vector3D& dir) const
 {
-  using VectorHelpers::phi;
   using VectorHelpers::perp;
+  using VectorHelpers::phi;
   // Optimized trigonometry on the propagation direction
   const double x = dir(0);  // == cos(phi) * sin(theta)
   const double y = dir(1);  // == sin(phi) * sin(theta)

@@ -156,6 +156,6 @@ namespace IntegrationTest {
     T m_propagator;
   };
 
-}  // namespace Test
+}  // namespace IntegrationTest
 
 }  // namespace Acts

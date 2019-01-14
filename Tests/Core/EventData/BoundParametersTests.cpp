@@ -490,5 +490,5 @@ namespace Test {
                       &n_ataLine_from_global.referenceSurface());
     BOOST_CHECK_EQUAL(sSurface.use_count(), 5);
   }
-}
-}
+}  // namespace Test
+}  // namespace Acts

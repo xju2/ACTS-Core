@@ -13,6 +13,7 @@
 #pragma once
 #include <memory>
 #include <vector>
+#include <map>
 #include "Acts/Material/MaterialProperties.hpp"
 #include "Acts/Utilities/Definitions.hpp"
 #include "Acts/Utilities/GeometryID.hpp"
@@ -172,5 +173,8 @@ SurfaceMaterial::materialProperties(const Vector3D&     gp,
   }
   return plainMatProp;
 }
+
+using SurfaceMaterialMap
+    = std::map<GeometryID, std::shared_ptr<const SurfaceMaterial>>;
 
 }  // namespace

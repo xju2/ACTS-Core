@@ -81,7 +81,7 @@ struct MaterialCollector
         return dstream.str();
       });
 
-      if (state.navigation.currentSurface->associatedMaterial()) {
+      if (state.navigation.currentSurface->surfaceMaterial()) {
         // get the material propertices and only continue
         const MaterialProperties* mProperties
             = state.navigation.currentSurface->associatedMaterial()->material(
@@ -95,7 +95,7 @@ struct MaterialCollector
               return std::string("Update on start surface: post-update mode.");
             });
             prepofu
-                = state.navigation.currentSurface->associatedMaterial()->factor(
+                = state.navigation.currentSurface->surfaceMaterial()->factor(
                     state.stepping.navDir, postUpdate);
           } else if (state.navigation.targetSurface
                      == state.navigation.currentSurface) {
@@ -103,7 +103,7 @@ struct MaterialCollector
               return std::string("Update on target surface: pre-update mode");
             });
             prepofu
-                = state.navigation.currentSurface->associatedMaterial()->factor(
+                = state.navigation.currentSurface->surfaceMaterial()->factor(
                     state.stepping.navDir, preUpdate);
           } else {
             debugLog(state, [&] {

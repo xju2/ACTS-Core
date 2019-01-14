@@ -12,10 +12,10 @@
 
 #pragma once
 
-#include "Acts/Utilities/Definitions.hpp"
 #include "Acts/Detector/DetectorElementBase.hpp"
 #include "Acts/Surfaces/PlanarBounds.hpp"
 #include "Acts/Surfaces/PlaneSurface.hpp"
+#include "Acts/Utilities/Definitions.hpp"
 #include "LineSurfaceStub.hpp"
 
 /// Set the identifier PLUGIN

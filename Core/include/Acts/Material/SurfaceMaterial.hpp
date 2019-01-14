@@ -11,9 +11,9 @@
 ///////////////////////////////////////////////////////////////////
 
 #pragma once
+#include <map>
 #include <memory>
 #include <vector>
-#include <map>
 #include "Acts/Material/MaterialProperties.hpp"
 #include "Acts/Utilities/Definitions.hpp"
 #include "Acts/Utilities/GeometryID.hpp"

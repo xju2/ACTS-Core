@@ -80,7 +80,7 @@ namespace Test {
     // Build PlanarModuleCluster
     PlanarModuleCluster* pmc
         = new PlanarModuleCluster(pSur,
-                                  0,
+                                  Identifier(0),
                                   cov,
                                   local[0],
                                   local[1],
@@ -108,7 +108,7 @@ namespace Test {
 
     PlanarModuleCluster* pmc2
         = new PlanarModuleCluster(pSur2,
-                                  1,
+                                  Identifier(1),
                                   cov,
                                   local[0],
                                   local[1],
@@ -148,7 +148,7 @@ namespace Test {
 
     PlanarModuleCluster* pmc3
         = new PlanarModuleCluster(pSur3,
-                                  2,
+                                  Identifier(2),
                                   cov,
                                   local[0],
                                   local[1],

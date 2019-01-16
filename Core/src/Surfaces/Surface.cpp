@@ -30,7 +30,7 @@ Acts::Surface::Surface(const Surface& other)
   : GeometryObject(other)
   , std::enable_shared_from_this<Surface>()
   , m_transform(other.m_transform)
-  , m_associatedMaterial(other.m_associatedMaterial)
+  , m_surfaceMaterial(other.m_surfaceMaterial)
 {
 }
 
@@ -39,7 +39,7 @@ Acts::Surface::Surface(const Surface& other, const Transform3D& shift)
   , m_transform(std::make_shared<const Transform3D>(
         Transform3D(shift * other.transform())))
   , m_associatedLayer(other.m_associatedLayer)
-  , m_associatedMaterial(other.m_associatedMaterial)
+  , m_surfaceMaterial(other.m_surfaceMaterial)
 {
 }
 
@@ -81,7 +81,7 @@ Acts::Surface::operator=(const Surface& other)
     // detector element, identifier & layer association are unique
     m_transform          = other.m_transform;
     m_associatedLayer    = other.m_associatedLayer;
-    m_associatedMaterial = other.m_associatedMaterial;
+    m_surfaceMaterial = other.m_surfaceMaterial;
     // assigning does invalidate the link to the detectore element
     // we want to have a unique association
     m_associatedDetElement = nullptr;

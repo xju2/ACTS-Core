@@ -77,7 +77,7 @@ namespace Test {
 
     // Build PlanarModuleCluster
     PlanarModuleCluster* pmc = new PlanarModuleCluster(
-        pSur, 0, cov, local[0], local[1], {DigitizationCell(0, 0, 1.)});
+        pSur, Identifier(0), cov, local[0], local[1], {DigitizationCell(0, 0, 1.)});
 
     std::cout << "Hit created" << std::endl;
 

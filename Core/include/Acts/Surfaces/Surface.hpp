@@ -563,7 +563,7 @@ protected:
   const TrackingVolume* m_associatedTrackingVolume{nullptr};
 
   /// Possibility to attach a material descrption
-  std::shared_ptr<const SurfaceMaterial> m_associatedMaterial;
+  std::shared_ptr<const SurfaceMaterial> m_surfaceMaterial;
 };
 
 #include "Acts/Surfaces/detail/Surface.ipp"

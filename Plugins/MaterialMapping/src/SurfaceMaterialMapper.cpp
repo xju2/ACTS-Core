@@ -118,11 +118,11 @@ Acts::SurfaceMaterialMapper::checkAndInsert(State&         mState,
 
     // We need a dynamic_cast to either a surface material proxy or
     // proper surface material
-    auto smp = dynamic_cast<const ProtoSurfaceMaterial*>(surfaceMaterial);
+    auto psm = dynamic_cast<const ProtoSurfaceMaterial*>(surfaceMaterial);
 
     // Get the bin utility: try proxy material first
-    const BinUtility* bu = (smp != nullptr) ? (&smp->binUtility()) : nullptr;
-    if (bu) {
+    const BinUtility* bu = (psm != nullptr) ? (&psm->binUtility()) : nullptr;
+    if (bu != nullptr) {
       // Screen output for Binned Surface material
       ACTS_INFO("       - (proto) binning is " << *bu);
       // Now update

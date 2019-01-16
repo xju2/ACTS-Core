@@ -85,7 +85,7 @@ Acts::Surface::operator=(const Surface& other)
     // detector element, identifier & layer association are unique
     m_transform            = other.m_transform;
     m_associatedLayer      = other.m_associatedLayer;
-    m_surfaceMaterial   = other.m_associatedMaterial;
+    m_surfaceMaterial      = other.m_surfaceMaterial;
     m_associatedDetElement = other.m_associatedDetElement;
   }
   return *this;

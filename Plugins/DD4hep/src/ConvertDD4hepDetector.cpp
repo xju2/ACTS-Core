@@ -124,7 +124,6 @@ std::shared_ptr<const CylinderVolumeBuilder> volumeBuilder_dd4hep(
     subDetExtension = subDetector.extension<Acts::IActsExtension>();
   } catch (std::runtime_error& e) {
   }
-
   if (subDetector.type() == "compound") {
     ACTS_VERBOSE("[D] Subdetector : '"
                  << subDetector.name()

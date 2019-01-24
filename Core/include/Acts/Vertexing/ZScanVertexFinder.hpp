@@ -63,6 +63,7 @@ class ZScanVertexFinder {
     double expPt = 1.;
     // minimum required weight
     double minWeight = 0.01;
+
   };
 
   /// @brief Constructor used if input_track_t type == BoundParameters
@@ -71,11 +72,13 @@ class ZScanVertexFinder {
   /// @param logger The logging instance
   template <typename T = input_track_t,
             std::enable_if_t<std::is_same<T, BoundParameters>::value, int> = 0>
+
   ZScanVertexFinder(Config cfg,
                     std::unique_ptr<const Logger> logger =
                         getDefaultLogger("ZScanVertexFinder", Logging::INFO))
       : m_cfg(std::move(cfg)),
         m_extractParameters([](T params) { return params; }),
+
         m_logger(std::move(logger)) {}
 
   /// @brief Constructor for user-defined input_track_t type =! BoundParameters

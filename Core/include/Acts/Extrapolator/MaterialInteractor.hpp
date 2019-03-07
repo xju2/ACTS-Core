@@ -36,7 +36,9 @@ struct MaterialInteraction
   /// The position information of the material hit
   Vector3D position = Vector3D(0., 0., 0);
   /// The momentum information of the track at the material hit
-  Vector3D momentum = Vector3D(1., 0., 0);
+  Vector3D direction = Vector3D(1., 0., 0);
+  /// The momentum of the particle
+  double p = 0.;
   /// The calculated path & applied path correction factor
   double pathCorrection = 1.;
   /// The (passsed) material properties
@@ -276,6 +278,7 @@ struct MaterialInteractor
         if (recordInteractions) {
           mInteraction.position           = stepper.position(state.stepping);
           mInteraction.direction          = stepper.direction(state.stepping);
+          mInteraction.p                  = stepper.momentum(state.stepping);
           mInteraction.materialProperties = mProperties;
           mInteraction.pathCorrection     = pCorrection;
           result.materialInteractions.push_back(std::move(mInteraction));

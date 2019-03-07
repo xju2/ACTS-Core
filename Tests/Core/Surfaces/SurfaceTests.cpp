@@ -101,7 +101,7 @@ namespace Test {
     BOOST_CHECK_EQUAL(surface.associatedLayer(), pLayer.get());
     // associated Material is not set to the surface
     // it is set to the detector element surface though
-    BOOST_CHECK_NE(surface.associatedMaterial(), pMaterial.get());
+    BOOST_CHECK_NE(surface.surfaceMaterial(), pMaterial.get());
     // center()
     CHECK_CLOSE_OR_SMALL(reference, surface.center(), 1e-6, 1e-9);
     // stream insertion operator <<
@@ -143,8 +143,8 @@ namespace Test {
     MaterialProperties newProperties{0.5, 0.5, 0.5, 20., 10., 5.};
     auto               pNewMaterial
         = std::make_shared<const HomogeneousSurfaceMaterial>(newProperties);
-    surface.setAssociatedMaterial(pNewMaterial);
-    BOOST_CHECK_EQUAL(surface.associatedMaterial(),
+    surface.assignSurfaceMaterial(pNewMaterial);
+    BOOST_CHECK_EQUAL(surface.surfaceMaterial(),
                       pNewMaterial.get());  // passes ??
     //
     CHECK_CLOSE_OR_SMALL(surface.transform(), *pTransform, 1e-6, 1e-9);

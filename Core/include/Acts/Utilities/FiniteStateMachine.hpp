@@ -9,6 +9,7 @@
 #pragma once
 
 #include <optional>
+#include <string_view>
 #include <variant>
 
 namespace Acts {
@@ -19,11 +20,12 @@ class FiniteStateMachine
 public:
   struct Terminated
   {
+    constexpr static std::string_view name = "Terminated";
   };
   using StateVariant = std::variant<Terminated, States...>;
 
 protected:
-  using self_type = FiniteStateMachine<Derived, States...>;
+  using fsm_base = FiniteStateMachine<Derived, States...>;
 
   using event_return = std::optional<StateVariant>;
 
@@ -34,37 +36,42 @@ public:
   FiniteStateMachine(StateVariant state) : m_state(std::move(state)){};
 
   const StateVariant&
-  getState() const
+  getState() const noexcept
   {
     return m_state;
   }
 
   StateVariant&
-  getState()
+  getState() noexcept
   {
     return m_state;
   }
 
+  template <typename... Args>
   void
-  setState(StateVariant state)
+  setState(StateVariant state, Args&&... args)
   {
     Derived& child = static_cast<Derived&>(*this);
 
     // call on exit function
-    std::visit([&](auto& s) { child.on_exit(s); }, m_state);
+    std::visit([&](auto& s) { child.on_exit(s, std::forward<Args>(args)...); },
+               m_state);
 
     // no change state
     m_state = std::move(state);
 
     // call on enter function
-    std::visit([&](auto& s) { child.on_enter(s); }, m_state);
+    std::visit([&](auto& s) { child.on_enter(s, std::forward<Args>(args)...); },
+               m_state);
   }
 
   template <typename S>
   bool
   is(const S& /*state*/) const noexcept
   {
-    if (std::get_if<S>(&m_state)) { return true; }
+    if (std::get_if<S>(&m_state)) {
+      return true;
+    }
     return false;
   }
 
@@ -78,12 +85,19 @@ public:
   event_return
   process_event(Event&& event, Args&&... args)
   {
-
-    Derived& child     = static_cast<Derived&>(*this);
-    auto     new_state = std::visit(
+    Derived& child = static_cast<Derived&>(*this);
+    child.log(event);
+    auto new_state = std::visit(
         [&](auto& s) -> std::optional<StateVariant> {
-          return child.on_event(
-              s, std::forward<Event>(event), std::forward<Args...>(args)...);
+          auto s2 = child.on_event(
+              s, std::forward<Event>(event), std::forward<Args>(args)...);
+
+          if (s2) {
+            std::visit([&](auto& s2_) { child.log(s, event, s2_); }, *s2);
+          } else {
+            child.log(s, event);
+          }
+          return std::move(s2);
         },
         m_state);
     return std::move(new_state);
@@ -93,9 +107,10 @@ public:
   void
   dispatch(Event&& event, Args&&... args)
   {
-    auto new_state = process_event(std::forward<Event>(event),
-                                    std::forward<Args...>(args)...);
-    if (new_state) { setState(std::move(*new_state)); }
+    auto new_state = process_event(std::forward<Event>(event), args...);
+    if (new_state) {
+      setState(std::move(*new_state), std::forward<Args>(args)...);
+    }
   }
 
 private:

@@ -71,3 +71,7 @@ if (ACTS_BUILD_LEGACY)
   
   install (TARGETS AtlasStepperBenchmark RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}/Profiling)
 endif()
+
+add_executable (FSMNavigatorTests FSMNavigatorTests.cpp)
+target_link_libraries (FSMNavigatorTests PRIVATE ActsCore ActsTestsCommonHelpers ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+add_test(NAME FSMNavigatorTests COMMAND FSMNavigatorTests)

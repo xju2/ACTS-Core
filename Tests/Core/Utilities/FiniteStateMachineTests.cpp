@@ -66,7 +66,7 @@ namespace Test {
                                   states::Connected>
   {
 
-    fsm() : self_type(states::Disconnected{}){};
+    fsm() : fsm_base(states::Disconnected{}){};
 
     event_return
     on_event(const states::Disconnected&, const events::Connect&)
@@ -114,20 +114,26 @@ namespace Test {
       return Terminated{};
     }
 
-    template <typename State>
+    template <typename State, typename... Args>
     void
-    on_enter(const State&)
+    on_enter(const State&, Args&&...)
     {
     }
 
-    template <typename State>
+    template <typename State, typename... Args>
     void
-    on_exit(const State&)
+    on_exit(const State&, Args&&...)
+    {
+    }
+
+    template <typename... Args>
+    void
+    log(Args&&...)
     {
     }
   };
 
-  BOOST_AUTO_TEST_SUITE(Utilities);
+  BOOST_AUTO_TEST_SUITE(Utilities)
 
   BOOST_AUTO_TEST_CASE(Transitions)
   {
@@ -160,9 +166,9 @@ namespace Test {
   }
 
   struct fsm2
-    : FiniteStateMachine<fsm2, states::Disconnected, states::Connected>
+      : FiniteStateMachine<fsm2, states::Disconnected, states::Connected>
   {
-    fsm2() : self_type(states::Disconnected{}){};
+    fsm2() : fsm_base(states::Disconnected{}){};
 
     event_return
     on_event(const states::Disconnected&, const events::Connect&, double f)
@@ -175,6 +181,7 @@ namespace Test {
     event_return
     on_event(const states::Connected&, const events::Disconnect&)
     {
+      std::cout << "disconnect!" << std::endl;
       return states::Disconnected{};
     }
 
@@ -185,21 +192,27 @@ namespace Test {
       return Terminated{};
     }
 
+    template <typename... Args>
     void
-    on_enter(const Terminated&)
+    on_enter(const Terminated&, Args&&...)
     {
       throw std::runtime_error("FSM terminated!");
     }
 
-    template <typename State>
+    template <typename State, typename... Args>
     void
-    on_enter(const State&)
+    on_enter(const State&, Args&&...)
     {
     }
 
-    template <typename State>
+    template <typename State, typename... Args>
     void
-    on_exit(const State&)
+    on_exit(const State&, Args&&...)
+    {
+    }
+    template <typename... Args>
+    void
+    log(Args&&...)
     {
     }
   };
@@ -233,44 +246,69 @@ namespace Test {
     BOOST_CHECK(sm.is(states::Connected{}));
   }
 
-  struct S1 {};
-  struct S2 {};
-  struct S3 {};
+  struct S1
+  {
+  };
+  struct S2
+  {
+  };
+  struct S3
+  {
+  };
 
-  struct E1 {};
-  struct E2 {};
-  struct E3 {};
+  struct E1
+  {
+  };
+  struct E2
+  {
+  };
+  struct E3
+  {
+  };
 
-  struct fsm3 : FiniteStateMachine<fsm3, S1, S2, S3> {
-    
-    bool on_exit_called = false;
+  struct fsm3 : FiniteStateMachine<fsm3, S1, S2, S3>
+  {
+
+    bool on_exit_called  = false;
     bool on_enter_called = false;
-    void reset() {on_exit_called = false; on_enter_called = false;}
+    void
+    reset()
+    {
+      on_exit_called  = false;
+      on_enter_called = false;
+    }
 
     // S1 + E1 = S2
-    event_return on_event(const S1&, const E1&) {
+    event_return
+    on_event(const S1&, const E1&)
+    {
       return S2{};
     }
-   
+
     // S2 + E1 = S2
     // external transition to self
-    event_return on_event(const S2&, const E1&) {
+    event_return
+    on_event(const S2&, const E1&)
+    {
       return S2{};
     }
-    
+
     // S2 + E2
     // internal transition
-    event_return on_event(const S2&, const E2&) {
+    event_return
+    on_event(const S2&, const E2&)
+    {
       return std::nullopt;
-      //return S2{};
+      // return S2{};
     }
 
     // S2 + E3 = S3
     // external transition
-    event_return on_event(const S2&, const E3&) {
+    event_return
+    on_event(const S2&, const E3&)
+    {
       return S3{};
     }
-
 
     // catchers
 
@@ -280,24 +318,29 @@ namespace Test {
     {
       return Terminated{};
     }
-    
-    template <typename State>
+
+    template <typename State, typename... Args>
     void
-    on_enter(const State&)
+    on_enter(const State&, Args&&...)
     {
       on_enter_called = true;
     }
 
-    template <typename State>
+    template <typename State, typename... Args>
     void
-    on_exit(const State&)
+    on_exit(const State&, Args&&...)
     {
       on_exit_called = true;
     }
-
+    template <typename... Args>
+    void
+    log(Args&&...)
+    {
+    }
   };
 
-  BOOST_AUTO_TEST_CASE(InternalTransitions) {
+  BOOST_AUTO_TEST_CASE(InternalTransitions)
+  {
 
     fsm3 sm;
     BOOST_CHECK(sm.is(S1{}));
@@ -308,7 +351,7 @@ namespace Test {
     BOOST_CHECK(sm.on_enter_called);
 
     sm.reset();
-    
+
     sm.dispatch(E1{});
     // still in S2
     BOOST_CHECK(sm.is(S2{}));
@@ -331,11 +374,9 @@ namespace Test {
     BOOST_CHECK(sm.on_exit_called);
     BOOST_CHECK(sm.on_enter_called);
     sm.reset();
-
   }
 
-
-  BOOST_AUTO_TEST_SUITE_END();
+  BOOST_AUTO_TEST_SUITE_END()
 
 }  // namespace Test
 }  // namespace Acts

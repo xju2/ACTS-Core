@@ -96,3 +96,7 @@ acts_add_test_to_cdash_project (PROJECT ACore TEST MaterialMapUtilsTest TARGETS 
 add_executable (HelpersTests HelpersTests.cpp)
 target_link_libraries (HelpersTests PRIVATE ActsCore ActsTestsCommonHelpers ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 add_test (NAME HelpersTests COMMAND HelpersTests)
+
+add_executable (FiniteStateMachineTests FiniteStateMachineTests.cpp)
+target_link_libraries (FiniteStateMachineTests PRIVATE ActsCore ActsTestsCommonHelpers ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+add_test (NAME FiniteStateMachineTests COMMAND FiniteStateMachineTests)

@@ -94,6 +94,12 @@ const Acts::TrackingVolume* Acts::TrackingVolume::lowestTrackingVolume(
     return (m_confinedVolumes->object(gp).get());
   }
 
+  // search for dense volumes
+  if (!m_confinedDenseVolumes.empty())
+    for (auto& denseVolume : m_confinedDenseVolumes)
+      if (denseVolume->inside(gp, 0.001)) return denseVolume.get();
+
+
   // there is no lower sub structure
   return this;
 }
@@ -438,7 +444,7 @@ void Acts::TrackingVolume::closeGeometry(
     for (auto& volumesIter : m_confinedDenseVolumes) {
       auto mutableVolumesIter
           = std::const_pointer_cast<TrackingVolume>(volumesIter);
-      mutableVolumesIter->closeGeometry(volumeMap, vol);
+      mutableVolumesIter->closeGeometry(surfaceMaterialMap, volumeMap, vol);
     }
   }
 }

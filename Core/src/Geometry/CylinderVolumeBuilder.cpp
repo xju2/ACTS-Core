@@ -261,7 +261,8 @@ Acts::CylinderVolumeBuilder::trackingVolume(
     if (wConfig.fGapVolumeConfig) {
       // create the gap volume
       auto fGap
-          = tvHelper->createGapTrackingVolume(gctx,wConfig.cVolumeConfig.volumes,
+          = tvHelper->createGapTrackingVolume(gctx,
+                                              wConfig.cVolumeConfig.volumes,
                                               m_cfg.volumeMaterial,
                                               wConfig.fGapVolumeConfig.rMin,
                                               wConfig.fGapVolumeConfig.rMax,
@@ -277,7 +278,8 @@ Acts::CylinderVolumeBuilder::trackingVolume(
     if (wConfig.sGapVolumeConfig) {
       // create the gap volume
       auto sGap
-          = tvHelper->createGapTrackingVolume(gctx,wConfig.cVolumeConfig.volumes,
+          = tvHelper->createGapTrackingVolume(gctx,
+                                              wConfig.cVolumeConfig.volumes,
                                               m_cfg.volumeMaterial,
                                               wConfig.sGapVolumeConfig.rMin,
                                               wConfig.sGapVolumeConfig.rMax,
@@ -345,8 +347,10 @@ Acts::CylinderVolumeBuilder::trackingVolume(
 
 // -----------------------------
 Acts::VolumeConfig
-Acts::CylinderVolumeBuilder::analyzeContent(const GeometryContext& gctx,
-                                           const LayerVector&     lVector, const MutableTrackingVolumeVector& mtvVector) const
+Acts::CylinderVolumeBuilder::analyzeContent(
+    const GeometryContext&             gctx,
+    const LayerVector&                 lVector,
+    const MutableTrackingVolumeVector& mtvVector) const
 {
   // @TODO add envelope tolerance
   //

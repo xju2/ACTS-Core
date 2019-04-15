@@ -436,6 +436,7 @@ void Acts::TrackingVolume::closeGeometry(
       auto mutableVolumesIter =
           std::const_pointer_cast<TrackingVolume>(volumesIter);
       mutableVolumesIter->closeGeometry(materialDecorator, volumeMap, vol);
+      mutableVolumesIter->setMotherVolume(this);
     }
   }
 
@@ -443,7 +444,8 @@ void Acts::TrackingVolume::closeGeometry(
     for (auto& volumesIter : m_confinedDenseVolumes) {
       auto mutableVolumesIter
           = std::const_pointer_cast<TrackingVolume>(volumesIter);
-      mutableVolumesIter->closeGeometry(surfaceMaterialMap, volumeMap, vol);
+      mutableVolumesIter->closeGeometry(materialDecorator, volumeMap, vol);
+      mutableVolumesIter->setMotherVolume(this);
     }
   }
 }

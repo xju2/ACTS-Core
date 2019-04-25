@@ -889,10 +889,10 @@ private:
         debugLog(state, [&] {
           std::stringstream ss;
           ss << "Boundary intersection with:\n";
-          boundaryIntersect.object->toStream(state.geoContext, ss);
+          //boundaryIntersect.object->toStream(state.geoContext, ss);
           ss << "\n";
           ss << "Boundary intersection not valid, skipping it.\n";
-          ss << "valid: " << bool(boundaryIntersect) << "\n";
+          //ss << "valid: " << bool(boundaryIntersect) << "\n";
           ss << "pathLength: " << distance << "\n";
           if (distance < 0 && std::abs(distance) < 0.01) {
             ss << "Very likely overstepped over boundary surface! \n";

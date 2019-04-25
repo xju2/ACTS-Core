@@ -225,8 +225,8 @@ Acts::EigenStepper<B, C, E, A>::step(propagator_state_t& state) const
 
   // First Runge-Kutta point (at current position)
   sd.B_first = getField(state.stepping, state.stepping.pos);
-  if (!state.stepping.extension.validExtensionForStep(state, *this)
-      || !state.stepping.extension.k1(state, *this, sd.k1, sd.B_first)) {
+  if (!state.stepping.extension.validExtensionForStep(state, *this,state.stepping)
+      || !state.stepping.extension.k1(state, *this, state.stepping, sd.k1, sd.B_first)) {
     return 0.;
   }
 
@@ -244,13 +244,13 @@ Acts::EigenStepper<B, C, E, A>::step(propagator_state_t& state) const
         = state.stepping.pos + half_h * state.stepping.dir + h2 * 0.125 * sd.k1;
     sd.B_middle = getField(state.stepping, pos1);
     if (!state.stepping.extension.k2(
-            state, *this, sd.k2, sd.B_middle, half_h, sd.k1)) {
+            state, *this, state.stepping, sd.k2, sd.B_middle, half_h, sd.k1)) {
       return false;
     }
 
     // Third Runge-Kutta point
     if (!state.stepping.extension.k3(
-            state, *this, sd.k3, sd.B_middle, half_h, sd.k2)) {
+            state, *this, state.stepping, sd.k3, sd.B_middle, half_h, sd.k2)) {
       return false;
     }
 
@@ -259,7 +259,7 @@ Acts::EigenStepper<B, C, E, A>::step(propagator_state_t& state) const
         = state.stepping.pos + h * state.stepping.dir + h2 * 0.5 * sd.k3;
     sd.B_last = getField(state.stepping, pos2);
     if (!state.stepping.extension.k4(
-            state, *this, sd.k4, sd.B_last, h, sd.k3)) {
+            state, *this, state.stepping, sd.k4, sd.B_last, h, sd.k3)) {
       return false;
     }
 
@@ -301,14 +301,14 @@ Acts::EigenStepper<B, C, E, A>::step(propagator_state_t& state) const
   if (state.stepping.covTransport) {
     // The step transport matrix in global coordinates
     ActsMatrixD<7, 7> D;
-    if (!state.stepping.extension.finalize(state, *this, h, D)) {
+    if (!state.stepping.extension.finalize(state, *this, state.stepping, h, D)) {
       return EigenStepperError::StepInvalid;
     }
 
     // for moment, only update the transport part
     state.stepping.jacTransport = D * state.stepping.jacTransport;
   } else {
-    if (!state.stepping.extension.finalize(state, *this, h)) {
+    if (!state.stepping.extension.finalize(state, *this, state.stepping, h)) {
       return EigenStepperError::StepInvalid;
     }
   }

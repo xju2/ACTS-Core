@@ -65,7 +65,7 @@ namespace Test {
   EigenPropagatorType epropagator(std::move(estepper), std::move(navigator));
 
   const int ntests    = 100;
-  bool      debugMode = false;
+  bool      debugMode = true;
 
   // A plane selector for the SurfaceCollector
   struct PlaneSelector

@@ -95,7 +95,7 @@ namespace detail {
     /// @param [in,out] state The propagation state object
     template <typename propagator_state_t, typename stepper_t>
     bool
-    operator()(propagator_state_t& state, const stepper_t& /*unused*/) const
+    operator()(propagator_state_t& state, const stepper_t& stepper) const
     {
       if (state.navigation.targetReached) {
         return true;
@@ -106,6 +106,7 @@ namespace detail {
       double distance  = limit - state.stepping.pathAccumulated;
       double tolerance = state.options.targetTolerance;
       state.stepping.stepSize.update(distance, ConstrainedStep::aborter);
+      stepper.updateStep(state.stepping, distance, ConstrainedStep::aborter);
       bool limitReached = (distance * distance < tolerance * tolerance);
       if (limitReached) {
         targetDebugLog(state, "x", [&] {

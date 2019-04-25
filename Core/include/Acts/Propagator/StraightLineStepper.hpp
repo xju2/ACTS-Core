@@ -184,6 +184,26 @@ public:
     return surface->isOnSurface(
         state.geoContext, position(state), direction(state), true);
   }
+  // targetSurface method
+  // corrector_t is needed?
+  template <typename options_t, typename corrector_t>
+  std::pair<bool, double>
+  targetSurface(State&             state,
+                const Surface*     surface,
+                const options_t&   navOpts,
+                const corrector_t& navCorr) const
+  {
+    // Intersect the surface
+    auto surfaceIntersect = surface->surfaceIntersectionEstimate(
+        state.geoContext, state.pos, state.dir, navOpts, navCorr);
+    if (surfaceIntersect) {
+      // update the stepsize
+      double ssize = surfaceIntersect.intersection.pathLength;
+      state.stepSize.update(ssize, cstep::actor, true);
+      return std::make_pair(true, ssize);
+    }
+    return std::make_pair(false, std::numeric_limits<double>::max());
+  }
 
   /// Create and return the bound state at the current position
   ///
@@ -310,6 +330,26 @@ public:
   {
   }
 
+  /// updateStep method
+  void
+  updateStep(state_type&                      state,
+             const VoidIntersectionCorrector& navCorr,
+             double                           navigationStep,
+             bool                             release = false) const  // *
+  {
+    state.stepSize.update(navigationStep, cstep::actor, release);
+    /// If we have an initial step and are configured to modify it
+    if (state.pathAccumulated == 0. and navCorr(state.stepSize)) {
+    }
+  }
+  template <typename type>
+  void
+  updateStep(state_type& state,
+             double      abortStep,
+             type        cstepType = cstep::aborter) const
+  {
+    state.stepSize.update(abortStep, cstepType);
+  }
   /// Perform a straight line propagation step
   ///
   /// @param [in,out] state is the propagation state associated with the track

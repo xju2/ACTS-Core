@@ -182,6 +182,10 @@ public:
     } stepData;
   };
 
+  /// Always use the same propagation state type, independently of the initial
+  /// track parameter type and of the target surface
+  using state_type = State;
+
   /// Return parameter types depend on the propagation mode:
   /// - when propagating to a surface we usually return BoundParameters
   /// - otherwise CurvilinearParameters
@@ -243,6 +247,34 @@ public:
   {
     return surface->isOnSurface(
         state.geoContext, position(state), direction(state), true);
+  }
+
+  /// caculates the stepSize of the state in navigator
+  /// @param [in] state State is the MC state
+  /// @param [in] surface Surface that is tested
+  /// @param [in] navigator options
+  /// @param [in] navigator corrections
+  //
+  /// @return pair of <Boolean,Double>
+  /// Bool: if target at the surface candidate
+  /// Double : the pathlength
+  template <typename options_t>
+  std::pair<bool, double>
+  targetSurface(State&             state,
+                const Surface*     surface,
+                const options_t&   navOpts,
+                const corrector_t& navCorr) const
+  {
+    // Intersect the surface
+    auto surfaceIntersect = surface->surfaceIntersectionEstimate(state.geoContext,
+        position(state), direction(state), navOpts, navCorr);
+    if (surfaceIntersect) {
+      double ssize = surfaceIntersect.intersection.pathLength;
+      // update the stepsize
+      updateStep(state, navCorr, ssize, true);
+      return std::make_pair(true, ssize);
+    }
+    return std::make_pair(false, std::numeric_limits<double>::max());
   }
 
   /// Create and return the bound state at the current position
@@ -335,6 +367,39 @@ public:
   covarianceTransport(State&         state,
                       const Surface& surface,
                       bool           reinitialize = true) const;
+
+  /// This method updates the constrained step size
+  ///
+  /// @tparam propagator_state_t is the state type
+  ///
+  /// @param[in,out] state The state object for the step length
+  /// @param[in] step the step size
+  /// @param[in] release flag steers if the step is released first
+  template <typename state_type>
+  void
+  updateStep(state_type&        state,
+             const corrector_t& navCorr,
+             double             stepSize,
+             bool               release = false) const
+  {
+    state.stepSize.update(stepSize, cstep::actor, release);
+    if (state.pathAccumulated == 0. and navCorr(state.stepSize)) {
+      /*dummy*/
+    }
+  }
+
+  /// This method call at the Standard abort
+  /// @param[in,out] state The state object for the step length
+  /// @param[in] step the step size
+  /// update in the aborter
+  template <typename state_type>
+  void
+  updateStep(state_type& state,
+             double      abortStep,
+             cstep::Type type = cstep::aborter) const
+  {
+    state.stepSize.update(abortStep, type);
+  }
 
   /// Perform a Runge-Kutta track parameter propagation step
   ///

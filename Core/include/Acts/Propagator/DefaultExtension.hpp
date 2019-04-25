@@ -29,10 +29,15 @@ struct DefaultExtension
   ///
   /// @tparam propagator_state_t Type of the state of the propagator
   /// @tparam stepper_t Type of the stepper
+  /// @tparam state_type Type of the stepper
   /// @return Boolean flag if the step would be valid
-  template <typename propagator_state_t, typename stepper_t>
+  template <typename propagator_state_t,
+            typename stepper_t,
+            typename state_type>
   int
-  bid(const propagator_state_t& /*unused*/, const stepper_t& /*unused*/) const
+  bid(const propagator_state_t& /*unused*/,
+      const stepper_t& /*unused*/,
+      const state_type& /*unused*/) const
   {
     return 1;
   }
@@ -50,10 +55,13 @@ struct DefaultExtension
   /// @param [in] h Step size (= 0. ^ 0.5 * StepSize ^ StepSize)
   /// @param [in] kprev Evaluated k_{i - 1}
   /// @return Boolean flag if the calculation is valid
-  template <typename propagator_state_t, typename stepper_t>
+  template <typename propagator_state_t,
+            typename stepper_t,
+            typename state_type>
   bool
   k(const propagator_state_t& state,
     const stepper_t&          stepper,
+    const state_type&         component_state,
     Vector3D&                 knew,
     const Vector3D&           bField,
     const int                 i     = 0,
@@ -64,13 +72,13 @@ struct DefaultExtension
     if (i == 0) {
       // Store qop, it is always used if valid
       qop = stepper.charge(state.stepping)
-          / units::Nat2SI<units::MOMENTUM>(stepper.momentum(state.stepping));
+          / units::Nat2SI<units::MOMENTUM>(stepper.momentum(component_state));
 
       // Evaluate the k_i
-      knew = qop * stepper.direction(state.stepping).cross(bField);
+      knew = qop * stepper.direction(component_state).cross(bField);
     } else {
-      knew
-          = qop * (stepper.direction(state.stepping) + h * kprev).cross(bField);
+      knew = qop
+          * (stepper.direction(component_state) + h * kprev).cross(bField);
     }
     return true;
   }
@@ -82,10 +90,13 @@ struct DefaultExtension
   /// @tparam propagator_state_t Type of the state of the propagator
   /// @tparam stepper_t Type of the stepper
   /// @return Boolean flag if the calculation is valid
-  template <typename propagator_state_t, typename stepper_t>
+  template <typename propagator_state_t,
+            typename stepper_t,
+            typename state_type>
   bool
   finalize(propagator_state_t& /*unused*/,
            const stepper_t& /*unused*/,
+           state_type& /*unused*/,
            const double /*unused*/) const
   {
     return true;
@@ -102,14 +113,17 @@ struct DefaultExtension
   /// @param [in] h Step size
   /// @param [out] D Transport matrix
   /// @return Boolean flag if the calculation is valid
-  template <typename propagator_state_t, typename stepper_t>
+  template <typename propagator_state_t,
+            typename stepper_t,
+            typename state_type>
   bool
   finalize(propagator_state_t& state,
            const stepper_t&    stepper,
+           state_type&         component_state,
            const double        h,
            ActsMatrixD<7, 7>& D) const
   {
-    return transportMatrix(state, stepper, h, D);
+    return transportMatrix(state, stepper, component_state, h, D);
   }
 
 private:
@@ -122,10 +136,13 @@ private:
   /// @param [in] h Step size
   /// @param [out] D Transport matrix
   /// @return Boolean flag if evaluation is valid
-  template <typename propagator_state_t, typename stepper_t>
+  template <typename propagator_state_t,
+            typename stepper_t,
+            typename state_type>
   bool
   transportMatrix(propagator_state_t& state,
                   const stepper_t&    stepper,
+                  state_type&         component_state,
                   const double        h,
                   ActsMatrixD<7, 7>& D) const
   {
@@ -149,7 +166,7 @@ private:
     /// missing Lambda part) and only exists for dFdu' in dlambda/dlambda.
 
     auto& sd  = state.stepping.stepData;
-    auto  dir = stepper.direction(state.stepping);
+    auto  dir = stepper.direction(component_state);
 
     D = ActsMatrixD<7, 7>::Identity();
 

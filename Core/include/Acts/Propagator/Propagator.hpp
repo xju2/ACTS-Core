@@ -211,7 +211,7 @@ public:
   using Stepper = stepper_t;
 
   /// Type of state object used by the propagation implementation
-  using StepperState = typename Stepper::State;
+  using StepperState = typename Stepper::state_type;
 
   /// Typedef the navigator state
   using NavigatorState = typename navigator_t::State;

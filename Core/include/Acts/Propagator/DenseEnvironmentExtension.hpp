@@ -60,13 +60,17 @@ struct DenseEnvironmentExtension
   /// @tparam stepper_t Type of the stepper
   /// @param [in] state State of the propagator
   /// @return Boolean flag if the step would be valid
-  template <typename propagator_state_t, typename stepper_t>
+  template <typename propagator_state_t,
+            typename stepper_t,
+            typename state_type>
   int
-  bid(const propagator_state_t& state, const stepper_t& stepper) const
+  bid(const propagator_state_t& state,
+      const stepper_t&          stepper,
+      const state_type&         component_state) const
   {
     // Check for valid particle properties
-    if (stepper.charge(state.stepping) == 0. || state.options.mass == 0.
-        || stepper.momentum(state.stepping)
+    if (stepper.charge(component_state) == 0. || state.options.mass == 0.
+        || stepper.momentum(component_state)
             < conv * state.options.momentumCutOff) {
       return 0;
     }
@@ -91,39 +95,43 @@ struct DenseEnvironmentExtension
   /// @param [in] h Step size (= 0. ^ 0.5 * StepSize ^ StepSize)
   /// @param [in] kprev Evaluated k_{i - 1}
   /// @return Boolean flag if the calculation is valid
-  template <typename propagator_state_t, typename stepper_t>
+  template <typename propagator_state_t,
+            typename stepper_t,
+            typename state_type>
   bool
   k(const propagator_state_t& state,
     const stepper_t&          stepper,
+    state_type&               component_state,
     Vector3D&                 knew,
     const Vector3D&           bField,
     const int                 i     = 0,
     const double              h     = 0.,
     const Vector3D&           kprev = Vector3D())
+
   {
     // i = 0 is used for setup and evaluation of k
     if (i == 0) {
       // Set up container for energy loss
       auto volumeMaterial = state.navigation.currentVolume->volumeMaterial();
-      Vector3D position   = stepper.position(state.stepping);
+      Vector3D position   = stepper.position(component_state);
       massSI              = units::Nat2SI<units::MASS>(state.options.mass);
       material            = &(volumeMaterial->material(position));
       initialMomentum
-          = units::Nat2SI<units::MOMENTUM>(stepper.momentum(state.stepping));
+          = units::Nat2SI<units::MOMENTUM>(stepper.momentum(component_state));
       currentMomentum = initialMomentum;
       qop[0]          = stepper.charge(state.stepping) / initialMomentum;
       initializeEnergyLoss(state);
       // Evaluate k
-      knew = qop[0] * stepper.direction(state.stepping).cross(bField);
+      knew = qop[0] * stepper.direction(component_state).cross(bField);
     } else {
       // Update parameters and check for momentum condition
-      updateEnergyLoss(h, state.stepping, stepper, i);
+      updateEnergyLoss(h, component_state, stepper, i);
       if (currentMomentum < state.options.momentumCutOff) {
         return false;
       }
       // Evaluate k
       knew = qop[i]
-          * (stepper.direction(state.stepping) + h * kprev).cross(bField);
+          * (stepper.direction(component_state) + h * kprev).cross(bField);
     }
     return true;
   }
@@ -138,14 +146,17 @@ struct DenseEnvironmentExtension
   /// @param [in] state State of the propagator
   /// @param [in] h Step size
   /// @return Boolean flag if the calculation is valid
-  template <typename propagator_state_t, typename stepper_t>
+  template <typename propagator_state_t,
+            typename stepper_t,
+            typename state_type>
   bool
   finalize(propagator_state_t& state,
            const stepper_t&    stepper,
+           state_type&         component_state,
            const double        h) const
   {
     // Evaluate the new momentum
-    double newMomentum = stepper.momentum(state.stepping)
+    double newMomentum = stepper.momentum(component_state)
         + conv * (h / 6.) * (dPds[0] + 2. * (dPds[1] + dPds[2]) + dPds[3]);
 
     // Break propagation if momentum becomes below cut-off
@@ -155,14 +166,14 @@ struct DenseEnvironmentExtension
     }
 
     // Add derivative dlambda/ds = Lambda''
-    state.stepping.derivative(6)
+    component_state.derivative(6)
         = -std::sqrt(state.options.mass * state.options.mass
                      + newMomentum * newMomentum)
         * units::SI2Nat<units::ENERGY>(g)
         / (newMomentum * newMomentum * newMomentum);
 
     // Update momentum
-    state.stepping.p = newMomentum;
+    component_state.p = newMomentum;
 
     return true;
   }
@@ -180,14 +191,18 @@ struct DenseEnvironmentExtension
   /// @param [in] h Step size
   /// @param [out] D Transport matrix
   /// @return Boolean flag if the calculation is valid
-  template <typename propagator_state_t, typename stepper_t>
+  template <typename propagator_state_t,
+            typename stepper_t,
+            typename state_type>
   bool
   finalize(propagator_state_t& state,
            const stepper_t&    stepper,
+           state_type&         component_state,
            const double        h,
            ActsMatrixD<7, 7>& D) const
   {
-    return finalize(state, stepper, h) && transportMatrix(state, stepper, h, D);
+    return finalize(state, stepper, component_state, h)
+        && transportMatrix(state, stepper, component_state, h, D);
   }
 
 private:
@@ -199,10 +214,13 @@ private:
   /// @param [in] h Step size
   /// @param [out] D Transport matrix
   /// @return Boolean flag if evaluation is valid
-  template <typename propagator_state_t, typename stepper_t>
+  template <typename propagator_state_t,
+            typename stepper_t,
+            typename state_type>
   bool
   transportMatrix(propagator_state_t& state,
                   const stepper_t&    stepper,
+                  state_type&         component_state,
                   const double        h,
                   ActsMatrixD<7, 7>& D) const
   {
@@ -227,7 +245,7 @@ private:
     /// missing Lambda part) and only exists for dGdu' in dlambda/dlambda.
 
     auto& sd  = state.stepping.stepData;
-    auto  dir = stepper.direction(state.stepping);
+    auto  dir = stepper.direction(component_state);
 
     D                   = ActsMatrixD<7, 7>::Identity();
     const double half_h = h * 0.5;

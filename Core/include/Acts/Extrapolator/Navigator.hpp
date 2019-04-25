@@ -642,26 +642,20 @@ private:
         return dstream.str();
       });
       // Now intersect (should exclude punch-through)
-      auto surfaceIntersect = surface->surfaceIntersectionEstimate(
-          state.geoContext,
-          stepper.position(state.stepping),
-          stepper.direction(state.stepping),
-          navOpts,
-          navCorr);
-      double surfaceDistance = surfaceIntersect.intersection.pathLength;
-      if (!surfaceIntersect) {
+
+      auto surfaceIntersect
+          = stepper.targetSurface(state.stepping, surface, navOpts, navCorr);
+      if (!surfaceIntersect.first) {
         debugLog(state, [&] {
           std::stringstream dstream;
           dstream << "Surface intersection at path length ";
-          dstream << surfaceDistance;
+          dstream << surfaceIntersect.second;
           dstream << " is not valid.";
           return dstream.str();
         });
         ++state.navigation.navSurfaceIter;
         continue;
       }
-      // Update the step for the stepper
-      updateStep(state, navCorr, surfaceDistance, true);
       // Return to the propagator
       return true;
     }
@@ -744,22 +738,15 @@ private:
       }
       // Otherwise try to step towards it
       NavigationOptions<Surface> navOpts(state.stepping.navDir, true);
-      auto layerIntersect = layerSurface->surfaceIntersectionEstimate(
-          state.geoContext,
-          stepper.position(state.stepping),
-          stepper.direction(state.stepping),
-          navOpts,
-          navCorr);
+      auto                       layerIntersect = stepper.targetSurface(
+          state.stepping, layerSurface, navOpts, navCorr);
       // check if the intersect is invalid
-      if (!layerIntersect) {
+      if (!layerIntersect.first) {
         debugLog(state, [&] {
           return std::string("Layer intersection not valid, skipping it.");
         });
         ++state.navigation.navLayerIter;
       } else {
-        // update the navigation step size, release the former first
-        updateStep(
-            state, navCorr, layerIntersect.intersection.pathLength, true);
         return true;
       }
     }
@@ -891,16 +878,12 @@ private:
       // That is the current boundary surface
       auto boundarySurface = state.navigation.navBoundaryIter->representation;
       // Step towards the boundary surface
-      auto boundaryIntersect = boundarySurface->surfaceIntersectionEstimate(
-          state.geoContext,
-          stepper.position(state.stepping),
-          stepper.direction(state.stepping),
-          navOpts,
-          navCorr);
+      auto boundaryIntersect = stepper.targetSurface(
+          state.stepping, boundarySurface, navOpts, navCorr);
       // Distance
-      auto distance = boundaryIntersect.intersection.pathLength;
+      auto distance = boundaryIntersect.second;
       // Check the boundary is properly intersected: we are in target mode
-      if (!boundaryIntersect
+      if (!boundaryIntersect.first
           or distance * distance
               < s_onSurfaceTolerance * s_onSurfaceTolerance) {
         debugLog(state, [&] {
@@ -922,8 +905,6 @@ private:
       } else {
         debugLog(state,
                  [&] { return std::string("Boundary intersection valid."); });
-        // This is a new navigation stream, release the former first
-        updateStep(state, navCorr, distance, true);
         return true;
       }
     }
@@ -1093,10 +1074,10 @@ private:
       state.navigation.navSurfaceIter = state.navigation.navSurfaces.begin();
       // Update the navigation step size before you return to the stepper
       // This is a new navigation stream, release the former step size first
-      updateStep(state,
-                 navCorr,
-                 state.navigation.navSurfaceIter->intersection.pathLength,
-                 true);
+      stepper.targetSurface(state.stepping,
+                            state.navigation.navSurfaceIter->object,
+                            navOpts,
+                            navCorr);
       return true;
     }
     state.navigation.navSurfaceIter = state.navigation.navSurfaces.end();
@@ -1179,10 +1160,10 @@ private:
               != state.navigation.startLayer) {
         debugLog(state, [&] { return std::string("Target at layer."); });
         // update the navigation step size before you return
-        updateStep(state,
-                   navCorr,
-                   state.navigation.navLayerIter->intersection.pathLength,
-                   true);
+        stepper.targetSurface(state.stepping,
+                              state.navigation.navLayerIter->representation,
+                              navOpts,
+                              navCorr);
         // Trigger the return to the propagator
         return true;
       }
@@ -1197,44 +1178,12 @@ private:
     });
     // Update the navigation step to the target step to trigger
     // step modification when requested
-    updateStep(state, navCorr, state.stepping.stepSize.value(Cstep::aborter));
+    stepper.updateStep(
+        state.stepping, navCorr, state.stepping.stepSize.value(Cstep::aborter));
 
     return false;
   }
 
-  /// This method updates the constrained step size
-  ///
-  /// @tparam propagator_state_t is the state type
-  ///
-  /// @param[in,out] state The state object for the step length
-  /// @param[in] step the step size
-  /// @param[in] release flag steers if the step is released first
-  template <typename propagator_state_t, typename corrector_t>
-  void
-  updateStep(propagator_state_t& state,
-             const corrector_t&  navCorr,
-             double              navigationStep,
-             bool                release = false) const
-  {  //  update the step
-    state.stepping.stepSize.update(navigationStep, Cstep::actor, release);
-    debugLog(state, [&] {
-      std::stringstream dstream;
-      std::string       releaseFlag = release ? "released and " : "";
-      dstream << "Navigation stepSize " << releaseFlag << "updated to ";
-      dstream << state.stepping.stepSize.toString();
-      return dstream.str();
-    });
-    /// If we have an initial step and are configured to modify it
-    if (state.stepping.pathAccumulated == 0.
-        and navCorr(state.stepping.stepSize)) {
-      debugLog(state, [&] {
-        std::stringstream dstream;
-        dstream << "Initial navigation step modified to ";
-        dstream << state.stepping.stepSize.toString();
-        return dstream.str();
-      });
-    }
-  }
 
   /// --------------------------------------------------------------------
   /// Inactive

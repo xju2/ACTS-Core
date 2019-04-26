@@ -263,7 +263,7 @@ public:
   targetSurface(State&             state,
                 const Surface*     surface,
                 const options_t&   navOpts,
-                const corrector_t& navCorr) const
+                const Corrector& navCorr) const
   {
     // Intersect the surface
     auto surfaceIntersect = surface->surfaceIntersectionEstimate(state.geoContext,
@@ -334,10 +334,10 @@ public:
          double          up) const;
 
   /// Return a corrector
-  corrector_t
+  Corrector
   corrector(State& state) const
   {
-    return corrector_t(state.startPos, state.startDir, state.pathAccumulated);
+    return Corrector(state.startPos, state.startDir, state.pathAccumulated);
   }
 
   /// Method for on-demand transport of the covariance
@@ -378,7 +378,7 @@ public:
   template <typename state_type>
   void
   updateStep(state_type&        state,
-             const corrector_t& navCorr,
+             const Corrector& navCorr,
              double             stepSize,
              bool               release = false) const
   {

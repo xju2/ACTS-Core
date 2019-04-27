@@ -65,7 +65,7 @@ namespace Test {
   EigenPropagatorType epropagator(std::move(estepper), std::move(navigator));
 
   const int ntests    = 100;
-  bool      debugMode = false;
+  bool      debugMode = true;
 
   // A plane selector for the SurfaceCollector
   struct PlaneSelector
@@ -126,14 +126,22 @@ namespace Test {
     auto covPtr = std::make_unique<const ActsSymMatrixD<5>>(cov);
     CurvilinearParameters start(std::move(covPtr), pos, mom, q);
 
-    PropagatorOptions<> options(tgContext, mfContext);
+    using DebugOutput = detail::DebugOutputActor;
+    PropagatorOptions<ActionList<DebugOutput>> options(tgContext, mfContext);
     options.maxStepSize = 10. * units::_cm;
     options.pathLimit   = 25 * units::_cm;
+    options.debug= true;
 
-    BOOST_CHECK(epropagator.propagate(start, options).value().endParameters
-                != nullptr);
+    const auto& result = epropagator.propagate(start, options).value();
+
+    if (debugMode) {
+      const auto& output = result.get<DebugOutput::result_type>();
+      std::cout << ">>> Extrapolation output " << std::endl;
+      std::cout << output.debugString << std::endl;
+    }
   }
 
+  /*
   // This test case checks that no segmentation fault appears
   // - this tests the collection of surfaces
   BOOST_DATA_TEST_CASE(
@@ -349,6 +357,7 @@ namespace Test {
       CHECK_CLOSE_REL(status.pathLength, options.pathLimit, 1e-3);
     }
   }
+  */
 
 }  // namespace Test
 }  // namespace Acts

@@ -63,7 +63,7 @@ namespace Test {
   ActsSymMatrixD<1> cov1D;
   ActsSymMatrixD<2> cov2D;
 
-  bool debugMode = false;
+  bool debugMode = true;
 
   // Create a test context
   GeometryContext      tgContext  = GeometryContext();

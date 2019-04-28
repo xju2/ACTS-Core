@@ -16,6 +16,7 @@
 
 #include "Acts/EventData/TrackParameters.hpp"
 #include "Acts/Extrapolator/MaterialInteractor.hpp"
+#include "Acts/Extrapolator/MultiMaterialInteractor.hpp"
 #include "Acts/Extrapolator/Navigator.hpp"
 #include "Acts/Extrapolator/SurfaceCollector.hpp"
 #include "Acts/MagneticField/ConstantBField.hpp"
@@ -74,7 +75,7 @@ namespace Test {
   MultiEigenPropagatorType multi_epropagator(std::move(multi_estepper),
                                              std::move(multi_navigator));
 
-  const int ntests    = 100;
+  const int ntests    = 10;
   bool      debugMode = true;
 
   // A plane selector for the SurfaceCollector
@@ -90,10 +91,11 @@ namespace Test {
   };
 
 
-  // This test case checks that no segmentation fault appears
-  // - this tests the collection of surfaces
+  /*
+  // This test case checks that no segmentation fault appears in the mcs
+  // the basic multi stepper propagate
   BOOST_DATA_TEST_CASE(
-      test_material_interactor_,
+      test_mcs_extrapolation_,
       bdata::random((bdata::seed = 0,
                      bdata::distribution
                      = std::uniform_real_distribution<>(0.4 * units::_GeV,
@@ -152,22 +154,23 @@ namespace Test {
       std::cout << output.debugString << std::endl;
     }
   }
+  */
 
   // This test case checks that no segmentation fault appears
   // - this tests the same surfaceHit of different stepper
   BOOST_DATA_TEST_CASE(
-      test_surface_collection_,
-      bdata::random((bdata::seed = 10,
+      test_equal_scs_mcs_collection_,
+      bdata::random((bdata::seed = 0,
                      bdata::distribution
                      = std::uniform_real_distribution<>(0.4 * units::_GeV,
                                                         10. * units::_GeV)))
-          ^ bdata::random((bdata::seed = 11,
+          ^ bdata::random((bdata::seed = 1,
                            bdata::distribution
                            = std::uniform_real_distribution<>(-M_PI, M_PI)))
-          ^ bdata::random((bdata::seed = 12,
+          ^ bdata::random((bdata::seed = 2,
                            bdata::distribution
                            = std::uniform_real_distribution<>(1.0, M_PI - 1.0)))
-          ^ bdata::random((bdata::seed = 13,
+          ^ bdata::random((bdata::seed = 3,
                            bdata::distribution
                            = std::uniform_int_distribution<>(0, 1)))
           ^ bdata::xrange(ntests),
@@ -215,6 +218,13 @@ namespace Test {
     multi_options.pathLimit   = 25 * units::_cm;
     multi_options.debug       = debugMode;
 
+    using DebugOutput = detail::DebugOutputActor;
+    PropagatorOptions<ActionList<DebugOutput,PlaneCollector,MultiMaterialInteractor>> multi_material_options(
+        tgContext, mfContext);
+    multi_material_options.maxStepSize = 10. * units::_cm;
+    multi_material_options.pathLimit   = 25 * units::_cm;
+    multi_material_options.debug       = debugMode;
+
     // sigle component
     const auto& result           = epropagator.propagate(start, options).value();
     auto        collector_result = result.get<PlaneCollector::result_type>();
@@ -223,9 +233,19 @@ namespace Test {
     const auto& multi_result 	 = multi_epropagator.propagate(start, multi_options).value();
     auto multi_collector_result  = multi_result.get<PlaneCollector::result_type>();
 
+	// multi_material component
+    const auto& multi_material_result 	 = multi_epropagator.propagate(start, multi_material_options).value();
+    auto multi_material_collector_result  = multi_material_result.get<PlaneCollector::result_type>();
+
     BOOST_CHECK_EQUAL(collector_result.collected.size(),
                       multi_collector_result.collected.size());
     BOOST_CHECK(collector_result.collected == multi_collector_result.collected);
+
+    if (debugMode) {
+      const auto& output = multi_material_result.get<DebugOutput::result_type>();
+      std::cout << ">>> Extrapolation output " << std::endl;
+      std::cout << output.debugString << std::endl;
+    }
   }
 
 }  // namespace Test

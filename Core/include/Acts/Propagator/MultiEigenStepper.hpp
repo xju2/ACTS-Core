@@ -19,10 +19,12 @@ enum StateStatus : int { FREE = 0, LOCKED = 1, DEAD = 2 };
 ///
 /// the state of MC contains a list of single state
 /// each component contains its own position, direction and stepSize
-/// in the step() method, loop all the single components and do caculating as in the single stepper 
+/// in the step() method, loop all the single components and do caculating as in
+/// the single stepper
 /// in the surfaceReached() method, determine if all components
 /// are on the aimed surface
-/// with targetSurface() method ,collect the candidate surfaces inNavigator with the
+/// with targetSurface() method ,collect the candidate surfaces inNavigator with
+/// the
 /// combination of components (pos,dir),
 /// and update the stepSize of each components
 ///
@@ -43,29 +45,34 @@ class MultiEigenStepper : public EigenStepper<BField>
 {
 
 public:
-  using cstep = detail::ConstrainedStep;
+  using cstep     = detail::ConstrainedStep;
   using Corrector = corrector_t;
 
   /// Jacobian, Covariance and State defintions
-  using Jacobian         = ActsMatrixD<5, 5>;
-  using Covariance       = ActsSymMatrixD<5>;
+  using Jacobian   = ActsMatrixD<5, 5>;
+  using Covariance = ActsSymMatrixD<5>;
 
-  /// @note Currently the BoundState/CurvilinearState is defined for Single component which is a combination of all components, the Jacobian for this meaning is nonsense 
-  /// This should be replaced by std::tuple<MultiBoundParameters,list<Jacobian>,list<double> or other wise structure with Jacobians
+  /// @note Currently the BoundState/CurvilinearState is defined for Single
+  /// component which is a combination of all components, the Jacobian for this
+  /// meaning is nonsense
+  /// This should be replaced by
+  /// std::tuple<MultiBoundParameters,list<Jacobian>,list<double> or other wise
+  /// structure with Jacobians
   using BoundState       = std::tuple<BoundParameters, Jacobian, double>;
   using CurvilinearState = std::tuple<CurvilinearParameters, Jacobian, double>;
   using SingleStateType  = typename EigenStepper<BField>::State;
 
-  /// @brief State for track parameter propagation 
+  /// @brief State for track parameter propagation
   ///
   /// by the propagator
-  /// the MultiState behave like the SingleState in Navigator, while contains information of each single components
+  /// the MultiState behave like the SingleState in Navigator, while contains
+  /// information of each single components
   struct MultiState
   {
 
     /// Constructor from the initial track parameters
-	/// construct the multi components from one single component
-	///
+    /// construct the multi components from one single component
+    ///
     /// @param [in] gctx is the context object for the geometry
     /// @param [in] mctx is the context object for the magnetic field
     /// @param [in] par The track parameters at start
@@ -74,9 +81,9 @@ public:
     ///
     /// @note the coviance matrix is not in use now
     template <typename parameters_t>
-	explicit MultiState(std::reference_wrapper<const GeometryContext>      gctx,
-		std::reference_wrapper<const MagneticFieldContext> mctx,
-				   const parameters_t&            par,
+    explicit MultiState(std::reference_wrapper<const GeometryContext>      gctx,
+                        std::reference_wrapper<const MagneticFieldContext> mctx,
+                        const parameters_t&                                par,
                         NavigationDirection ndir = forward,
                         double ssize = std::numeric_limits<double>::max())
       : pos(par.position())
@@ -89,8 +96,10 @@ public:
       , geoContext(gctx)
     {
       /// initialize the MC state with one component
-      stateCol.push_back(std::make_tuple(
-          SingleStateType(gctx, mctx, par, ndir, ssize), 1., StateStatus::FREE));
+      stateCol.push_back(
+          std::make_tuple(SingleStateType(gctx, mctx, par, ndir, ssize),
+                          1.,
+                          StateStatus::FREE));
       /// remember the start parameters
       startPos = pos;
       startDir = dir;
@@ -114,20 +123,20 @@ public:
     double p = 0.;
 
     /// The charge
-	/// Currently suppose every component has the same charge
+    /// Currently suppose every component has the same charge
     double q = 1.;
 
     /// Navigation direction, this is needed for searching
     NavigationDirection navDir;
 
-	/// Currently not in used 
-    bool       covTransport = false;
+    /// Currently not in used
+    bool covTransport = false;
 
     /// accummulated path length state
-	/// the combination of the alive components 
+    /// the combination of the alive components
     double pathAccumulated = 0.;
 
-	/// the MultiStepper stepSize not used now
+    /// the MultiStepper stepSize not used now
     cstep stepSize{std::numeric_limits<double>::max()};
 
     /// This caches the current magnetic field cell and stays
@@ -198,7 +207,7 @@ public:
     return state.q;
   }
 
-  /// always use the state_type in the Propagator 
+  /// always use the state_type in the Propagator
   using state_type = MultiState;
 
   /// Constructor requires knowledge of the detector's magnetic field
@@ -210,7 +219,7 @@ public:
   ///                 the magnetic field cell is used (and potentially updated)
   /// @param [in] pos is the field position
 
-  template<typename stateType>
+  template <typename stateType>
   Vector3D
   getField(stateType& state, const Vector3D& pos) const
   {
@@ -233,11 +242,12 @@ public:
   surfaceReached(MultiState& state, const Surface* surface) const;
 
   /// output template method to check
-  void outPut(const MultiState& state) const;
+  void
+  outPut(const MultiState& state) const;
 
-  /// @brief this caculates the stepSize of all the components 
+  /// @brief this caculates the stepSize of all the components
   /// to the candidate surfaces/layers/boundaries in the Navigator
-  /// @param [in] state State is the mcs 
+  /// @param [in] state State is the mcs
   /// @param [in] surface Surface that is tested
   /// @param [in] navigator options
   /// @param [in] navigator corrections
@@ -250,9 +260,9 @@ public:
   /// Fitter stage
   template <typename options_t>
   std::pair<bool, double>
-  targetSurface(MultiState&        state,
-                const Surface*     surface,
-                const options_t&   navOpts,
+  targetSurface(MultiState&      state,
+                const Surface*   surface,
+                const options_t& navOpts,
                 const Corrector& navCorr) const;
 
   /// reweight the free components
@@ -265,7 +275,8 @@ public:
   void
   deleteComponents(MultiState& state) const;
 
-  /// @brief get a sinlge parameter of combination of multi component on a surface, the jocobian is nonsence here 
+  /// @brief get a sinlge parameter of combination of multi component on a
+  /// surface, the jocobian is nonsence here
   /// the pathAccumulated is a combination calculated in the step()
   /// @to do parameter should be MultiBoundParameters
   BoundState
@@ -273,14 +284,15 @@ public:
              const Surface& surface,
              bool           reinitialize = true) const;
 
-  /// @brief get a sinlge parameter of combination of multi component on a surface, the jocobian is nonsence here 
+  /// @brief get a sinlge parameter of combination of multi component on a
+  /// surface, the jocobian is nonsence here
   /// the pathAccumulated is a combination calculated in the step()
   /// @to do parameter should be MultiCurvilinearParameters
   CurvilinearState
   curvilinearState(MultiState& state, bool reinitialize = true) const;
 
   /// Return a corrector
-  Corrector 
+  Corrector
   corrector(MultiState& state) const
   {
     return Corrector(state.startPos, state.startDir, state.pathAccumulated);
@@ -290,14 +302,13 @@ public:
   /// only call at navigator, use aborter value to udpate
   /// use a udpate each stepsize with the combination value ?
   void
-  updateStep(MultiState&        state,
+  updateStep(MultiState&      state,
              const Corrector& navCorr,
-             double             navigationStep,
-             bool               release = false) const;
+             double           navigationStep,
+             bool             release = false) const;
 
-  void 
-	releaseStep(MultiState& state,
-	      		cstep::Type type = cstep::actor) const;
+  void
+  releaseStep(MultiState& state, cstep::Type type = cstep::actor) const;
 
   /// this called in StandardAborter, set a pathlimit of the combination
   /// component
@@ -308,15 +319,14 @@ public:
 
   /// @brief update for the single state, update singlestate to some parameters
   void
-  update(SingleStateType&          singlestate,
-	  const BoundParameters& pars) const;
+  update(SingleStateType& singlestate, const BoundParameters& pars) const;
 
   /// @brief update for the single state, update singlestate direction and p
   void
-  update(SingleStateType&          singlestate,
-         const Vector3D& uposition,
-         const Vector3D& udirection,
-         double          up) const;
+  update(SingleStateType& singlestate,
+         const Vector3D&  uposition,
+         const Vector3D&  udirection,
+         double           up) const;
 
   /// Perform a Runge-Kutta track parameter propagation step
   ///

@@ -140,7 +140,7 @@ namespace Test {
       std::cout << output.debugString << std::endl;
     }
   }
-  
+
   // This test case checks that no segmentation fault appears
   // - this tests the collection of surfaces
   BOOST_DATA_TEST_CASE(
@@ -356,6 +356,6 @@ namespace Test {
       CHECK_CLOSE_REL(status.pathLength, options.pathLimit, 1e-3);
     }
   }
-  
+
 }  // namespace Test
 }  // namespace Acts

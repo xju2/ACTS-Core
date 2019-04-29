@@ -333,7 +333,7 @@ public:
           });
           // Navigation break & release navigation stepping
           state.navigation.navigationBreak = true;
-		  stepper.releaseStep(state.stepping, Cstep::actor);
+          stepper.releaseStep(state.stepping, Cstep::actor);
           return;
         } else {
           debugLog(state, [&] { return std::string("Volume updated."); });
@@ -353,7 +353,7 @@ public:
       });
       // Set navigation break and release the navigation step size
       state.navigation.navigationBreak = true;
-	  stepper.releaseStep(state.stepping, Cstep::actor);
+      stepper.releaseStep(state.stepping, Cstep::actor);
     } else {
       debugLog(state, [&] {
         return std::string("Status could not be determined - good luck.");
@@ -412,7 +412,7 @@ public:
       });
       // Set navigation break and release the navigation step size
       state.navigation.navigationBreak = true;
-	  stepper.releaseStep(state.stepping, Cstep::actor);
+      stepper.releaseStep(state.stepping, Cstep::actor);
     }
 
     // Navigator target always resets the current surface
@@ -599,7 +599,7 @@ private:
         });
         // set the navigation break
         state.navigation.navigationBreak = true;
-		stepper.releaseStep(state.stepping, Cstep::actor);
+        stepper.releaseStep(state.stepping, Cstep::actor);
       }
       return startResolved;
     }
@@ -817,7 +817,7 @@ private:
         return std::string("No sufficient information to resolve boundary, "
                            "stopping navigation.");
       });
-		stepper.releaseStep(state.stepping, Cstep::actor);
+      stepper.releaseStep(state.stepping, Cstep::actor);
       return false;
     } else if (state.navigation.currentVolume
                == state.navigation.targetVolume) {
@@ -825,7 +825,7 @@ private:
         return std::string("In target volume: no need to resolve boundary, "
                            "stopping navigation.");
         state.navigation.navigationBreak = true;
-		stepper.releaseStep(state.stepping, Cstep::actor);
+        stepper.releaseStep(state.stepping, Cstep::actor);
       });
       return true;
     }
@@ -889,10 +889,10 @@ private:
         debugLog(state, [&] {
           std::stringstream ss;
           ss << "Boundary intersection with:\n";
-          //boundaryIntersect.object->toStream(state.geoContext, ss);
+          // boundaryIntersect.object->toStream(state.geoContext, ss);
           ss << "\n";
           ss << "Boundary intersection not valid, skipping it.\n";
-          //ss << "valid: " << bool(boundaryIntersect) << "\n";
+          // ss << "valid: " << bool(boundaryIntersect) << "\n";
           ss << "pathLength: " << distance << "\n";
           if (distance < 0 && std::abs(distance) < 0.01) {
             ss << "Very likely overstepped over boundary surface! \n";
@@ -1183,7 +1183,6 @@ private:
 
     return false;
   }
-
 
   /// --------------------------------------------------------------------
   /// Inactive

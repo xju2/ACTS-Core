@@ -62,25 +62,20 @@ Acts::MultiEigenStepper<B, C, E, A>::surfaceReached(MultiState& state, const Sur
   bool status = true;
   for (auto& tuple_state : state.stateCol) {
 	auto& singlestate = std::get<0>(tuple_state);
-	/// if locked, test if there is wrong
 	if (std::get<2>(tuple_state) != StateStatus::FREE) continue; 
-	else {
-	  /// not on surface, states set false
+	  /// if this component is not on surface, status is set false
 	  if (!surface->isOnSurface(state.geoContext, EigenStepper<B>::position(singlestate),
 			EigenStepper<B>::direction(singlestate),
-			true)) {
-		status = false;
-	  }
-	  // on surface: locked
+			true))  { status = false; }
+	  // if this component on surface: locked
 	  else {
 		std::get<2>(tuple_state) = StateStatus::LOCKED;
 	  }
-	}
   }
   if (status == false) {
 	return false;
   } else {
-	// if all the components are on surface(except the dead ones, set them
+	// if all the components are on the surface(except the dead ones), set them
 	// free and set the currentSurface in Navigator.
 	for (auto& tuple_state : state.stateCol) {
 	  if (std::get<2>(tuple_state) == StateStatus::LOCKED) {
@@ -108,21 +103,23 @@ Acts::MultiEigenStepper<B, C, E, A>::targetSurface(MultiState& state,
 	auto  target      = EigenStepper<B>::targetSurface(
 		singlestate, surface, navOpts, navCorr);
 	minDist = minDist < target.second ? minDist : target.second;
-	/// a protection to avoid the flip components, which is abnormal in
+	/// a protection to avoid the flip components, which is abnormal propagate 
 	if (direction(state).dot(direction(singlestate)) < 0) {
 	  target.first = false;
 	}
-	/// this should be considered in the Fitter, currently we simply set
+	/// this should be considered in the Fitter best, currently we simply set
 	/// it dead here
 	if (target.first == false) {
 	  std::get<2>(tuple_state) = StateStatus::DEAD;
 	}
-	/// as long as one component is alive, return true
+	/// as long as one component is alive, the navigation stream is true 
 	else {
 	  active = true;
 	}
   }
+  /// delete the dead component
   deleteComponents(state);
+  /// normalize the weight to 1.
   normalizeComponents(state);
   return std::make_pair(active, minDist);
 }
@@ -132,7 +129,7 @@ void
 Acts::MultiEigenStepper<B, C, E, A>::normalizeComponents(MultiState& state) const 
 {
   double weight_sum = 0;
-  for (auto& tuple_state : state.stateCol) {
+  for (const auto& tuple_state : state.stateCol) {
 	if (std::get<2>(tuple_state) == StateStatus::DEAD) continue;
 	weight_sum += std::get<1>(tuple_state);
   }
@@ -154,7 +151,7 @@ Acts::MultiEigenStepper<B, C, E, A>::deleteComponents(MultiState& state) const
 	if (std::get<2>(*it) == StateStatus::DEAD) {
 	  it = col.erase(it);
 	} else {
-	  it++;
+	  ++it;
 	}
   }
 }
@@ -199,7 +196,7 @@ Acts::MultiEigenStepper<B, C, E, A>::releaseStep(MultiState& state,
       // only deal with the free
       if (std::get<2>(tuple_state) != StateStatus::FREE) continue;
       auto& singlestate = std::get<0>(tuple_state);
-      EigenStepper<B>::releaseStep( singlestate, type);
+      EigenStepper<B>::releaseStep(singlestate, type);
       }
 }
 
@@ -282,7 +279,7 @@ template <typename propagator_state_t>
 Acts::Result<double>
 Acts::MultiEigenStepper<B, C, E, A>::step(propagator_state_t& state) const
 {
-  // a variant to record the combination of the pathlength of the compact
+  // a variable to record the combination of the pathlength of the compact
   double combine_h = 0;
   // loop all the components that are free
   for (auto& tuple_state : state.stepping.stateCol) {

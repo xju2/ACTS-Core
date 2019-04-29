@@ -152,6 +152,7 @@ namespace Test {
       std::cout << output.debugString << std::endl;
     }
   }
+
   /*
   // This test case checks that no segmentation fault appears
   // - this tests the same surfaceHit of different stepper

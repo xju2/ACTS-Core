@@ -341,6 +341,14 @@ public:
     navCorr(state.stepSize);
   }
 
+  void
+	updateStep(state_type& state,
+	  double      stepSize,
+	  cstep::Type type) const
+  {
+	state.stepSize.update(stepSize, type);
+  }
+
   void releaseStep(state_type& state, cstep::Type type) const
   {
 	state.stepSize.release(type);

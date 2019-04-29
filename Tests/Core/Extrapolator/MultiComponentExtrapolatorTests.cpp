@@ -76,7 +76,7 @@ namespace Test {
                                              std::move(multi_navigator));
 
   const int ntests    = 10;
-  bool      debugMode = true;
+  bool      debugMode = false;
 
   // A plane selector for the SurfaceCollector
   struct PlaneSelector
@@ -90,162 +90,199 @@ namespace Test {
     }
   };
 
+  // A direction changing actor
+  // in MultiMaterialInteractor, at each surface the component splits into 2 equal ones,
+  // in this actor, the first component will flip the direction, and it will be killed in the MultiStepper since it is a dead component
+  struct DirChangeActor
+  {
+	struct this_result                                                                                                                
+	{
+	  std::vector<Vector3D> dirVec;
+	};
+	using result_type = this_result;
+
+	template <typename propagator_state_t, typename stepper_t>
+	  void
+	  operator()(propagator_state_t& state,
+		  const stepper_t&    stepper,
+		  result_type&        result) const
+	  {
+		if (state.navigation.currentSurface) {
+		  if (state.stepping.stateCol.size() > 1) {
+			std::get<0>(state.stepping.stateCol.front()).dir
+			  = -1 * stepper.direction(state.stepping);
+			std::get<1>(state.stepping.stateCol.front()) *= 0.0001;
+			result.dirVec.push_back(
+				std::get<0>(state.stepping.stateCol.front()).dir);
+		  }
+		  stepper.normalizeComponents(state.stepping);
+		}
+	  }
+  };
+
+
   // This test case checks that no segmentation fault appears in the mcs
   // the basic multi stepper propagate
   BOOST_DATA_TEST_CASE(
-      test_mcs_extrapolation_,
-      bdata::random((bdata::seed = 0,
-                     bdata::distribution
-                     = std::uniform_real_distribution<>(0.4 * units::_GeV,
-                                                        10. * units::_GeV)))
-          ^ bdata::random((bdata::seed = 1,
-                           bdata::distribution
-                           = std::uniform_real_distribution<>(-M_PI, M_PI)))
-          ^ bdata::random((bdata::seed = 2,
-                           bdata::distribution
-                           = std::uniform_real_distribution<>(1.0, M_PI - 1.0)))
-          ^ bdata::random((bdata::seed = 3,
-                           bdata::distribution
-                           = std::uniform_int_distribution<>(0, 1)))
-          ^ bdata::xrange(ntests),
-      pT,
-      phi,
-      theta,
-      charge,
-      index)
-  {
+	  test_mcs_extrapolation_,
+	  bdata::random((bdata::seed = 0,
+		  bdata::distribution
+		  = std::uniform_real_distribution<>(0.4 * units::_GeV,
+			10. * units::_GeV)))
+	  ^ bdata::random((bdata::seed = 1,
+		  bdata::distribution
+		  = std::uniform_real_distribution<>(-M_PI, M_PI)))
+	  ^ bdata::random((bdata::seed = 2,
+		  bdata::distribution
+		  = std::uniform_real_distribution<>(1.0, M_PI - 1.0)))
+	  ^ bdata::random((bdata::seed = 3,
+		  bdata::distribution
+		  = std::uniform_int_distribution<>(0, 1)))
+	  ^ bdata::xrange(ntests),
+	  pT,
+	  phi,
+	  theta,
+	  charge,
+	  index)
+	  {
 
-    double dcharge = -1 + 2 * charge;
-    (void)index;
+		double dcharge = -1 + 2 * charge;
+		(void)index;
 
-    // define start parameters
-    double   x  = 0;
-    double   y  = 0;
-    double   z  = 0;
-    double   px = pT * cos(phi);
-    double   py = pT * sin(phi);
-    double   pz = pT / tan(theta);
-    double   q  = dcharge;
-    Vector3D pos(x, y, z);
-    Vector3D mom(px, py, pz);
-    /// a covariance matrix to transport
-    ActsSymMatrixD<5> cov;
-    // take some major correlations (off-diagonals)
-    cov << 10 * units::_mm, 0, 0.123, 0, 0.5, 0, 10 * units::_mm, 0, 0.162, 0,
-        0.123, 0, 0.1, 0, 0, 0, 0.162, 0, 0.1, 0, 0.5, 0, 0, 0,
-        1. / (10 * units::_GeV);
-    auto covPtr = std::make_unique<const ActsSymMatrixD<5>>(cov);
-    CurvilinearParameters start(std::move(covPtr), pos, mom, q);
+		// define start parameters
+		double   x  = 0;
+		double   y  = 0;
+		double   z  = 0;
+		double   px = pT * cos(phi);
+		double   py = pT * sin(phi);
+		double   pz = pT / tan(theta);
+		double   q  = dcharge;
+		Vector3D pos(x, y, z);
+		Vector3D mom(px, py, pz);
+		/// a covariance matrix to transport
+		ActsSymMatrixD<5> cov;
+		// take some major correlations (off-diagonals)
+		cov << 10 * units::_mm, 0, 0.123, 0, 0.5, 0, 10 * units::_mm, 0, 0.162, 0,
+			0.123, 0, 0.1, 0, 0, 0, 0.162, 0, 0.1, 0, 0.5, 0, 0, 0,
+			1. / (10 * units::_GeV);
+		auto covPtr = std::make_unique<const ActsSymMatrixD<5>>(cov);
+		CurvilinearParameters start(std::move(covPtr), pos, mom, q);
 
-    using DebugOutput = detail::DebugOutputActor;
+		using DebugOutput = detail::DebugOutputActor;
 
-    PropagatorOptions<ActionList<DebugOutput>> options(
-        tgContext, mfContext);
-    options.debug       = debugMode;
-    options.maxStepSize = 10. * units::_cm;
-    options.pathLimit   = 25 * units::_cm;
+		PropagatorOptions<ActionList<DebugOutput>> options(
+			tgContext, mfContext);
+		options.debug       = debugMode;
+		options.maxStepSize = 10. * units::_cm;
+		options.pathLimit   = 25 * units::_cm;
 
-    const auto& result = multi_epropagator.propagate(start, options).value();
-    if (debugMode) {
-      const auto& output = result.get<DebugOutput::result_type>();
-      std::cout << ">>> Extrapolation output " << std::endl;
-      std::cout << output.debugString << std::endl;
-    }
-  }
+		const auto& result = multi_epropagator.propagate(start, options).value();
+		if (debugMode) {
+		  const auto& output = result.get<DebugOutput::result_type>();
+		  std::cout << ">>> Extrapolation output " << std::endl;
+		  std::cout << output.debugString << std::endl;
+		}
+	  }
 
-  /*
   // This test case checks that no segmentation fault appears
   // - this tests the same surfaceHit of different stepper
   BOOST_DATA_TEST_CASE(
-      test_equal_scs_mcs_collection_,
-      bdata::random((bdata::seed = 0,
-                     bdata::distribution
-                     = std::uniform_real_distribution<>(0.4 * units::_GeV,
-                                                        10. * units::_GeV)))
-          ^ bdata::random((bdata::seed = 1,
-                           bdata::distribution
-                           = std::uniform_real_distribution<>(-M_PI, M_PI)))
-          ^ bdata::random((bdata::seed = 2,
-                           bdata::distribution
-                           = std::uniform_real_distribution<>(1.0, M_PI - 1.0)))
-          ^ bdata::random((bdata::seed = 3,
-                           bdata::distribution
-                           = std::uniform_int_distribution<>(0, 1)))
-          ^ bdata::xrange(ntests),
-      pT,
-      phi,
-      theta,
-      charge,
-      index)
-  {
+	  test_equal_scs_mcs_collection_,
+	  bdata::random((bdata::seed = 0,
+		  bdata::distribution
+		  = std::uniform_real_distribution<>(0.4 * units::_GeV,
+			10. * units::_GeV)))
+	  ^ bdata::random((bdata::seed = 1,
+		  bdata::distribution
+		  = std::uniform_real_distribution<>(-M_PI, M_PI)))
+	  ^ bdata::random((bdata::seed = 2,
+		  bdata::distribution
+		  = std::uniform_real_distribution<>(1.0, M_PI - 1.0)))
+	  ^ bdata::random((bdata::seed = 3,
+		  bdata::distribution
+		  = std::uniform_int_distribution<>(0, 1)))
+	  ^ bdata::xrange(ntests),
+	  pT,
+	  phi,
+	  theta,
+	  charge,
+	  index)
+	  {
 
-    double dcharge = -1 + 2 * charge;
-    (void)index;
+		double dcharge = -1 + 2 * charge;
+		(void)index;
 
-    // define start parameters
-    double   x  = 0;
-    double   y  = 0;
-    double   z  = 0;
-    double   px = pT * cos(phi);
-    double   py = pT * sin(phi);
-    double   pz = pT / tan(theta);
-    double   q  = dcharge;
-    Vector3D pos(x, y, z);
-    Vector3D mom(px, py, pz);
-    /// a covariance matrix to transport
-    ActsSymMatrixD<5> cov;
-    // take some major correlations (off-diagonals)
-    cov << 10 * units::_mm, 0, 0.123, 0, 0.5, 0, 10 * units::_mm, 0, 0.162, 0,
-        0.123, 0, 0.1, 0, 0, 0, 0.162, 0, 0.1, 0, 0.5, 0, 0, 0,
-        1. / (10 * units::_GeV);
-    auto covPtr = std::make_unique<const ActsSymMatrixD<5>>(cov);
-    CurvilinearParameters start(std::move(covPtr), pos, mom, q);
+		// define start parameters
+		double   x  = 0;
+		double   y  = 0;
+		double   z  = 0;
+		double   px = pT * cos(phi);
+		double   py = pT * sin(phi);
+		double   pz = pT / tan(theta);
+		double   q  = dcharge;
+		Vector3D pos(x, y, z);
+		Vector3D mom(px, py, pz);
+		/// a covariance matrix to transport
+		ActsSymMatrixD<5> cov;
+		// take some major correlations (off-diagonals)
+		cov << 10 * units::_mm, 0, 0.123, 0, 0.5, 0, 10 * units::_mm, 0, 0.162, 0,
+			0.123, 0, 0.1, 0, 0, 0, 0.162, 0, 0.1, 0, 0.5, 0, 0, 0,
+			1. / (10 * units::_GeV);
+		auto covPtr = std::make_unique<const ActsSymMatrixD<5>>(cov);
+		CurvilinearParameters start(std::move(covPtr), pos, mom, q);
 
-    // A PlaneSelector for the SurfaceCollector
-    using PlaneCollector = SurfaceCollector<PlaneSelector>;
+		// A PlaneSelector for the SurfaceCollector
+		using PlaneCollector = SurfaceCollector<PlaneSelector>;
 
-    PropagatorOptions<ActionList<PlaneCollector>> options(
-        tgContext, mfContext);
-    options.maxStepSize       = 10. * units::_cm;
-    options.pathLimit         = 25 * units::_cm;
-    options.debug             = debugMode;
+		PropagatorOptions<ActionList<PlaneCollector>> options(
+			tgContext, mfContext);
+		options.maxStepSize       = 10. * units::_cm;
+		options.pathLimit         = 25 * units::_cm;
+		options.debug             = debugMode;
 
-    PropagatorOptions<ActionList<PlaneCollector>> multi_options(
-        tgContext, mfContext);
-    multi_options.maxStepSize = 10. * units::_cm;
-    multi_options.pathLimit   = 25 * units::_cm;
-    multi_options.debug       = debugMode;
+		PropagatorOptions<ActionList<PlaneCollector>> multi_options(
+			tgContext, mfContext);
+		multi_options.maxStepSize = 10. * units::_cm;
+		multi_options.pathLimit   = 25 * units::_cm;
+		multi_options.debug       = debugMode;
 
-    using DebugOutput = detail::DebugOutputActor;
-    PropagatorOptions<ActionList<DebugOutput,PlaneCollector,MultiMaterialInteractor>> multi_material_options(
-        tgContext, mfContext);
-    multi_material_options.maxStepSize = 10. * units::_cm;
-    multi_material_options.pathLimit   = 25 * units::_cm;
-    multi_material_options.debug       = debugMode;
+		PropagatorOptions<ActionList<PlaneCollector,MultiMaterialInteractor>> multi_material_options(
+			tgContext, mfContext);
+		multi_material_options.maxStepSize = 10. * units::_cm;
+		multi_material_options.pathLimit   = 25 * units::_cm;
+		multi_material_options.debug       = debugMode;
 
-    // sigle component
-    const auto& result           = epropagator.propagate(start, options).value();
-    auto        collector_result = result.get<PlaneCollector::result_type>();
+		PropagatorOptions<ActionList<PlaneCollector,MultiMaterialInteractor,DirChangeActor>> flip_options(
+			tgContext, mfContext);
+		flip_options.maxStepSize = 10. * units::_cm;
+		flip_options.pathLimit   = 25 * units::_cm;
+		flip_options.debug       = debugMode;
 
-    // multi component
-    const auto& multi_result 	 = multi_epropagator.propagate(start, multi_options).value();
-    auto multi_collector_result  = multi_result.get<PlaneCollector::result_type>();
+		// sigle component
+		const auto& result           = epropagator.propagate(start, options).value();
+		auto        collector_result = result.get<PlaneCollector::result_type>();
 
-	// multi_material component
-    const auto& multi_material_result 	 = multi_epropagator.propagate(start, multi_material_options).value();
-    auto multi_material_collector_result  = multi_material_result.get<PlaneCollector::result_type>();
+		// multi component
+		const auto& multi_result 	 = multi_epropagator.propagate(start, multi_options).value();
+		auto multi_collector_result  = multi_result.get<PlaneCollector::result_type>();
 
-    BOOST_CHECK_EQUAL(collector_result.collected.size(),
-                      multi_collector_result.collected.size());
-    BOOST_CHECK(collector_result.collected == multi_collector_result.collected);
+		// multi_material component
+		const auto& multi_material_result 	 = multi_epropagator.propagate(start, multi_material_options).value();
+		auto multi_material_collector_result  = multi_material_result.get<PlaneCollector::result_type>();
 
-    if (debugMode) {
-      const auto& output = multi_material_result.get<DebugOutput::result_type>();
-      std::cout << ">>> Extrapolation output " << std::endl;
-      std::cout << output.debugString << std::endl;
-    }
-  }
-  */
+		// flip the multi component
+		const auto& flip_result 	 = multi_epropagator.propagate(start, flip_options).value();
+		auto flip_collector_result  = flip_result.get<PlaneCollector::result_type>();
+
+		BOOST_CHECK_EQUAL(collector_result.collected.size(), multi_collector_result.collected.size());
+		BOOST_CHECK_EQUAL(collector_result.collected.size(), multi_material_collector_result.collected.size());
+		BOOST_CHECK_EQUAL(collector_result.collected.size(), flip_collector_result.collected.size());
+		BOOST_CHECK(collector_result.collected == multi_collector_result.collected);
+		BOOST_CHECK(collector_result.collected == multi_material_collector_result.collected);
+		BOOST_CHECK(collector_result.collected == flip_collector_result.collected);
+
+
+	  }
 
 }  // namespace Test
 }  // namespace Acts

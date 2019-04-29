@@ -218,7 +218,7 @@ public:
     return m_bField.getField(pos, state.fieldCache);
   }
 
-  /// Tests if all the single states reach a surface
+  /// @brief Tests if all the single states reach a surface
   /// if all single states reach(except the dead ones) successfully,
   ///  return true; otherwise return false;
   ///
@@ -235,9 +235,9 @@ public:
   /// output template method to check
   void outPut(const MultiState& state) const;
 
-  /// this caculates all the components the stepSize
+  /// @brief this caculates the stepSize of all the components 
   /// to the candidate surfaces/layers/boundaries in the Navigator
-  /// @param [in] state State is the MC state
+  /// @param [in] state State is the mcs 
   /// @param [in] surface Surface that is tested
   /// @param [in] navigator options
   /// @param [in] navigator corrections
@@ -246,8 +246,8 @@ public:
   /// Bool: at least one of the single components target successfully
   /// Double : the smallest distance of the component pathlengh in the compact
   //
-  /// @to do: the dead component should be take into more consideration in the
-  /// Fitter
+  /// @to do: the dead component should be taken into consideration in the
+  /// Fitter stage
   template <typename options_t>
   std::pair<bool, double>
   targetSurface(MultiState&        state,

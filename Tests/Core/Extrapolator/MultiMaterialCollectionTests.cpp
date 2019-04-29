@@ -146,8 +146,8 @@ namespace Test {
       std::cout << " There collects "<<numOfComponents<<" components.";
     } 
 
-	// Test if the number of components split into 128 in the interactions of 6 surfaces
-	BOOST_CHECK( numOfComponents == 128 );
+	// Test if the number of components split into 64 in the interactions of 6 surfaces
+	BOOST_CHECK( numOfComponents == 64);
 
 	// Test for each surface all material interaction recorded are the same 
 	// because the component split don't change anything

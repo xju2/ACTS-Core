@@ -197,10 +197,13 @@ namespace Test {
                  bool                             release = false) const
       {
         state.stepSize.update(navigationStep, Cstep::actor, release);
-        /// If we have an initial step and are configured to modify it
-        if (state.pathAccumulated == 0. and navCorr(state.stepSize)) {
-        }
+        navCorr(state.stepSize);
       }
+	  /// release method
+	  void releaseStep(State& state, Cstep::Type type) const
+	  {
+		state.stepSize.release(type);                                                                                                     
+	  }
 
       template <typename options_t, typename corrector_t>
       std::pair<bool, double>

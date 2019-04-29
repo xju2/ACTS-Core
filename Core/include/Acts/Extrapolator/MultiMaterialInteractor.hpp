@@ -12,6 +12,7 @@
 #include <sstream>
 #include <utility>
 #include "Acts/Extrapolator/detail/InteractionFormulas.hpp"
+#include "Acts/Extrapolator/MaterialInteractor.hpp"
 #include "Acts/Material/ISurfaceMaterial.hpp"
 #include "Acts/Material/Material.hpp"
 #include "Acts/Material/MaterialProperties.hpp"
@@ -20,38 +21,7 @@
 
 namespace Acts {
 
-/// @brief The Multi Material interaction struct
-///
-struct MaterialInteraction
-{
-  /// The material surface
-  const Surface* surface = nullptr;
-
-  /// The position information of the material hit
-  Vector3D position = Vector3D(0., 0., 0);
-  /// The direction information of the material hit
-  Vector3D direction = Vector3D(0., 0., 0);
-  /// The calculated path & applied path correction factor
-  double pathCorrection = 1.;
-  /// The (passsed) material properties
-  /// it is the material and the actual (corrected) path length
-  MaterialProperties materialProperties = MaterialProperties();
-  bool
-  operator==(const MaterialInteraction& others) const
-  {
-    if (fabs((this->direction - others.direction).norm()) > 1e-10) {
-      return false;
-    }
-    if (fabs((this->position - others.position).norm()) > 1e-10) {
-      return false;
-    }
-    if (this->surface != others.surface) {
-      return false;
-    }
-	return true;
-  }
-};
-using MaterialInteractionVec = std::vector<MaterialInteraction>;
+using MaterialInteractionVec = std::vector<Acts::MaterialInteraction>;
 
 /// The Material interactor struct
 ///
@@ -190,7 +160,7 @@ struct MultiMaterialInteractor
 
 		  // Create the material interaction class, in case we record afterwards
 		  // Record the material interaction if configured to do so
-		  MaterialInteraction mInteraction;
+		  Acts::MaterialInteraction mInteraction;
 		  if (recordInteractions) {
 			mInteraction.surface 			= state.navigation.currentSurface;
             mInteraction.position           = stepper.position(singlestate);

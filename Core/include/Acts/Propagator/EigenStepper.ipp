@@ -45,6 +45,14 @@ Acts::EigenStepper<B, C, E, A>::updateStep(State& state,
 
 template <typename B, typename C, typename E, typename A>
 void
+Acts::EigenStepper<B, C, E, A>::releaseStep(State& state,
+	cstep::Type type) const
+{
+  state.stepSize.release(type);
+}
+
+template <typename B, typename C, typename E, typename A>
+void
 Acts::EigenStepper<B, C, E, A>::updateStep(State& state,
              double      stepSize,
              cstep::Type type) const

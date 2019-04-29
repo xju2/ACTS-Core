@@ -90,8 +90,6 @@ namespace Test {
     }
   };
 
-
-  /*
   // This test case checks that no segmentation fault appears in the mcs
   // the basic multi stepper propagate
   BOOST_DATA_TEST_CASE(
@@ -154,8 +152,7 @@ namespace Test {
       std::cout << output.debugString << std::endl;
     }
   }
-  */
-
+  /*
   // This test case checks that no segmentation fault appears
   // - this tests the same surfaceHit of different stepper
   BOOST_DATA_TEST_CASE(
@@ -247,6 +244,7 @@ namespace Test {
       std::cout << output.debugString << std::endl;
     }
   }
+  */
 
 }  // namespace Test
 }  // namespace Acts

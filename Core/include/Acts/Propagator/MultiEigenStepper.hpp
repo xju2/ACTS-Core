@@ -14,27 +14,26 @@ namespace Acts {
 
 enum StateStatus : int { FREE = 0, LOCKED = 1, DEAD = 2 };
 
-/// @brief multicomponent(MC) stepper is based on the Single Stepper
-/// implementation
-/// developed fot Gaussian Sum Filter (GSF)
+/// @brief multicomponent stepper(mcs) is based on the Single Stepper
+/// implementation developed for Gaussian Sum Filter (GSF)
+///
 /// the state of MC contains a list of single state
 /// each component contains its own position, direction and stepSize
-/// in the step() method, loop all the single components and do caculating as in
-/// the single object
-/// in the navigator, with surfaceReach method to determine if all components
+/// in the step() method, loop all the single components and do caculating as in the single stepper 
+/// in the surfaceReached() method, determine if all components
 /// are on the aimed surface
-/// with targetSurface() method ,collect the candidate surfaces with the
-/// combination of components,
+/// with targetSurface() method ,collect the candidate surfaces inNavigator with the
+/// combination of components (pos,dir),
 /// and update the stepSize of each components
 ///
-/// in MC, each single component owns a status:
+/// in mcs, each single component owns a status:
 /// free - not on surface
 /// lock - on surface
-/// dead - can not target surface
+/// dead - can not target the surface
 ///
-/// @to do the dead surface should not to kill in the MC,
+/// @to do the dead surface should not to kill in the mcs,
 /// should be determined in the Gaussian Sum Filter
-/// @to do the par&cov in MultiTrackState
+/// @to do compliant with the MultiParameter class
 
 template <typename BField,
           typename corrector_t     = VoidIntersectionCorrector,
@@ -43,44 +42,37 @@ template <typename BField,
 class MultiEigenStepper : public EigenStepper<BField>
 {
 
-private:
-  // This struct is a meta-function which normally maps to BoundParameters...
-  template <typename T, typename S>
-  struct s
-  {
-    using type = BoundParameters;
-  };
-
-  // ...unless type S is int, in which case it maps to Curvilinear parameters
-  template <typename T>
-  struct s<T, int>
-  {
-    using type = CurvilinearParameters;
-  };
-
 public:
   using cstep = detail::ConstrainedStep;
+  using Corrector = corrector_t;
 
   /// Jacobian, Covariance and State defintions
   using Jacobian         = ActsMatrixD<5, 5>;
   using Covariance       = ActsSymMatrixD<5>;
+
+  /// @note Currently the BoundState/CurvilinearState is defined for Single component which is a combination of all components, the Jacobian for this meaning is nonsense 
+  /// This should be replaced by std::tuple<MultiBoundParameters,list<Jacobian>,list<double> or other wise structure with Jacobians
   using BoundState       = std::tuple<BoundParameters, Jacobian, double>;
   using CurvilinearState = std::tuple<CurvilinearParameters, Jacobian, double>;
   using SingleStateType  = typename EigenStepper<BField>::State;
 
-  /// @brief State for track parameter propagation
+  /// @brief State for track parameter propagation 
   ///
   /// by the propagator
+  /// the MultiState behave like the SingleState in Navigator, while contains information of each single components
   struct MultiState
   {
 
     /// Constructor from the initial track parameters
+	/// construct the multi components from one single component
+	///
+    /// @param [in] gctx is the context object for the geometry
+    /// @param [in] mctx is the context object for the magnetic field
     /// @param [in] par The track parameters at start
     /// @param [in] ndir The navigation direction w.r.t momentum
     /// @param [in] ssize is the maximum step size
     ///
-    /// @note the covariance matrix is copied when needed
-    /// the coviance matrix is not in use now
+    /// @note the coviance matrix is not in use now
     template <typename parameters_t>
 	explicit MultiState(std::reference_wrapper<const GeometryContext>      gctx,
 		std::reference_wrapper<const MagneticFieldContext> mctx,
@@ -122,21 +114,20 @@ public:
     double p = 0.;
 
     /// The charge
+	/// Currently suppose every component has the same charge
     double q = 1.;
 
     /// Navigation direction, this is needed for searching
     NavigationDirection navDir;
 
-    /// no use and meaningless, should delete
-    ActsMatrixD<5, 5> jacobian = ActsMatrixD<5, 5>::Identity();
+	/// Currently not in used 
     bool       covTransport = false;
-    Covariance cov          = Covariance::Zero();
 
     /// accummulated path length state
+	/// the combination of the alive components 
     double pathAccumulated = 0.;
 
-    /// adaptive step size of the runge-kutta integration
-	/// should reserve it as the combination ?
+	/// the MultiStepper stepSize not used now
     cstep stepSize{std::numeric_limits<double>::max()};
 
     /// This caches the current magnetic field cell and stays
@@ -166,71 +157,38 @@ public:
   /// @brief Global particle position accessor
   /// get the combination of the position of all FREE components
   Vector3D
-  position(const MultiState& state) const
-  {
-    Vector3D pos = Vector3D(0, 0, 0);
-    for (const auto& tuple_state : state.stateCol) {
-      if (std::get<2>(tuple_state) != StateStatus::FREE) continue;
-      Vector3D component_pos
-          = EigenStepper<BField>::position(std::get<0>(tuple_state));
-      pos += component_pos * std::get<1>(tuple_state);
-    }
-    return pos;
-  }
+  position(const MultiState& state) const;
 
-  /// Global direction accessor
-  /// get the combination of the Direction of all FREE components
+  /// @brief Global direction accessor
+  /// get the combination of the direction of all FREE components
   Vector3D
-  direction(const MultiState& state) const
-  {
-    Vector3D dir = Vector3D(0, 0, 0);
-    for (const auto& tuple_state : state.stateCol) {
-      if (std::get<2>(tuple_state) != StateStatus::FREE) continue;
-      Vector3D component_dir
-          = EigenStepper<BField>::direction(std::get<0>(tuple_state));
-      dir += component_dir * std::get<1>(tuple_state);
-    }
-    return dir;  
-  }
+  direction(const MultiState& state) const;
 
-  /// Global get the combination of the Momentum of all FREE components
-  /// Actual momentum accessor
+  /// @brief momentum accessor
+  /// @brief Global get the combination of the momentum of all FREE components
   double
-  momentum(const MultiState& state) const
-  {
-    double mom = 0.;
-    for (const auto& tuple_state : state.stateCol) {
-      if (std::get<2>(tuple_state) != StateStatus::FREE) continue;
-      double component_mom
-          = EigenStepper<BField>::momentum(std::get<0>(tuple_state));
-      mom += component_mom * std::get<1>(tuple_state);
-    }
-    return mom;
-  }
+  momentum(const MultiState& state) const;
 
   /// Global particle position accessor
   /// get the position of each component
   Vector3D
   position(const SingleStateType& singlestate) const
   {
-    Vector3D pos = EigenStepper<BField>::position(singlestate);
-    return pos;
+    return EigenStepper<BField>::position(singlestate);
   }
   /// Global direction accessor
   /// get the direction of each component
   Vector3D
   direction(const SingleStateType& singlestate) const
   {
-    Vector3D dir = EigenStepper<BField>::direction(singlestate);
-    return dir;
+    return EigenStepper<BField>::direction(singlestate);
   }
-  /// Global Momentum accessor
-  /// get the Momentum of each component
+  /// Global momentum accessor
+  /// get the momentum of each component
   double
   momentum(const SingleStateType& singlestate) const
   {
-    double mom = EigenStepper<BField>::momentum(singlestate);
-    return mom;
+    return EigenStepper<BField>::momentum(singlestate);
   }
 
   /// Charge access
@@ -243,23 +201,16 @@ public:
   /// always use the state_type in the Propagator 
   using state_type = MultiState;
 
-  /// Return parameter types depend on the propagation mode:
-  /// - when propagating to a surface we usually return BoundParameters
-  /// - otherwise CurvilinearParameters
-  template <typename T, typename S = int>
-  using return_parameter_type = typename s<T, S>::type;
-
   /// Constructor requires knowledge of the detector's magnetic field
   MultiEigenStepper(BField bField = BField());
 
-  /// Get the field for the stepping, it checks first if the access is still
-  /// within the Cell, and updates the cell if necessary.
-  ///
+  /// @copy of the Single stepper
+  /// @brief getField from single-component or multi-component
   /// @param [in,out] state is the propagation state associated with the track
   ///                 the magnetic field cell is used (and potentially updated)
   /// @param [in] pos is the field position
 
-  template <typename stateType>
+  template<typename stateType>
   Vector3D
   getField(stateType& state, const Vector3D& pos) const
   {
@@ -267,70 +218,22 @@ public:
     return m_bField.getField(pos, state.fieldCache);
   }
 
-  /// Tests if all the single states reached a surface
-  /// if all reached (except the dead ones), return true, otherwise return
-  /// false;
-  /// the single status that returned is set to locked
-  /// if all single states locked, free all of them
+  /// Tests if all the single states reach a surface
+  /// if all single states reach(except the dead ones) successfully,
+  ///  return true; otherwise return false;
   ///
-  /// @param [in] state State is the MC state
+  /// the single state that successfully reach is set to locked
+  /// then if all single states locked, free all of them
+  ///
+  /// @param [in] state State is the mcs state
   /// @param [in] surface Surface that is tested
   ///
   /// @return Boolean statement if surface is reached by state
   bool
-  surfaceReached(MultiState& state, const Surface* surface) const
-  {
-    bool status = true;
-    for (auto& tuple_state : state.stateCol) {
-      auto& singlestate = std::get<0>(tuple_state);
-      /// if locked, test if there is wrong
-      if (std::get<2>(tuple_state) != StateStatus::FREE) {
-
-        if (std::get<2>(tuple_state) == StateStatus::DEAD) {
-            //std::cout<<" the component is dead "<<std::endl;
-        } else {
-            //std::cout<<" the component is locked "<<std::endl;
-        }
-      } else {
-        /// not on surface, states set false
-        if (!surface->isOnSurface(state.geoContext, EigenStepper<BField>::position(singlestate),
-                                  EigenStepper<BField>::direction(singlestate),
-                                  true)) {
-          status = false;
-        }
-        // on surface: locked
-        else {
-          std::get<2>(tuple_state) = StateStatus::LOCKED;
-        }
-      }
-    }
-    if (status == false) {
-      return false;
-    } else {
-      // if all the components are on surface(except the dead ones, set them
-      // free and set the currentSurface in Navigator.
-      for (auto& tuple_state : state.stateCol) {
-        if (std::get<2>(tuple_state) == StateStatus::LOCKED) {
-          std::get<2>(tuple_state) = StateStatus::FREE;
-        }
-      }
-      return true;
-    }
-  }
+  surfaceReached(MultiState& state, const Surface* surface) const;
 
   /// output template method to check
-	void outPut(const MultiState& state) const
-	{
-	  for( const auto& tuple_state : state.stateCol )
-	  {
-		const auto& singlestate = std::get<0>(tuple_state);
-		const auto& weight 		= std::get<1>(tuple_state);
-		const auto& stat 		= std::get<2>(tuple_state);
-		std::cout<<"the single component stat: "<<stat<<" weight "<<weight<<std::endl;
-		std::cout<<"pos: "<<singlestate.pos<<std::endl;
-		std::cout<<"dir: "<<singlestate.dir<<std::endl;
-	  }
-	}
+  void outPut(const MultiState& state) const;
 
   /// this caculates all the components the stepSize
   /// to the candidate surfaces/layers/boundaries in the Navigator
@@ -350,68 +253,17 @@ public:
   targetSurface(MultiState&        state,
                 const Surface*     surface,
                 const options_t&   navOpts,
-                const corrector_t& navCorr) const
-  {
-    bool   active  = false;
-    double minDist = std::numeric_limits<double>::max();
-    for (auto& tuple_state : state.stateCol) {
-      /// only target the free component
-      if (std::get<2>(tuple_state) != StateStatus::FREE) continue;
-      auto& singlestate = std::get<0>(tuple_state);
-      auto  target      = EigenStepper<BField>::targetSurface(
-          singlestate, surface, navOpts, navCorr);
-      minDist = minDist < target.second ? minDist : target.second;
-      /// a protection to avoid the flip components, which is abnormal in
-      if (direction(state).dot(direction(singlestate)) < 0) {
-        target.first = false;
-      }
-      /// this should be considered in the Fitter, currently we simply set
-      /// it dead here
-      if (target.first == false) {
-        std::get<2>(tuple_state) = StateStatus::DEAD;
-      }
-      /// as long as one component is alive, return true
-      else {
-        active = true;
-      }
-    }
-    deleteDied(state);
-    normalize(state);
-    return std::make_pair(active, minDist);
-  }
+                const Corrector& navCorr) const;
 
   /// reweight the free components
   /// the free and locked components are reweighted
   void
-  normalize(MultiState& state) const
-  {
-    double weight_sum = 0;
-    for (auto& tuple_state : state.stateCol) {
-      if (std::get<2>(tuple_state) == StateStatus::DEAD) continue;
-      weight_sum += std::get<1>(tuple_state);
-    }
-    for (auto& tuple_state : state.stateCol) {
-      if (std::get<2>(tuple_state) == StateStatus::DEAD) continue;
-      std::get<1>(tuple_state) = std::get<1>(tuple_state) / weight_sum;
-    }
-  }
+  normalizeComponents(MultiState& state) const;
+
   /// @brief The method s to delete the died components
   /// acturally, this should be done at Fitting step
   void
-  deleteDied(MultiState& state) const
-  {
-    auto& col = state.stateCol;
-    typename std::list<std::tuple<SingleStateType, double, StateStatus>>::
-        iterator it
-        = col.begin();
-    while (it != col.end()) {
-      if (std::get<2>(*it) == StateStatus::DEAD) {
-        it = col.erase(it);
-      } else {
-        it++;
-      }
-    }
-  }
+  deleteComponents(MultiState& state) const;
 
   /// @brief get a sinlge parameter of combination of multi component on a surface, the jocobian is nonsence here 
   /// the pathAccumulated is a combination calculated in the step()
@@ -428,51 +280,31 @@ public:
   curvilinearState(MultiState& state, bool reinitialize = true) const;
 
   /// Return a corrector
-  corrector_t
+  Corrector 
   corrector(MultiState& state) const
   {
-    return corrector_t(state.startPos, state.startDir, state.pathAccumulated);
+    return Corrector(state.startPos, state.startDir, state.pathAccumulated);
   }
 
   /// updateStep method
   /// only call at navigator, use aborter value to udpate
   /// use a udpate each stepsize with the combination value ?
-  template <typename state_type>
   void
-  updateStep(state_type&        state,
-             const corrector_t& navCorr,
+  updateStep(MultiState&        state,
+             const Corrector& navCorr,
              double             navigationStep,
-             bool               release = false) const
-  {
-    for (auto& tuple_state : state.stateCol) {
-      // only deal with the free
-      if (std::get<2>(tuple_state) != StateStatus::FREE) continue;
-      auto& singlestate = std::get<0>(tuple_state);
-      // singlestate.stepSize.update(navigationStep, cstep::actor, release);
-      EigenStepper<BField>::updateStep(
-          singlestate, navCorr, navigationStep, release);
-      if (singlestate.pathAccumulated == 0. and navCorr(singlestate.stepSize)) {
-        /*dummy*/
-      }
-    }
-  }
+             bool               release = false) const;
+
+  void 
+	releaseStep(MultiState& state,
+	      		cstep::Type type = cstep::actor) const;
 
   /// this called in StandardAborter, set a pathlimit of the combination
   /// component
-  template <typename state_type>
   void
-  updateStep(state_type& state,
+  updateStep(MultiState& state,
              double      abortStep,
-             cstep::Type type = cstep::aborter) const
-  {
-    for (auto& tuple_state : state.stateCol) {
-      // only deal with the free
-      if (std::get<2>(tuple_state) != StateStatus::FREE) continue;
-      auto& singlestate = std::get<0>(tuple_state);
-      singlestate.stepSize.update(abortStep, type);
-    }
-  }
-
+             cstep::Type type = cstep::aborter) const;
 
   /// @brief update for the single state, update singlestate to some parameters
   void

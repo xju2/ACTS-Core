@@ -22,7 +22,7 @@ namespace Acts {
 
 /// @brief The Multi Material interaction struct
 ///
-struct MultiMaterialInteraction
+struct MaterialInteraction
 {
   /// The material surface
   const Surface* surface = nullptr;
@@ -36,7 +36,22 @@ struct MultiMaterialInteraction
   /// The (passsed) material properties
   /// it is the material and the actual (corrected) path length
   MaterialProperties materialProperties = MaterialProperties();
+  bool
+  operator==(const MaterialInteraction& others) const
+  {
+    if (fabs((this->direction - others.direction).norm()) > 1e-10) {
+      return false;
+    }
+    if (fabs((this->position - others.position).norm()) > 1e-10) {
+      return false;
+    }
+    if (this->surface != others.surface) {
+      return false;
+    }
+	return true;
+  }
 };
+using MaterialInteractionVec = std::vector<MaterialInteraction>;
 
 /// The Material interactor struct
 ///
@@ -71,7 +86,7 @@ struct MultiMaterialInteractor
     /// The accumulated materialInL0
     double materialInL0 = 0.;
     /// This one is only filled when recordInteractions is switched on
-    std::vector<MultiMaterialInteraction> materialInteractions;
+	std::map<const Surface*,MaterialInteractionVec> multi_materialInteractions;
 	///
 	int numComponents = 0;
   };
@@ -139,23 +154,24 @@ struct MultiMaterialInteractor
         });
       }
 
-      // typename of the tuple<state,weight,status>
+      /// Get the surface material & properties from them and continue if you
+      /// found some
+      const ISurfaceMaterial* sMaterial
+          = state.navigation.currentSurface->surfaceMaterial();
+
+      /// typename of the tuple<state,weight,status>
       using stateColType   = decltype(state.stepping.stateCol);
       using tupleStateType = typename stateColType::value_type;
 
-      // loop the single components in the list
+      /// loop the single components in the list
       typename stateColType::iterator it = state.stepping.stateCol.begin();
-      // N to be tuning number
+      /// N to be tuning number
       const int              N = 2;
       const double           m = state.options.mass;
-      const ISurfaceMaterial* sMaterial
-          = state.navigation.currentSurface->surfaceMaterial();
-	  MultiMaterialInteraction mInteraction;
-	  mInteraction.surface = state.navigation.currentSurface;  //*
-      while (it != state.stepping.stateCol.end()) {
+	  MaterialInteractionVec  materialInteractionVec;
+	  while (it != state.stepping.stateCol.end()) {
         auto& singlestate = std::get<0>((*it));
-        // Get the surface material & properties from them and continue if you
-        // found some
+
         MaterialProperties mProperties = sMaterial->materialProperties(
             singlestate.pos, singlestate.navDir, mStage);
         // Material properties (non-zero) have been found for this configuration
@@ -164,16 +180,6 @@ struct MultiMaterialInteractor
           debugLog(state, [&] {
             return std::string("Material properties found for this surface.");
           });
-
-          // Create the material interaction class, in case we record afterwards
-
-          // To integrate process noise, we need to transport
-          // the covariance to the current position in space
-          // the 'true' indicates re-initializaiton of the further transport
-          if (singlestate.covTransport) {
-            stepper.covarianceTransport(singlestate, true);
-          }
-
           // Calculate the path correction
           double pCorrection = state.navigation.currentSurface->pathCorrection(
             state.geoContext,
@@ -182,12 +188,27 @@ struct MultiMaterialInteractor
           // Scale the material properties
           mProperties *= pCorrection;
 
-          // the corrected thickness
-          // const double cThickness = mProperties.thickness();
+		  // Create the material interaction class, in case we record afterwards
+		  // Record the material interaction if configured to do so
+		  MaterialInteraction mInteraction;
+		  if (recordInteractions) {
+			mInteraction.surface 			= state.navigation.currentSurface;
+            mInteraction.position           = stepper.position(singlestate);
+            mInteraction.direction          = stepper.direction(singlestate);
+            mInteraction.materialProperties = mProperties;
+            mInteraction.pathCorrection     = pCorrection;
+            materialInteractionVec.push_back(std::move(mInteraction));
+          }  // end of record
 
-          // if meets material surface , split the current single state to get
-          // newlist
-          // here just copy
+          // To integrate process noise, we need to transport
+          // the covariance to the current position in space
+          // the 'true' indicates re-initializaiton of the further transport
+          if (singlestate.covTransport) {
+            stepper.covarianceTransport(singlestate, true);
+          }
+
+
+          // if meets material surface , split the current single state to get newlist
           debugLog(state, [&] { return std::string("in Split method."); });
           stateColType newList
               = split<tupleStateType>((*it), N, mProperties, m);
@@ -195,23 +216,16 @@ struct MultiMaterialInteractor
           // insert the newlist
           state.stepping.stateCol.insert(it, newList.begin(), newList.end());
 
-          // delete the old state
+          // delete the current state
           it = state.stepping.stateCol.erase(it);
 
           // This doesn't cost anything - do it regardless
           result.materialInX0 += mProperties.thicknessInX0();
           result.materialInL0 += mProperties.thicknessInL0();
 
-          // Record the material interaction if configured to do so
-          if (recordInteractions) {
-            mInteraction.position           = stepper.position(singlestate);
-            mInteraction.direction          = stepper.direction(singlestate);
-            mInteraction.materialProperties = mProperties;
-            mInteraction.pathCorrection     = pCorrection;
-            result.materialInteractions.push_back(std::move(mInteraction));
-          }  // end of record
         }
       }  // end of loop
+	  result.multi_materialInteractions.insert(std::pair<const Surface*,MaterialInteractionVec>(state.navigation.currentSurface,std::move(materialInteractionVec)));
 	  result.numComponents  =  state.stepping.stateCol.size();
     }
   }
@@ -326,35 +340,6 @@ struct MultiMaterialInteractor
     return std::make_tuple(Emean, Vmean, Wmean);
   }
 
-  // method of number of components fixed to a compositary number of (N)
-  void
-  reduction_by_close_components() const /*unused*/
-  {
-    // compare each two of the state list
-    // each time combine the closest two
-    // till the Maximum number
-  }
-  void
-  reduction_by_largest_weight() const /*unused*/
-  {
-  }
-  // method of the distance of two components
-  // with the K-L distance method
-  // Dkl(p1,p2) = tr[(V1-V2)(W1-W2)]+(u1-u2)^T(W1+W2)(u1-u2)
-  void
-  distance() const /*unused*/
-  {
-  }
-  // method of combine two closed components
-  void
-  combine() const /*unused*/
-  {
-  }
-  // method of correct the 1st 2nd order motion of components
-  void
-  corrected() const /*unused*/
-  {
-  }
 
 private:
   /// The private propagation debug logging

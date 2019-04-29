@@ -199,6 +199,15 @@ namespace Test {
         state.stepSize.update(navigationStep, Cstep::actor, release);
         navCorr(state.stepSize);
       }
+
+	  void
+		updateStep(State& state,
+			double      stepSize,
+			Cstep::Type type) const
+		{
+		  state.stepSize.update(stepSize, type);
+		}
+
 	  /// release method
 	  void releaseStep(State& state, Cstep::Type type) const
 	  {

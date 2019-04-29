@@ -93,7 +93,13 @@ public:
      Vector3D&                 knew,
      const Vector3D&           bField)
   {
-    return impl::k(tuple(), state, stepper,component_state, knew, bField, validExtensions);
+    return impl::k(tuple(),
+                   state,
+                   stepper,
+                   component_state,
+                   knew,
+                   bField,
+                   validExtensions);
   }
 
   /// @brief This functions broadcasts the call for evaluating k2. It collects
@@ -111,8 +117,16 @@ public:
      const double              h,
      const Vector3D&           kprev)
   {
-    return impl::k(
-        tuple(), state, stepper,component_state, knew, bField, validExtensions, 1, h, kprev);
+    return impl::k(tuple(),
+                   state,
+                   stepper,
+                   component_state,
+                   knew,
+                   bField,
+                   validExtensions,
+                   1,
+                   h,
+                   kprev);
   }
 
   /// @brief This functions broadcasts the call for evaluating k3. It collects
@@ -130,8 +144,16 @@ public:
      const double              h,
      const Vector3D&           kprev)
   {
-    return impl::k(
-        tuple(), state, stepper, component_state, knew, bField, validExtensions, 2, h, kprev);
+    return impl::k(tuple(),
+                   state,
+                   stepper,
+                   component_state,
+                   knew,
+                   bField,
+                   validExtensions,
+                   2,
+                   h,
+                   kprev);
   }
 
   /// @brief This functions broadcasts the call for evaluating k4. It collects
@@ -149,8 +171,16 @@ public:
      const double              h,
      const Vector3D&           kprev)
   {
-    return impl::k(
-        tuple(), state, stepper, component_state, knew, bField, validExtensions, 3, h, kprev);
+    return impl::k(tuple(),
+                   state,
+                   stepper,
+                   component_state,
+                   knew,
+                   bField,
+                   validExtensions,
+                   3,
+                   h,
+                   kprev);
   }
 
   /// @brief This functions broadcasts the call of the method finalize(). It
@@ -166,7 +196,8 @@ public:
            const double        h,
            ActsMatrixD<7, 7>& D)
   {
-    return impl::finalize(tuple(), state, stepper, component_state, h, D, validExtensions);
+    return impl::finalize(
+        tuple(), state, stepper, component_state, h, D, validExtensions);
   }
 
   /// @brief This functions broadcasts the call of the method finalize(). It
@@ -181,7 +212,8 @@ public:
            state_type&         component_state,
            const double        h)
   {
-    return impl::finalize(tuple(), state, stepper, component_state, h, validExtensions);
+    return impl::finalize(
+        tuple(), state, stepper, component_state, h, validExtensions);
   }
 };
 

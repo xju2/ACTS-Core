@@ -8,30 +8,32 @@
 
 #pragma once
 
-#include "Acts/Utilities/Definitions.hpp"
-#include "Acts/Utilities/Units.hpp"
+#include <cmath>
 #include <fstream>
 #include <iostream>
-#include <cmath>
+#include "Acts/Utilities/Definitions.hpp"
+#include "Acts/Utilities/Units.hpp"
 
 namespace Acts {
 
-  namespace detail {
-	struct BetheHitler{
-	  const static int N = 2;
-	  struct ComponentValues {
-		double weight= 1./N;
-		double mean= 0.;
-		double variance = 0.;
-	  }; 
-	  std::vector<ComponentValues>
-		getMixture(double /*unused*/, double /*unused*/)  const
-		{
-		  // make non effect, just means copy the components in material effect
-		  return std::move( std::vector<ComponentValues>(N) );
-		}
-	};
-  }
+namespace detail {
+  struct BetheHitler
+  {
+    const static int N = 2;
+    struct ComponentValues
+    {
+      double weight   = 1. / N;
+      double mean     = 0.;
+      double variance = 0.;
+    };
+    std::vector<ComponentValues>
+    getMixture(double /*unused*/, double /*unused*/) const
+    {
+      // make non effect, just means copy the components in material effect
+      return std::move(std::vector<ComponentValues>(N));
+    }
+  };
+}
 }
 
 /*
@@ -63,17 +65,17 @@ private:
 std::vector<double> m_coefficients;
 };
 
-struct ComponentValues {                                         
+struct ComponentValues {
 ComponentValues(const double w,
 const double m,
 const double c)
 : weight(w)
 ,mean(m)
-,variance(c){} 
-double weight;                                                 
-double mean;                                                   
-double variance;                                               
-}; 
+,variance(c){}
+double weight;
+double mean;
+double variance;
+};
 
 
 std::vector<ComponentValues>
@@ -83,7 +85,7 @@ NavigationDirection navDir)  const
 {
 std::vector<ComponentValues> mixture;
 // no Bethe-Hitler effect applied
-if( pathLX0<0.0001 ){ 
+if( pathLX0<0.0001 ){
 std::cout<<"none "<<std::endl;
 mixture.push_back( ComponentValues(1,0,0) );
 }//end if pathLX0<0.0001
@@ -107,20 +109,21 @@ if ( navDir == forward )
 {
 varQoverP = 1. / (meanZ * meanZ * momentum * momentum) * varZ;
 }
-else 
+else
 {
   varQoverP = varZ / (momentum * momentum);
 }
 mixture.push_back( ComponentValues(1,deltaP,varQoverP) );
 }  //end if pathLX0 < 0.002
 
-else 
+else
 {
   std::cout<<"in Bethe - Hitler "<<std::endl;
   if( pathLX0 > 0.2 ) { pathLX0 = 0.2; }
   //LT
   // this should be initialize in the begining of alg
-  std::string readFile = "/afs/cern.ch/work/j/jinz/acts-core/Core/include/Acts/Extrapolator/detail/GeantSim_LT01_cdf_nC6_O5.par";
+  std::string readFile =
+"/afs/cern.ch/work/j/jinz/acts-core/Core/include/Acts/Extrapolator/detail/GeantSim_LT01_cdf_nC6_O5.par";
   const char* file = readFile.c_str();
   std::ifstream fin( file );
   if( !fin ) std::cout<<" read error ! "<<std::endl;
@@ -135,38 +138,38 @@ else
   fin >> trans;
   std::cout<<"Bethe - Hitler N "<<N<<std::endl;
   for( unsigned int componentIndex = 0; componentIndex < N; ++componentIndex ){
-	polynomial_weight.push_back( readPolynomial(fin,order) );
-	polynomial_mean.push_back( readPolynomial(fin,order) );
-	polynomial_val.push_back( readPolynomial(fin,order) );
+  polynomial_weight.push_back( readPolynomial(fin,order) );
+  polynomial_mean.push_back( readPolynomial(fin,order) );
+  polynomial_val.push_back( readPolynomial(fin,order) );
   }
   //store par into mixture
   for( unsigned int componentIndex = 0; componentIndex < N; ++componentIndex ){
-	double updatedWeight = polynomial_weight[componentIndex](pathLX0);
-	double updatedMean   = polynomial_mean[componentIndex](pathLX0);
-	double updatedCov    = polynomial_val[componentIndex](pathLX0);
-	if( trans ) {
-	  updatedWeight = 1./(1.+exp( -updatedWeight));
-	  updatedMean   = 1./(1.+exp( -updatedMean));
-	  updatedCov    = exp(updatedCov);
-	}
-	else {
-	  updatedCov = updatedCov * updatedCov;
-	}
+  double updatedWeight = polynomial_weight[componentIndex](pathLX0);
+  double updatedMean   = polynomial_mean[componentIndex](pathLX0);
+  double updatedCov    = polynomial_val[componentIndex](pathLX0);
+  if( trans ) {
+    updatedWeight = 1./(1.+exp( -updatedWeight));
+    updatedMean   = 1./(1.+exp( -updatedMean));
+    updatedCov    = exp(updatedCov);
+  }
+  else {
+    updatedCov = updatedCov * updatedCov;
+  }
 
-	double deltaP(0.);
-	double deltaVar(0.);
+  double deltaP(0.);
+  double deltaVar(0.);
 
-	if ( navDir == forward )
-	{
-	  deltaP = momentum * ( updatedMean -1 );
-	  deltaVar = 1./((momentum*updatedMean)*(momentum*updatedMean)*updatedCov);
-	}
-	else {
-	  deltaP = momentum * ( 1./updatedMean -1 );
-	  deltaVar = updatedCov/(momentum*momentum);
-	}
+  if ( navDir == forward )
+  {
+    deltaP = momentum * ( updatedMean -1 );
+    deltaVar = 1./((momentum*updatedMean)*(momentum*updatedMean)*updatedCov);
+  }
+  else {
+    deltaP = momentum * ( 1./updatedMean -1 );
+    deltaVar = updatedCov/(momentum*momentum);
+  }
 
-	mixture.push_back( ComponentValues(updatedWeight,deltaP,deltaVar) );
+  mixture.push_back( ComponentValues(updatedWeight,deltaP,deltaVar) );
   }
 
 }//end if pathLX0 > 0.002
@@ -178,12 +181,13 @@ Polynomial readPolynomial (std::ifstream& fin, const int order)  const
   std::vector<double> coefficients(order + 1);
   int orderIndex = 0;
   for ( ; orderIndex < (order + 1); ++orderIndex ) {
-	fin >> coefficients[orderIndex];
+  fin >> coefficients[orderIndex];
   }
   return Polynomial(coefficients);
 }
 };
-std::ostream& operator<< (std::ostream& os, const BetheHitler::ComponentValues& obj) {
+std::ostream& operator<< (std::ostream& os, const BetheHitler::ComponentValues&
+obj) {
   os<<"weight mean cov "<<obj.weight<<","<<obj.mean<<","<<obj.variance<<" ";
   return os;
 }

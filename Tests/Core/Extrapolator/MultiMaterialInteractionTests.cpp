@@ -60,14 +60,14 @@ namespace Test {
   CalibrationContext   calContext = CalibrationContext();
 
   ///
-  /// @brief Unit test for multi material interactor 
+  /// @brief Unit test for multi material interactor
   ///
-  BOOST_AUTO_TEST_CASE( kalman_fitter_zero_field)
+  BOOST_AUTO_TEST_CASE(kalman_fitter_zero_field)
   {
     // Build detector
     CubicTrackingGeometry cGeometry(tgContext);
     auto                  detector = cGeometry();
-    // Build navigator 
+    // Build navigator
     Navigator mNavigator(detector);
     mNavigator.resolvePassive   = false;
     mNavigator.resolveMaterial  = true;
@@ -78,7 +78,7 @@ namespace Test {
     RecoStepper rStepper(bField);
     using RecoPropagator = Propagator<RecoStepper, Navigator>;
     RecoPropagator multiPropagator(rStepper, mNavigator);
-	//
+    //
     // Set initial parameters for the particle track
     ActsSymMatrixD<5> cov;
     cov << 1000. * units::_um, 0., 0., 0., 0., 0., 1000. * units::_um, 0., 0.,
@@ -96,33 +96,41 @@ namespace Test {
     SingleCurvilinearTrackParameters<ChargedPolicy> rStart(
         std::move(covPtr), rPos, rMom, 1.);
 
-    PropagatorOptions<ActionList<DebugOutput,MultiMaterialInteractor>,AbortList<detail::EndOfWorldReached> > rOptions(
-        tgContext, mfContext);
-    rOptions.debug              = debugMode;
+    PropagatorOptions<ActionList<DebugOutput, MultiMaterialInteractor>,
+                      AbortList<detail::EndOfWorldReached>>
+        rOptions(tgContext, mfContext);
+    rOptions.debug = debugMode;
 
     auto result = multiPropagator.propagate(rStart, rOptions).value();
-	auto numOfComponents = result.template get<MultiMaterialInteractor::result_type>().numComponents;
+    auto numOfComponents
+        = result.template get<MultiMaterialInteractor::result_type>()
+              .numComponents;
     if (debugMode) {
       const auto debugString
           = result.template get<DebugOutput::result_type>().debugString;
       std::cout << ">>>> Measurement creation: " << std::endl;
       std::cout << debugString;
-      std::cout << " There collects "<<numOfComponents<<" components.";
-    } 
+      std::cout << " There collects " << numOfComponents << " components.";
+    }
 
-	// Test if the number of components split into 64 in the interactions of 6 surfaces
-	BOOST_CHECK( numOfComponents == 64);
+    // Test if the number of components split into 64 in the interactions of 6
+    // surfaces
+    BOOST_CHECK(numOfComponents == 64);
 
-	// Test for each surface all material interaction recorded are the same 
-	// because the component split don't change anything
-	const auto& material_interactions_result = result.template get<MultiMaterialInteractor::result_type>().multiMaterialInteractions;
-	for(const auto& materialInteractionPair: material_interactions_result)
-	{
-	  const auto& materialInteractionVec = materialInteractionPair.second;
-	 BOOST_CHECK( std::all_of(materialInteractionVec.begin()+1,materialInteractionVec.end(),
-		            [&](const Acts::InteractionPointVec::value_type& r) {return r == materialInteractionVec.front();}) );
-	}
+    // Test for each surface all material interaction recorded are the same
+    // because the component split don't change anything
+    const auto& material_interactions_result
+        = result.template get<MultiMaterialInteractor::result_type>()
+              .multiMaterialInteractions;
+    for (const auto& materialInteractionPair : material_interactions_result) {
+      const auto& materialInteractionVec = materialInteractionPair.second;
+      BOOST_CHECK(
+          std::all_of(materialInteractionVec.begin() + 1,
+                      materialInteractionVec.end(),
+                      [&](const Acts::InteractionPointVec::value_type& r) {
+                        return r == materialInteractionVec.front();
+                      }));
+    }
   }
 }
 }
-

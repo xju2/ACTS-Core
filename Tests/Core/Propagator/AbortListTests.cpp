@@ -109,12 +109,14 @@ namespace Test {
   /// This is a struct to mimic the stepper
   struct Stepper
   {
-	template <typename state_type>
-	  void
-	updateStep(state_type& state, double abortStep, cstep::Type type = cstep::aborter) const                                                             
-	{
-	  state.stepSize.update(abortStep, type);
-	}
+    template <typename state_type>
+    void
+    updateStep(state_type& state,
+               double      abortStep,
+               cstep::Type type = cstep::aborter) const
+    {
+      state.stepSize.update(abortStep, type);
+    }
   };
 
   /// This is a simple result struct to mimic the

@@ -55,7 +55,7 @@ struct MaterialInteraction
     if (this->surface != others.surface) {
       return false;
     }
-	return true;
+    return true;
   }
 };
 

@@ -14,30 +14,30 @@ Acts::EigenStepper<B, C, E, A>::EigenStepper(B bField)
 
 template <typename B, typename C, typename E, typename A>
 template <typename options_t>
-std::pair<bool,double>
+std::pair<bool, double>
 Acts::EigenStepper<B, C, E, A>::targetSurface(State& state,
-                const Surface*     surface,
-                const options_t&   navOpts,
-                const Corrector& navCorr) const
+                                              const Surface*   surface,
+                                              const options_t& navOpts,
+                                              const Corrector& navCorr) const
 {
-    // Intersect the surface
-    auto surfaceIntersect = surface->surfaceIntersectionEstimate(state.geoContext,
-        position(state), direction(state), navOpts, navCorr);
-    if (surfaceIntersect) {
-      double ssize = surfaceIntersect.intersection.pathLength;
-      // update the stepsize
-      updateStep(state, navCorr, ssize, true);
-      return std::move(std::make_pair(true, ssize));
-    }
-    return std::move(std::make_pair(false, std::numeric_limits<double>::max()));
+  // Intersect the surface
+  auto surfaceIntersect = surface->surfaceIntersectionEstimate(
+      state.geoContext, position(state), direction(state), navOpts, navCorr);
+  if (surfaceIntersect) {
+    double ssize = surfaceIntersect.intersection.pathLength;
+    // update the stepsize
+    updateStep(state, navCorr, ssize, true);
+    return std::move(std::make_pair(true, ssize));
+  }
+  return std::move(std::make_pair(false, std::numeric_limits<double>::max()));
 }
 
 template <typename B, typename C, typename E, typename A>
 void
 Acts::EigenStepper<B, C, E, A>::updateStep(State& state,
-             const Corrector& navCorr,
-             double             stepSize,
-             bool               release) const
+                                           const Corrector& navCorr,
+                                           double           stepSize,
+                                           bool             release) const
 {
   state.stepSize.update(stepSize, cstep::actor, release);
   navCorr(state.stepSize);
@@ -46,7 +46,7 @@ Acts::EigenStepper<B, C, E, A>::updateStep(State& state,
 template <typename B, typename C, typename E, typename A>
 void
 Acts::EigenStepper<B, C, E, A>::releaseStep(State& state,
-	cstep::Type type) const
+                                            cstep::Type type) const
 {
   state.stepSize.release(type);
 }
@@ -54,8 +54,8 @@ Acts::EigenStepper<B, C, E, A>::releaseStep(State& state,
 template <typename B, typename C, typename E, typename A>
 void
 Acts::EigenStepper<B, C, E, A>::updateStep(State& state,
-             double      stepSize,
-             cstep::Type type) const
+                                           double      stepSize,
+                                           cstep::Type type) const
 {
   state.stepSize.update(stepSize, type);
 }
@@ -273,8 +273,10 @@ Acts::EigenStepper<B, C, E, A>::step(propagator_state_t& state) const
 
   // First Runge-Kutta point (at current position)
   sd.B_first = getField(state.stepping, state.stepping.pos);
-  if (!state.stepping.extension.validExtensionForStep(state, *this,state.stepping)
-      || !state.stepping.extension.k1(state, *this, state.stepping, sd.k1, sd.B_first)) {
+  if (!state.stepping.extension.validExtensionForStep(
+          state, *this, state.stepping)
+      || !state.stepping.extension.k1(
+             state, *this, state.stepping, sd.k1, sd.B_first)) {
     return 0.;
   }
 
@@ -349,7 +351,8 @@ Acts::EigenStepper<B, C, E, A>::step(propagator_state_t& state) const
   if (state.stepping.covTransport) {
     // The step transport matrix in global coordinates
     ActsMatrixD<7, 7> D;
-    if (!state.stepping.extension.finalize(state, *this, state.stepping, h, D)) {
+    if (!state.stepping.extension.finalize(
+            state, *this, state.stepping, h, D)) {
       return EigenStepperError::StepInvalid;
     }
 

@@ -335,23 +335,22 @@ public:
   updateStep(state_type&                      state,
              const VoidIntersectionCorrector& navCorr,
              double                           navigationStep,
-             bool                             release = false) const  
+             bool                             release = false) const
   {
     state.stepSize.update(navigationStep, cstep::actor, release);
     navCorr(state.stepSize);
   }
 
   void
-	updateStep(state_type& state,
-	  double      stepSize,
-	  cstep::Type type) const
+  updateStep(state_type& state, double stepSize, cstep::Type type) const
   {
-	state.stepSize.update(stepSize, type);
+    state.stepSize.update(stepSize, type);
   }
 
-  void releaseStep(state_type& state, cstep::Type type) const
+  void
+  releaseStep(state_type& state, cstep::Type type) const
   {
-	state.stepSize.release(type);
+    state.stepSize.release(type);
   }
 
   /// Perform a straight line propagation step

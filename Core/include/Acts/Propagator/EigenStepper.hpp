@@ -260,9 +260,9 @@ public:
   /// Double : the pathlength
   template <typename options_t>
   std::pair<bool, double>
-  targetSurface(State&             state,
-                const Surface*     surface,
-                const options_t&   navOpts,
+  targetSurface(State&           state,
+                const Surface*   surface,
+                const options_t& navOpts,
                 const Corrector& navCorr) const;
 
   /// Create and return the bound state at the current position
@@ -358,26 +358,25 @@ public:
 
   /// This method updates the constrained step size
   ///
-  /// @param[in,out] state The state object for the step length 
+  /// @param[in,out] state The state object for the step length
   /// @param[in] Corrector& navigator corrections
   /// @param[in] stepSize the step size
   /// @param[in] release flag steers if the step is released first
   void
-  updateStep(State&        state,
+  updateStep(State&           state,
              const Corrector& navCorr,
-             double             stepSize,
-             bool               release = false) const;
-  void 
-	releaseStep(State& state,
-	      		cstep::Type type = cstep::actor) const;
+             double           stepSize,
+             bool             release = false) const;
+  void
+  releaseStep(State& state, cstep::Type type = cstep::actor) const;
 
   /// This method call at the Standard abort
   //
   /// @param[in,out] state The state object for the step length
   /// @param[in] step the step size
-  /// @param[in] default update the aborter stepsize  
+  /// @param[in] default update the aborter stepsize
   void
-  updateStep(State& state,
+  updateStep(State&      state,
              double      abortStep,
              cstep::Type type = cstep::aborter) const;
 

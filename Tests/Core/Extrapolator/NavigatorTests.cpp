@@ -191,7 +191,7 @@ namespace Test {
 
       /// updateStep method
       void
-      updateStep(State&                    state,
+      updateStep(State&                           state,
                  const VoidIntersectionCorrector& navCorr,
                  double                           navigationStep,
                  bool                             release = false) const
@@ -200,30 +200,29 @@ namespace Test {
         navCorr(state.stepSize);
       }
 
-	  void
-		updateStep(State& state,
-			double      stepSize,
-			Cstep::Type type) const
-		{
-		  state.stepSize.update(stepSize, type);
-		}
+      void
+      updateStep(State& state, double stepSize, Cstep::Type type) const
+      {
+        state.stepSize.update(stepSize, type);
+      }
 
-	  /// release method
-	  void releaseStep(State& state, Cstep::Type type) const
-	  {
-		state.stepSize.release(type);                                                                                                     
-	  }
+      /// release method
+      void
+      releaseStep(State& state, Cstep::Type type) const
+      {
+        state.stepSize.release(type);
+      }
 
       template <typename options_t, typename corrector_t>
       std::pair<bool, double>
-      targetSurface(State&      state,
+      targetSurface(State&             state,
                     const Surface*     surface,
                     const options_t&   navOpts,
                     const corrector_t& navCorr) const
       {
         // Intersect the surface
         auto surfaceIntersect = surface->surfaceIntersectionEstimate(
-          tgContext, state.pos, state.dir, navOpts, navCorr);
+            tgContext, state.pos, state.dir, navOpts, navCorr);
         if (surfaceIntersect) {
           // update the stepsize
           double ssize = surfaceIntersect.intersection.pathLength;

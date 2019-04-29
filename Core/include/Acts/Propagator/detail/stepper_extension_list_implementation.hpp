@@ -53,8 +53,10 @@ namespace detail {
         const state_type&         component_state,
         std::array<int, sizeof...(T)>& bids)
     {
-      std::get<N - 1>(bids) = std::get<N - 1>(obs_tuple).bid(state, stepper, component_state);
-      stepper_extension_list_impl<N - 1>::bid(obs_tuple, state, stepper, component_state, bids);
+      std::get<N - 1>(bids)
+          = std::get<N - 1>(obs_tuple).bid(state, stepper, component_state);
+      stepper_extension_list_impl<N - 1>::bid(
+          obs_tuple, state, stepper, component_state, bids);
     }
 
     /// The extension list call implementation
@@ -132,7 +134,8 @@ namespace detail {
       }
 
       // Continue as long as evaluations are 'true'
-      if (std::get<N - 1>(obs_tuple).finalize(state, stepper, component_state, h, D)) {
+      if (std::get<N - 1>(obs_tuple).finalize(
+              state, stepper, component_state, h, D)) {
         return stepper_extension_list_impl<N - 1>::finalize(
             obs_tuple, state, stepper, component_state, h, D, validExtensions);
       } else {
@@ -163,7 +166,8 @@ namespace detail {
       }
 
       // Continue as long as evaluations are 'true'
-      if (std::get<N - 1>(obs_tuple).finalize(state, stepper, component_state, h)) {
+      if (std::get<N - 1>(obs_tuple).finalize(
+              state, stepper, component_state, h)) {
         return stepper_extension_list_impl<N - 1>::finalize(
             obs_tuple, state, stepper, component_state, h, validExtensions);
       } else {

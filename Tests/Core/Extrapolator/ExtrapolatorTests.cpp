@@ -127,8 +127,7 @@ namespace Test {
     CurvilinearParameters start(std::move(covPtr), pos, mom, q);
 
     using DebugOutput = detail::DebugOutputActor;
-    PropagatorOptions<ActionList<DebugOutput>> options(
-        tgContext, mfContext);
+    PropagatorOptions<ActionList<DebugOutput>> options(tgContext, mfContext);
     options.maxStepSize = 10. * units::_cm;
     options.pathLimit   = 25 * units::_cm;
     options.debug       = debugMode;
@@ -140,7 +139,7 @@ namespace Test {
       std::cout << output.debugString << std::endl;
     }
   }
-  
+
   // This test case checks that no segmentation fault appears
   // - this tests the collection of surfaces
   BOOST_DATA_TEST_CASE(
@@ -356,6 +355,6 @@ namespace Test {
       CHECK_CLOSE_REL(status.pathLength, options.pathLimit, 1e-3);
     }
   }
-  
+
 }  // namespace Test
 }  // namespace Acts

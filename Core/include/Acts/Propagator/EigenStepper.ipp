@@ -13,6 +13,46 @@ Acts::EigenStepper<B, C, E, A>::EigenStepper(B bField)
 }
 
 template <typename B, typename C, typename E, typename A>
+template <typename options_t>
+std::pair<bool,double>
+Acts::EigenStepper<B, C, E, A>::targetSurface(State& state,
+                const Surface*     surface,
+                const options_t&   navOpts,
+                const Corrector& navCorr) const
+{
+    // Intersect the surface
+    auto surfaceIntersect = surface->surfaceIntersectionEstimate(state.geoContext,
+        position(state), direction(state), navOpts, navCorr);
+    if (surfaceIntersect) {
+      double ssize = surfaceIntersect.intersection.pathLength;
+      // update the stepsize
+      updateStep(state, navCorr, ssize, true);
+      return std::move(std::make_pair(true, ssize));
+    }
+    return std::move(std::make_pair(false, std::numeric_limits<double>::max()));
+}
+
+template <typename B, typename C, typename E, typename A>
+void
+Acts::EigenStepper<B, C, E, A>::updateStep(State& state,
+             const Corrector& navCorr,
+             double             stepSize,
+             bool               release) const
+{
+  state.stepSize.update(stepSize, cstep::actor, release);
+  navCorr(state.stepSize);
+}
+
+template <typename B, typename C, typename E, typename A>
+void
+Acts::EigenStepper<B, C, E, A>::updateStep(State& state,
+             double      stepSize,
+             cstep::Type type) const
+{
+  state.stepSize.update(stepSize, type);
+}
+
+template <typename B, typename C, typename E, typename A>
 auto
 Acts::EigenStepper<B, C, E, A>::boundState(State& state,
                                            const Surface& surface,

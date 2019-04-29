@@ -204,7 +204,7 @@ namespace detail {
           anyDirection);
       const double distance = intersection.pathLength;
       // Adjust the step size so that we cannot cross the target surface
-      state.stepping.stepSize.update(distance, ConstrainedStep::aborter);
+	  stepper.updateStep(state.stepping, distance, ConstrainedStep::aborter);
       // return true if you fall below tolerance
       bool targetReached = (distance * distance <= tolerance * tolerance);
       if (targetReached) {

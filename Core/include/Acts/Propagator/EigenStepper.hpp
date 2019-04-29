@@ -263,19 +263,7 @@ public:
   targetSurface(State&             state,
                 const Surface*     surface,
                 const options_t&   navOpts,
-                const Corrector& navCorr) const
-  {
-    // Intersect the surface
-    auto surfaceIntersect = surface->surfaceIntersectionEstimate(state.geoContext,
-        position(state), direction(state), navOpts, navCorr);
-    if (surfaceIntersect) {
-      double ssize = surfaceIntersect.intersection.pathLength;
-      // update the stepsize
-      updateStep(state, navCorr, ssize, true);
-      return std::make_pair(true, ssize);
-    }
-    return std::make_pair(false, std::numeric_limits<double>::max());
-  }
+                const Corrector& navCorr) const;
 
   /// Create and return the bound state at the current position
   ///
@@ -375,31 +363,20 @@ public:
   /// @param[in,out] state The state object for the step length
   /// @param[in] step the step size
   /// @param[in] release flag steers if the step is released first
-  template <typename state_type>
   void
-  updateStep(state_type&        state,
+  updateStep(State&        state,
              const Corrector& navCorr,
              double             stepSize,
-             bool               release = false) const
-  {
-    state.stepSize.update(stepSize, cstep::actor, release);
-    if (state.pathAccumulated == 0. and navCorr(state.stepSize)) {
-      /*dummy*/
-    }
-  }
+             bool               release = false) const;
 
   /// This method call at the Standard abort
   /// @param[in,out] state The state object for the step length
   /// @param[in] step the step size
   /// update in the aborter
-  template <typename state_type>
   void
-  updateStep(state_type& state,
+  updateStep(State& state,
              double      abortStep,
-             cstep::Type type = cstep::aborter) const
-  {
-    state.stepSize.update(abortStep, type);
-  }
+             cstep::Type type = cstep::aborter) const;
 
   /// Perform a Runge-Kutta track parameter propagation step
   ///

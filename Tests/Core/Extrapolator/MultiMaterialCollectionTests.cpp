@@ -146,6 +146,20 @@ namespace Test {
       std::cout << " There collects "<<numOfComponents<<" components.";
     } 
 
+	// Test if the number of components split into 128 in the interactions of 6 surfaces
+	BOOST_CHECK( numOfComponents == 128 );
+
+	// Test for each surface all material interaction recorded are the same 
+	// because the component split don't change anything
+	const auto& material_interactions_result = mResult.template get<MultiMaterialInteractor::result_type>().multi_materialInteractions;
+	for(const auto& materialInteractionPair: material_interactions_result)
+	{
+	  const auto& materialInteractionVec = materialInteractionPair.second;
+	 BOOST_CHECK( std::all_of(materialInteractionVec.begin()+1,materialInteractionVec.end(),
+		            [&](const Acts::MaterialInteractionVec::value_type& r) {return r == materialInteractionVec.front();}) );
+
+	}
+
   }
 }
 }

@@ -358,6 +358,5 @@ namespace Test {
     }
   }
   */
-
 }  // namespace Test
 }  // namespace Acts

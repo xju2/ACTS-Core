@@ -333,7 +333,7 @@ public:
           });
           // Navigation break & release navigation stepping
           state.navigation.navigationBreak = true;
-          state.stepping.stepSize.release(Cstep::actor);
+		  stepper.releaseStep(state.stepping, Cstep::actor);
           return;
         } else {
           debugLog(state, [&] { return std::string("Volume updated."); });
@@ -353,7 +353,7 @@ public:
       });
       // Set navigation break and release the navigation step size
       state.navigation.navigationBreak = true;
-      state.stepping.stepSize.release(Cstep::actor);
+	  stepper.releaseStep(state.stepping, Cstep::actor);
     } else {
       debugLog(state, [&] {
         return std::string("Status could not be determined - good luck.");
@@ -412,7 +412,7 @@ public:
       });
       // Set navigation break and release the navigation step size
       state.navigation.navigationBreak = true;
-      state.stepping.stepSize.release(Cstep::actor);
+	  stepper.releaseStep(state.stepping, Cstep::actor);
     }
 
     // Navigator target always resets the current surface
@@ -599,7 +599,7 @@ private:
         });
         // set the navigation break
         state.navigation.navigationBreak = true;
-        state.stepping.stepSize.release(Cstep::actor);
+		stepper.releaseStep(state.stepping, Cstep::actor);
       }
       return startResolved;
     }
@@ -817,7 +817,7 @@ private:
         return std::string("No sufficient information to resolve boundary, "
                            "stopping navigation.");
       });
-      state.stepping.stepSize.release(Cstep::actor);
+		stepper.releaseStep(state.stepping, Cstep::actor);
       return false;
     } else if (state.navigation.currentVolume
                == state.navigation.targetVolume) {
@@ -825,7 +825,7 @@ private:
         return std::string("In target volume: no need to resolve boundary, "
                            "stopping navigation.");
         state.navigation.navigationBreak = true;
-        state.stepping.stepSize.release(Cstep::actor);
+		stepper.releaseStep(state.stepping, Cstep::actor);
       });
       return true;
     }

@@ -105,8 +105,8 @@ namespace detail {
       double limit     = std::min(internalLimit, state.options.pathLimit);
       double distance  = limit - state.stepping.pathAccumulated;
       double tolerance = state.options.targetTolerance;
-      state.stepping.stepSize.update(distance, ConstrainedStep::aborter);
-      stepper.updateStep(state.stepping, distance, ConstrainedStep::aborter);
+	  // For multicomponent, update the combination of stepSize
+	  stepper.updateStep(state.stepping, distance, ConstrainedStep::aborter); 
       bool limitReached = (distance * distance < tolerance * tolerance);
       if (limitReached) {
         targetDebugLog(state, "x", [&] {
@@ -204,7 +204,7 @@ namespace detail {
           anyDirection);
       const double distance = intersection.pathLength;
       // Adjust the step size so that we cannot cross the target surface
-	  stepper.updateStep(state.stepping, distance, ConstrainedStep::aborter);
+	  stepper.updateStep(state.stepping, distance, ConstrainedStep::aborter); 
       // return true if you fall below tolerance
       bool targetReached = (distance * distance <= tolerance * tolerance);
       if (targetReached) {

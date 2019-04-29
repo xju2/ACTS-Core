@@ -358,21 +358,24 @@ public:
 
   /// This method updates the constrained step size
   ///
-  /// @tparam propagator_state_t is the state type
-  ///
-  /// @param[in,out] state The state object for the step length
-  /// @param[in] step the step size
+  /// @param[in,out] state The state object for the step length 
+  /// @param[in] Corrector& navigator corrections
+  /// @param[in] stepSize the step size
   /// @param[in] release flag steers if the step is released first
   void
   updateStep(State&        state,
              const Corrector& navCorr,
              double             stepSize,
              bool               release = false) const;
+  void 
+	releaseStep(State& state,
+	      		cstep::Type type = cstep::actor) const;
 
   /// This method call at the Standard abort
+  //
   /// @param[in,out] state The state object for the step length
   /// @param[in] step the step size
-  /// update in the aborter
+  /// @param[in] default update the aborter stepsize  
   void
   updateStep(State& state,
              double      abortStep,

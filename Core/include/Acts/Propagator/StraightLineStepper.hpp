@@ -335,21 +335,17 @@ public:
   updateStep(state_type&                      state,
              const VoidIntersectionCorrector& navCorr,
              double                           navigationStep,
-             bool                             release = false) const  // *
+             bool                             release = false) const  
   {
     state.stepSize.update(navigationStep, cstep::actor, release);
-    /// If we have an initial step and are configured to modify it
-    if (state.pathAccumulated == 0. and navCorr(state.stepSize)) {
-    }
+    navCorr(state.stepSize);
   }
-  template <typename type>
-  void
-  updateStep(state_type& state,
-             double      abortStep,
-             type        cstepType = cstep::aborter) const
+
+  void releaseStep(state_type& state, cstep::Type type) const
   {
-    state.stepSize.update(abortStep, cstepType);
+	state.stepSize.release(type);
   }
+
   /// Perform a straight line propagation step
   ///
   /// @param [in,out] state is the propagation state associated with the track

@@ -42,6 +42,21 @@ struct MaterialInteraction
   /// The (passsed) material properties
   /// it is the material and the actual (corrected) path length
   MaterialProperties materialProperties = MaterialProperties();
+
+  bool
+  operator==(const MaterialInteraction& others) const
+  {
+    if (fabs((this->direction - others.direction).norm()) > 1e-10) {
+      return false;
+    }
+    if (fabs((this->position - others.position).norm()) > 1e-10) {
+      return false;
+    }
+    if (this->surface != others.surface) {
+      return false;
+    }
+	return true;
+  }
 };
 
 /// The Material interactor struct

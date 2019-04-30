@@ -27,9 +27,9 @@ Acts::EigenStepper<B, C, E, A>::targetSurface(State& state,
     double ssize = surfaceIntersect.intersection.pathLength;
     // update the stepsize
     updateStep(state, navCorr, ssize, true);
-    return std::move(std::make_pair(true, ssize));
+    return std::make_pair(true, ssize);
   }
-  return std::move(std::make_pair(false, std::numeric_limits<double>::max()));
+  return std::make_pair(false, std::numeric_limits<double>::max());
 }
 
 template <typename B, typename C, typename E, typename A>

@@ -336,6 +336,40 @@ public:
         state.geoContext, position(state), direction(state), true);
   }
 
+  /// This method updates the constrained step size
+  ///
+  /// @param[in,out] state The state object for the step length
+  /// @param[in] Corrector& navigator corrections
+  /// @param[in] stepSize the step size
+  /// @param[in] release flag steers if the step is released first
+  void
+  updateStep(State&           state,
+             const Corrector& navCorr,
+             double           stepSize,
+             bool             release = false) const
+{
+  state.stepSize.update(stepSize, cstep::actor, release);
+  navCorr(state.stepSize);
+}
+  /// This method call at the Standard abort
+  //
+  /// @param[in,out] state The state object for the step length
+  /// @param[in] step the step size
+  /// @param[in] default update the aborter stepsize
+  void
+  updateStep(State&      state,
+             double      abortStep,
+             cstep::Type type = cstep::aborter) const
+{
+  state.stepSize.release(type);
+}
+
+  void
+  releaseStep(State& state, cstep::Type type = cstep::actor) const;
+{
+  state.stepSize.release(type);
+}
+
   /// Create and return the bound state at the current position
   ///
   ///

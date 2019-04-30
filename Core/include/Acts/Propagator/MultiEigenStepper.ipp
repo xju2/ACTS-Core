@@ -56,7 +56,7 @@ Acts::MultiEigenStepper<B, C, E, A>::momentum(const State& state) const
 template <typename B, typename C, typename E, typename A>
 bool
 Acts::MultiEigenStepper<B, C, E, A>::surfaceReached(
-    State&    state,
+    State&         state,
     const Surface* surface) const
 {
   /// status is true when there all free components are on surface
@@ -94,7 +94,7 @@ template <typename B, typename C, typename E, typename A>
 template <typename options_t>
 std::pair<bool, double>
 Acts::MultiEigenStepper<B, C, E, A>::targetSurface(
-    State&      state,
+    State&           state,
     const Surface*   surface,
     const options_t& navOpts,
     const Corrector& navCorr) const
@@ -131,8 +131,7 @@ Acts::MultiEigenStepper<B, C, E, A>::targetSurface(
 
 template <typename B, typename C, typename E, typename A>
 void
-Acts::MultiEigenStepper<B, C, E, A>::normalizeComponents(
-    State& state) const
+Acts::MultiEigenStepper<B, C, E, A>::normalizeComponents(State& state) const
 {
   double weight_sum = 0;
   for (const auto& tuple_state : state.stateCol) {

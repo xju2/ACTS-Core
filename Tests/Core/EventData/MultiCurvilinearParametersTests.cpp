@@ -57,6 +57,7 @@ namespace Test {
         multi_curvilinear_neg,0, pos, mom, -1., {{0., 0., fphi, ftheta, -oOp}});
     MultiConsistencyCheck(
         multi_curvilinear_neut,0, pos, mom, 0., {{0., 0., fphi, ftheta, oOp}});
+
     // check that the created surface is at the position
     CHECK_CLOSE_REL(
         multi_curvilinear_pos.referenceSurface().center(tgContext), pos, 1e-6);
@@ -84,17 +85,6 @@ namespace Test {
     CHECK_CLOSE_OR_SMALL(mFrame, multi_curvilinear_pos.referenceFrame(tgContext), 1e-6, 1e-9);
     CHECK_CLOSE_OR_SMALL(mFrame, multi_curvilinear_neg.referenceFrame(tgContext), 1e-6, 1e-9);
     CHECK_CLOSE_OR_SMALL(mFrame, multi_curvilinear_neut.referenceFrame(tgContext), 1e-6, 1e-9);
-
-	/*
-    /// copy construction test
-    MultipleCurvilinearParameters        multi_curvilinear_pos_copy (multi_curvilinear_pos);
-    MultipleCurvilinearParameters        multi_curvilinear_neg_copy (multi_curvilinear_neg);
-    MultipleNeutralCurvilinearParameters multi_curvilinear_neut_copy(multi_curvilinear_neut);
-
-    BOOST_CHECK_EQUAL(multi_curvilinear_pos_copy, multi_curvilinear_pos);
-    BOOST_CHECK_EQUAL(multi_curvilinear_neg_copy, multi_curvilinear_neg);
-    BOOST_CHECK_EQUAL(multi_curvilinear_neut_copy,multi_curvilinear_neut);
-	*/
 
     /// modification test with set methods
     double ux = 0.1;
@@ -132,7 +122,6 @@ namespace Test {
         multi_curvilinear_pos.referenceSurface().transform(tgContext).rotation().col(2),
         1e-6);
 
-	/*
 	/// append a component 
     Vector3D pos_append_1(1.34, 2.34, 3.45);
     Vector3D mom_append_1(1000., 1000., -0.100);
@@ -145,13 +134,6 @@ namespace Test {
     CurvilinearParameters* curvilinear_pos_append_2  = new CurvilinearParameters(nullptr, pos_append_2, mom_append_2, 1.);
 	multi_curvilinear_pos.append(0.1,curvilinear_pos_append_1);
 	multi_curvilinear_pos.append(0.2,curvilinear_pos_append_2);
-	std::cout<<"pos0 "<<multi_curvilinear_pos.position(0)<<std::endl;
-	std::cout<<"pos1 "<<multi_curvilinear_pos.position(1)<<std::endl;
-	std::cout<<"pos2 "<<multi_curvilinear_pos.position(2)<<std::endl;
-	std::cout<<"weight0 "<<multi_curvilinear_pos.weight(0)<<std::endl;
-	std::cout<<"weight1 "<<multi_curvilinear_pos.weight(1)<<std::endl;
-	std::cout<<"weight2 "<<multi_curvilinear_pos.weight(2)<<std::endl;
-	*/
   }
 
 

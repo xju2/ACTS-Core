@@ -94,19 +94,25 @@ namespace concept {
         constexpr static bool charge_exists = has_method<const S, double, charge_t, const state&>;
         static_assert(charge_exists, "charge method not found");
         constexpr static bool surface_reached_exists = has_method<const S, bool, surface_reached_t, const state&, const Surface*>;
+		/* multiStepper will change the status of state, allow State to be non-const
         static_assert(surface_reached_exists, "surfaceReached method not found");
+		*/
         constexpr static bool bound_state_method_exists= has_method<const S, typename S::BoundState, bound_state_method_t, state&, const Surface&, bool>;
         static_assert(bound_state_method_exists, "boundState method not found");
         constexpr static bool curvilinear_state_method_exists = has_method<const S, typename S::CurvilinearState, curvilinear_state_method_t, state&, bool>;
         static_assert(curvilinear_state_method_exists, "curvilinearState method not found");
+		/* multiStepper does not contains these methods currently
         constexpr static bool update_method_exists = require<has_method<const S, void, update_t, state&, const BoundParameters&>,
                                                              has_method<const S, void, update_t, state&, const Vector3D&, const Vector3D&, double>>;
         static_assert(update_method_exists, "update method not found");
+		*/
         constexpr static bool corrector_exists = has_method<const S, typename S::Corrector, corrector_t, state&>;
         static_assert(corrector_exists, "corrector method not found");
+		/* no need in multi stepper, cov transport only in single component
         constexpr static bool covariance_transport_exists = require<has_method<const S, void, covariance_transport_t, state&, bool>,
                                                                     has_method<const S, void, covariance_transport_t, state&, const Surface&, bool>>;
         static_assert(covariance_transport_exists, "covarianceTransport method not found");
+		*/
 
         constexpr static bool value = require<state_exists,
                                               jacobian_exists,
@@ -119,12 +125,12 @@ namespace concept {
                                               direction_exists,
                                               momentum_exists,
                                               charge_exists,
-                                              surface_reached_exists,
+                                              //surface_reached_exists,
                                               bound_state_method_exists,
                                               curvilinear_state_method_exists,
-                                              update_method_exists,
-                                              corrector_exists,
-                                              covariance_transport_exists>;
+                                              //update_method_exists,
+                                              corrector_exists>;
+                                              //covariance_transport_exists>;
       };
     // clang-format on
   }

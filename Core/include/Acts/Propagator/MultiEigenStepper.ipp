@@ -14,7 +14,7 @@ Acts::MultiEigenStepper<B, C, E, A>::MultiEigenStepper(B bField)
 
 template <typename B, typename C, typename E, typename A>
 Acts::Vector3D
-Acts::MultiEigenStepper<B, C, E, A>::position(const MultiState& state) const
+Acts::MultiEigenStepper<B, C, E, A>::position(const State& state) const
 {
   Vector3D pos = Vector3D(0, 0, 0);
   for (const auto& tuple_state : state.stateCol) {
@@ -28,7 +28,7 @@ Acts::MultiEigenStepper<B, C, E, A>::position(const MultiState& state) const
 
 template <typename B, typename C, typename E, typename A>
 Acts::Vector3D
-Acts::MultiEigenStepper<B, C, E, A>::direction(const MultiState& state) const
+Acts::MultiEigenStepper<B, C, E, A>::direction(const State& state) const
 {
   Vector3D dir = Vector3D(0, 0, 0);
   for (const auto& tuple_state : state.stateCol) {
@@ -42,7 +42,7 @@ Acts::MultiEigenStepper<B, C, E, A>::direction(const MultiState& state) const
 
 template <typename B, typename C, typename E, typename A>
 double
-Acts::MultiEigenStepper<B, C, E, A>::momentum(const MultiState& state) const
+Acts::MultiEigenStepper<B, C, E, A>::momentum(const State& state) const
 {
   double mom = 0.;
   for (const auto& tuple_state : state.stateCol) {
@@ -56,7 +56,7 @@ Acts::MultiEigenStepper<B, C, E, A>::momentum(const MultiState& state) const
 template <typename B, typename C, typename E, typename A>
 bool
 Acts::MultiEigenStepper<B, C, E, A>::surfaceReached(
-    MultiState&    state,
+    State&    state,
     const Surface* surface) const
 {
   /// status is true when there all free components are on surface
@@ -94,7 +94,7 @@ template <typename B, typename C, typename E, typename A>
 template <typename options_t>
 std::pair<bool, double>
 Acts::MultiEigenStepper<B, C, E, A>::targetSurface(
-    MultiState&      state,
+    State&      state,
     const Surface*   surface,
     const options_t& navOpts,
     const Corrector& navCorr) const
@@ -132,7 +132,7 @@ Acts::MultiEigenStepper<B, C, E, A>::targetSurface(
 template <typename B, typename C, typename E, typename A>
 void
 Acts::MultiEigenStepper<B, C, E, A>::normalizeComponents(
-    MultiState& state) const
+    State& state) const
 {
   double weight_sum = 0;
   for (const auto& tuple_state : state.stateCol) {
@@ -147,7 +147,7 @@ Acts::MultiEigenStepper<B, C, E, A>::normalizeComponents(
 
 template <typename B, typename C, typename E, typename A>
 void
-Acts::MultiEigenStepper<B, C, E, A>::deleteComponents(MultiState& state) const
+Acts::MultiEigenStepper<B, C, E, A>::deleteComponents(State& state) const
 {
   auto& col = state.stateCol;
   typename std::list<std::tuple<SingleStateType, double, StateStatus>>::iterator
@@ -164,7 +164,7 @@ Acts::MultiEigenStepper<B, C, E, A>::deleteComponents(MultiState& state) const
 
 template <typename B, typename C, typename E, typename A>
 void
-Acts::MultiEigenStepper<B, C, E, A>::outPut(const MultiState& state) const
+Acts::MultiEigenStepper<B, C, E, A>::outPut(const State& state) const
 {
   for (const auto& tuple_state : state.stateCol) {
     const auto& singlestate = std::get<0>(tuple_state);
@@ -179,7 +179,7 @@ Acts::MultiEigenStepper<B, C, E, A>::outPut(const MultiState& state) const
 
 template <typename B, typename C, typename E, typename A>
 void
-Acts::MultiEigenStepper<B, C, E, A>::updateStep(MultiState& state,
+Acts::MultiEigenStepper<B, C, E, A>::updateStep(State& state,
                                                 const Corrector& navCorr,
                                                 double           navigationStep,
                                                 bool             release) const
@@ -194,7 +194,7 @@ Acts::MultiEigenStepper<B, C, E, A>::updateStep(MultiState& state,
 
 template <typename B, typename C, typename E, typename A>
 void
-Acts::MultiEigenStepper<B, C, E, A>::releaseStep(MultiState& state,
+Acts::MultiEigenStepper<B, C, E, A>::releaseStep(State& state,
                                                  cstep::Type type) const
 {
   for (auto& tuple_state : state.stateCol) {
@@ -207,7 +207,7 @@ Acts::MultiEigenStepper<B, C, E, A>::releaseStep(MultiState& state,
 
 template <typename B, typename C, typename E, typename A>
 void
-Acts::MultiEigenStepper<B, C, E, A>::updateStep(MultiState& state,
+Acts::MultiEigenStepper<B, C, E, A>::updateStep(State& state,
                                                 double      abortStep,
                                                 cstep::Type type) const
 {
@@ -221,7 +221,7 @@ Acts::MultiEigenStepper<B, C, E, A>::updateStep(MultiState& state,
 
 template <typename B, typename C, typename E, typename A>
 auto
-Acts::MultiEigenStepper<B, C, E, A>::boundState(MultiState& state,
+Acts::MultiEigenStepper<B, C, E, A>::boundState(State& state,
                                                 const Surface& surface,
                                                 bool /*unused*/) const
     -> BoundState
@@ -244,7 +244,7 @@ Acts::MultiEigenStepper<B, C, E, A>::boundState(MultiState& state,
 
 template <typename B, typename C, typename E, typename A>
 auto
-Acts::MultiEigenStepper<B, C, E, A>::curvilinearState(MultiState& state,
+Acts::MultiEigenStepper<B, C, E, A>::curvilinearState(State& state,
                                                       bool /*unused*/) const
     -> CurvilinearState
 {

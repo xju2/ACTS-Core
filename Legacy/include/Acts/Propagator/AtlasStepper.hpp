@@ -274,6 +274,10 @@ public:
     size_t debugMsgWidth = 50;
   };
 
+  /// Always use the same propagation state type, independently of the initial
+  /// track parameter type and of the target surface
+  using state_type = State;
+
   template <typename T, typename S = int>
   using return_parameter_type = typename s<T, S>::type;
 

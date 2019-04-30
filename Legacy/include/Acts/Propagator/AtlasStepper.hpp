@@ -361,11 +361,11 @@ public:
              double      abortStep,
              cstep::Type type = cstep::aborter) const
 {
-  state.stepSize.release(type);
+  state.stepSize.update(stepSize, type);
 }
 
   void
-  releaseStep(State& state, cstep::Type type = cstep::actor) const;
+  releaseStep(State& state, cstep::Type type = cstep::actor) const
 {
   state.stepSize.release(type);
 }

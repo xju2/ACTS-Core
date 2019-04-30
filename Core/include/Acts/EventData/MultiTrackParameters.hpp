@@ -74,9 +74,8 @@ public:
 //	std::assert( order < m_tracksPars.size() );
 	unsigned int i = 0 ;
 	for(const auto& trackWeightedPair :  m_TrackList) {
-	  if( i == order ) break; 
+	  if( i == order ) return trackWeightedPair.second->position();
 	  ++i;
-	return trackWeightedPair.second->position();
 	}
   }
 
@@ -98,9 +97,8 @@ public:
 //	std::assert( order < m_tracksPars.size() );
 	unsigned int i = 0 ;
 	for(const auto& trackWeightedPair :  m_TrackList) {
-	  if( i == order ) break;
+	  if( i == order ) return trackWeightedPair.second->momentum();
 	  ++i;
-	  return trackWeightedPair.second->momentum();
 	}
   }
 
@@ -151,9 +149,8 @@ public:
 //	std::assert( order < m_tracksPars.size() );
 	unsigned int i = 0 ;
 	for( const auto& weightedTrackPars :  m_TrackList) {
-	  if( i == order ) break;
+	  if( i == order ) return weightedTrackPars.second->getParameterSet();
 	  ++i;
-	  return weightedTrackPars.second->getParameterSet();
 	}
   }
 
@@ -164,9 +161,8 @@ public:
 //	std::assert( order < m_tracksPars.size() );
 	unsigned int i = 0 ;
 	for( auto& weightedTrackPars :  m_TrackList) {
-	  if( i == order ) break;
+	  if( i == order ) return weightedTrackPars.second->getParameterSet();
 	  ++i;
-	  return weightedTrackPars.second->getParameterSet();
 	}
   }
 
@@ -184,9 +180,8 @@ public:
 //	std::assert( order < m_tracksPars.size() );
 	unsigned int i = 0 ;
 	for( auto& weightedTrackPars :  m_TrackList) {
-	  if( i == order ) break;
+	  if( i == order ) return weightedTrackPars.first;
 	  ++i;
-	  return weightedTrackPars.first;
 	}
   }
 
@@ -245,13 +240,11 @@ protected:
   /// @param rhs object to be copied
   /*unused*/
   MultiTrackParameters<ChargePolicy>&
-  operator=(const MultiTrackParameters<ChargePolicy>& rhs)
-  =default;
+  operator=(const MultiTrackParameters<ChargePolicy>& rhs)  {}
 
   /// @brief move assignment operator
   ///
   /// @param rhs object to be movied into `*this`
-  /* unused
   MultiTrackParameters<ChargePolicy>&
   operator=(MultiTrackParameters<ChargePolicy>&& rhs)
   {
@@ -262,7 +255,6 @@ protected:
 
     return *this;
   }
-  */
 
   /// @brief update global momentum from current parameter values
   ///
@@ -280,9 +272,8 @@ protected:
         getParameterSet(order).getParameters());
 	unsigned int i = 0 ;
 	for( auto& weightedTrackPars :  m_TrackList) {
-	  if( i == order ) break;
+	  if( i == order ) weightedTrackPars.second->updateMom( vMomentum );
 	  ++i;
-	  weightedTrackPars.second->updateMom( vMomentum );
 	}
   }
 
@@ -299,9 +290,8 @@ protected:
         gctx, getParameterSet(order).getParameters(), this->referenceSurface());
 	unsigned int i = 0 ;
 	for( auto& weightedTrackPars :  m_TrackList) {
-	  if( i == order ) break;
+	  if( i == order ) weightedTrackPars.second->updatePos( vPosition);
 	  ++i;
-	  weightedTrackPars.second->updatePos( vPosition);
 	}
   }
 

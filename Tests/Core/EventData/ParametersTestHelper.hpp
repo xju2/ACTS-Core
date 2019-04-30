@@ -36,5 +36,35 @@ namespace Test {
     CHECK_CLOSE_REL(pars.momentum(), momentum, 1e-6);
     BOOST_CHECK_EQUAL(pars.charge(), charge);
   }
+  template <typename Parameter>
+  void
+  MultiConsistencyCheck(const Parameter& pars,
+	  				unsigned int order,
+                   const Vector3D&  position,
+                   const Vector3D&  momentum,
+                   double           charge,
+                   std::array<double, 5> values)
+  {
+	std::cout<<"eLOC_0 "<<pars.parameters(order)[eLOC_0]<<" "<<values[0]<<std::endl;
+	std::cout<<"eLOC_1 "<<pars.parameters(order)[eLOC_1]<<" "<<values[1]<<std::endl;
+	std::cout<<"ePHI "<<pars.parameters(order)[ePHI]<<" "<<values[2]<<std::endl;
+	std::cout<<"eTHETA "<<pars.parameters(order)[eTHETA]<<" "<<values[3]<<std::endl;
+	std::cout<<"qOVERP "<<pars.parameters(order)[eQOP]<<" "<<values[4]<<std::endl;
+	std::cout<<"pos "<<pars.position(order)<<" "<<position<<std::endl;
+	std::cout<<"mom "<<pars.momentum(order)<<" "<<momentum<<std::endl;
+	std::cout<<"charge "<<pars.charge()<<" "<<charge<<std::endl;
+	std::cout<<std::endl;
+	
+    // check parameter vector
+    CHECK_CLOSE_ABS(pars.parameters(order)[eLOC_0], values[0], s_onSurfaceTolerance);
+    CHECK_CLOSE_ABS(pars.parameters(order)[eLOC_1], values[1], s_onSurfaceTolerance);
+    CHECK_CLOSE_REL(pars.parameters(order)[ePHI], values[2], 1e-6);
+    CHECK_CLOSE_REL(pars.parameters(order)[eTHETA], values[3], 1e-6);
+    CHECK_CLOSE_REL(pars.parameters(order)[eQOP], values[4], 1e-6);
+    // check global parameters
+    CHECK_CLOSE_REL(pars.position(order), position, 1e-6);
+    CHECK_CLOSE_REL(pars.momentum(order), momentum, 1e-6);
+    BOOST_CHECK_EQUAL(pars.charge(), charge);
+  }
 }
 }

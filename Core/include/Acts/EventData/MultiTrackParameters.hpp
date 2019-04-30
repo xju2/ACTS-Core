@@ -12,18 +12,18 @@
 #include "Acts/EventData/detail/coordinate_transformations.hpp"
 #include "Acts/Utilities/Definitions.hpp"
 #include "Acts/Utilities/GeometryContext.hpp"
+#include <set>
 
 namespace Acts {
 
 /// @class MultiTrackParameters
 ///
-/// @brief base class for a single set of track parameters
+/// @brief base class for a multi set of track parameters
 ///
 /// This class implements the interface for charged/neutral track parameters for
-/// the case that it represents a single set of track parameters
-/// (opposed to a list of different sets of track parameters as used by
-/// e.g. GSF or multi-track fitters).
+/// the case that it represents a multi set of track parameters (used in Gsf or MultiTrack Fitters)
 
+  /// pair of <weight,point_to_track>, when insert a trackParameter, that will allow to sort the track by weight 
   using WeightedTrackPars = std::pair< double, std::unique_ptr<TrackParametersBase> >;
   using TrackParSet       = std::multiset< WeightedTrackPars, std::greater<WeightedTrackPars> >;
 ///
@@ -56,10 +56,6 @@ public:
   /// @brief default virtual destructor
   ~MultiTrackParameters() override = default;
 
-  /// @brief virtual constructor
-  MultiTrackParameters<ChargePolicy>*
-  clone() const override = 0;
-
   /// @brief get weighted combination of position
   ActsVectorD<3>
   position() const final
@@ -80,9 +76,8 @@ public:
 	for(const auto& trackWeightedPair :  m_TrackList) {
 	  if( i == order ) break; 
 	  ++i;
+	return trackWeightedPair.second->position();
 	}
-	  return trackWeightedPair.second->position();
-    return m_vPosition;
   }
 
   /// @copydoc TrackParametersBase::momentum
@@ -105,15 +100,13 @@ public:
 	for(const auto& trackWeightedPair :  m_TrackList) {
 	  if( i == order ) break;
 	  ++i;
+	  return trackWeightedPair.second->momentum();
 	}
-	   return trackWeightedPair.second->momentum();
   }
 
   /// @brief equality operator
   ///
-  /// @return @c true of both objects have the same charge policy, parameter
-  /// values, position and momentum, otherwise @c false
-  /* unused
+  /// @return @c true if all single track parameters are same
   bool
   operator==(const TrackParametersBase& rhs) const override
   {
@@ -124,13 +117,11 @@ public:
 
     return ( m_TrackList == casted->m_TrackList);
   }
-  */
 
   /// @copydoc TrackParametersBase::charge
   double
   charge() const final
   {
-   // return m_oChargePolicy.getCharge();
     return m_TrackList.begin()->second->charge();
   }
 
@@ -162,8 +153,8 @@ public:
 	for( const auto& weightedTrackPars :  m_TrackList) {
 	  if( i == order ) break;
 	  ++i;
-	}
 	  return weightedTrackPars.second->getParameterSet();
+	}
   }
 
   /// @brief get single component
@@ -175,8 +166,8 @@ public:
 	for( auto& weightedTrackPars :  m_TrackList) {
 	  if( i == order ) break;
 	  ++i;
-	}
 	  return weightedTrackPars.second->getParameterSet();
+	}
   }
 
 
@@ -195,8 +186,8 @@ public:
 	for( auto& weightedTrackPars :  m_TrackList) {
 	  if( i == order ) break;
 	  ++i;
-	}
 	  return weightedTrackPars.first;
+	}
   }
 
   /// @brief update mom pos 
@@ -291,8 +282,8 @@ protected:
 	for( auto& weightedTrackPars :  m_TrackList) {
 	  if( i == order ) break;
 	  ++i;
-	}
 	  weightedTrackPars.second->updateMom( vMomentum );
+	}
   }
 
   /// @brief update global position from current parameter values
@@ -310,8 +301,8 @@ protected:
 	for( auto& weightedTrackPars :  m_TrackList) {
 	  if( i == order ) break;
 	  ++i;
-	}
 	  weightedTrackPars.second->updatePos( vPosition);
+	}
   }
 
   TrackParSet 	m_TrackList;

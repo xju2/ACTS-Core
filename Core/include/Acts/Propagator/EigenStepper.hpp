@@ -377,7 +377,7 @@ public:
   /// @param[in] default update the aborter stepsize
   void
   updateStep(State&      state,
-             double      abortStep,
+             double      stepSize,
              cstep::Type type = cstep::aborter) const;
 
   /// Perform a Runge-Kutta track parameter propagation step

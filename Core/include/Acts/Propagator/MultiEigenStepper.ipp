@@ -261,20 +261,20 @@ Acts::MultiEigenStepper<B, C, E, A>::curvilinearState(State& state,
 
 template <typename B, typename C, typename E, typename A>
 void
-Acts::MultiEigenStepper<B, C, E, A>::update(SingleStateType& state,
+Acts::MultiEigenStepper<B, C, E, A>::update(SingleStateType& singlestate,
                                             const BoundParameters& pars) const
 {
-  EigenStepper<B>::update(state, pars);
+  EigenStepper<B>::update(singlestate, pars);
 }
 
 template <typename B, typename C, typename E, typename A>
 void
-Acts::MultiEigenStepper<B, C, E, A>::update(SingleStateType& state,
+Acts::MultiEigenStepper<B, C, E, A>::update(SingleStateType& singlestate,
                                             const Vector3D& uposition,
                                             const Vector3D& udirection,
                                             double          up) const
 {
-  EigenStepper<B>::update(state, uposition, udirection, up);
+  EigenStepper<B>::update(singlestate, uposition, udirection, up);
 }
 
 template <typename B, typename C, typename E, typename A>

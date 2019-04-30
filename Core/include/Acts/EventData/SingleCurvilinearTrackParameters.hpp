@@ -126,14 +126,6 @@ public:
     return *this;
   }
 
-  /// @brief clone - charged/netural
-  /// virtual constructor for type creation without casting
-  SingleTrackParameters<ChargePolicy>*
-  clone() const override
-  {
-    return new SingleCurvilinearTrackParameters<ChargePolicy>(*this);
-  }
-
   /// @brief update of the track parameterisation
   /// only possible on non-const objects, enable for local parameters
   ///

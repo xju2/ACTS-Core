@@ -12,9 +12,17 @@
 #include "Acts/EventData/SingleCurvilinearTrackParameters.hpp"
 #include "Acts/EventData/SingleTrackParameters.hpp"
 
+//#include "Acts/EventData/MultiBoundTrackParameters.hpp"
+#include "Acts/EventData/MultiCurvilinearTrackParameters.hpp"
+#include "Acts/EventData/MultiTrackParameters.hpp"
+
 namespace Acts {
 using NeutralParameters = SingleTrackParameters<NeutralPolicy>;
 using NeutralCurvilinearParameters
     = SingleCurvilinearTrackParameters<NeutralPolicy>;
 using NeutralBoundParameters = SingleBoundTrackParameters<NeutralPolicy>;
+
+using MultipleNeutralParameters = MultiTrackParameters<NeutralPolicy>;
+using MultipleNeutralCurvilinearParameters
+      = MultiCurvilinearTrackParameters<NeutralPolicy>;
 }  // namespace Acts

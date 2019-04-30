@@ -215,14 +215,6 @@ public:
     return *this;
   }
 
-  /// @brief clone - charged/netural
-  /// virtual constructor for type creation without casting
-  SingleBoundTrackParameters<ChargePolicy>*
-  clone() const override
-  {
-    return new SingleBoundTrackParameters<ChargePolicy>(*this);
-  }
-
   /// @brief set method for parameter updates
   /// obviously only allowed on non-const objects
   //

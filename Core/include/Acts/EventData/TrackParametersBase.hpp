@@ -45,10 +45,6 @@ public:
   /// @brief virtual default destructor to allow for inheritance
   virtual ~TrackParametersBase() = default;
 
-  /// @brief virtual constructor
-  virtual TrackParametersBase*
-  clone() const = 0;
-
   /// @brief equality operator
   virtual bool
   operator==(const TrackParametersBase& rhs) const = 0;
@@ -187,6 +183,15 @@ public:
   /// matrix
   virtual const FullParameterSet&
   getParameterSet() const = 0;
+
+  virtual FullParameterSet&
+  getParameterSet() = 0;
+
+  virtual void 
+  updateMom( ActsVectorD<3>& mom) = 0; 
+
+  virtual void 
+  updatePos( ActsVectorD<3>& pos) = 0; 
 
 protected:
   /// @brief print information to output stream

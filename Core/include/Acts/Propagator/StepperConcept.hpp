@@ -101,7 +101,7 @@ namespace concept {
         static_assert(bound_state_method_exists, "boundState method not found");
         constexpr static bool curvilinear_state_method_exists = has_method<const S, typename S::CurvilinearState, curvilinear_state_method_t, state&, bool>;
         static_assert(curvilinear_state_method_exists, "curvilinearState method not found");
-		/* multiStepper does not contains these methods currently
+		/* multiStepper does not contain the methods currently
         constexpr static bool update_method_exists = require<has_method<const S, void, update_t, state&, const BoundParameters&>,
                                                              has_method<const S, void, update_t, state&, const Vector3D&, const Vector3D&, double>>;
         static_assert(update_method_exists, "update method not found");

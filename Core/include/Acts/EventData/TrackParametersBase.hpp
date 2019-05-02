@@ -193,6 +193,10 @@ public:
   virtual void 
   updatePos( ActsVectorD<3>& pos) = 0; 
 
+  /// @brief update the reference surface with position and direction
+  virtual void 
+  updateReferenceSurface( const ActsVectorD<3>&, const ActsVectorD<3>&) = 0; 
+
 protected:
   /// @brief print information to output stream
   ///

@@ -21,6 +21,21 @@ public:
   /// type of covariance matrix
   using CovPtr_t = typename MultiTrackParameters<ChargePolicy>::CovPtr_t;
 
+  /// pair of <weight,point_to_track>, when insert a trackParameter, that will allow to sort the track by weight 
+  using WeightedTrackPars = std::pair< double, std::unique_ptr<TrackParametersBase> >;
+  using TrackParMap       = std::map<WeightedTrackPars ,const unsigned int, std::greater<WeightedTrackPars> >;
+  using TrackParMapConstIter   = TrackParMap::const_iterator;
+  using TrackParMapIter   = TrackParMap::iterator;
+  struct TrackIndexFinder
+  {
+	TrackIndexFinder(const unsigned int id) : m_index(id){}
+	bool operator() (const TrackParMap::value_type& trackPar)
+	{
+	  return trackPar.second == m_index;
+	}
+	const unsigned int m_index;
+  };
+
   template <typename T = ChargePolicy,
             std::enable_if_t<std::is_same<T, ChargedPolicy>::value, int> = 0>
   MultiBoundTrackParameters(double weight,
@@ -43,9 +58,9 @@ public:
 	assert(m_pSurface);
   }
 
-
   /// @brief copy constructor - charged/neutral
   /// @param[in] copy The source parameters
+  /*unused*/
   MultiBoundTrackParameters(
       const MultiBoundTrackParameters<ChargePolicy>& copy) 
 	: MultiTrackParameters<ChargePolicy>(copy),
@@ -55,6 +70,7 @@ public:
 
   /// @brief move constructor - charged/neutral
   /// @param[in] other The source parameters
+  /*unused*/
   MultiBoundTrackParameters(
       MultiBoundTrackParameters<ChargePolicy>&& other)
     : MultiTrackParameters<ChargePolicy>(std::move(other))
@@ -65,9 +81,9 @@ public:
   /// @brief desctructor
   ~MultiBoundTrackParameters() override = default;
 
-
   /// @brief move assignment operator - charged/netural
   /// virtual constructor for type creation without casting
+  /*unused*/
   MultiBoundTrackParameters<ChargePolicy>&
   operator=(MultiBoundTrackParameters<ChargePolicy>&& rhs)
   {
@@ -79,69 +95,40 @@ public:
     return *this;
   }
 
-  /// @brief clone - charged/netural
-  MultiTrackParameters<ChargePolicy>*
-  clone() const override  /*unused*/
-  {
-    return new MultiBoundTrackParameters<ChargePolicy>(*this);
-  }
-
-  
-  /// @brief update of the track parameterisation
-  /// only possible on non-const objects, enable for local parameters
-  ///
-  /// @tparam ParID_t The parameter type
-  ///
-  /// @param newValue The new updaed value
-  ///
-  /// For curvilinear parameters the local parameters are forced to be
-  /// (0,0), hence an update is an effective shift of the reference
-  template <ParID_t par,
-            std::enable_if_t<std::is_same<typename par_type<par>::type,
-                                          local_parameter>::value,
-                             int> = 0>
+  /// @brief set method for parameter updates
+  /// obviously only allowed on non-const objects
+  //
+  /// @param[in] gctx is the Context object that is forwarded to the surface
+  ///            for local to global coordinate transformation
+  template <ParID_t par>
   void
-  set(const GeometryContext& gctx, ParValue_t newValue, unsigned int order)
+  set(const GeometryContext& gctx, ParValue_t newValue, unsigned int order )
   {
     // set the parameter & update the new global position
     this->getParameterSet(order).template setParameter<par>(newValue);
-    this->updateGlobalCoordinates(gctx, typename par_type<par>::type(),order);
-    // recreate the surface
-    m_pSurface = Surface::makeShared<PlaneSurface>(
-        this->position(order), this->momentum(order).normalized());
-    // reset to (0,0)
-    this->getParameterSet(order).template setParameter<par>(0.);
+    this->updateGlobalCoordinates(gctx, typename par_type<par>::type(),order );
   }
-
-  /// @brief update of the track parameterisation
-  /// only possible on non-const objects
-  /// enable for parameters that are not local parameters
-  /// @tparam ParID_t The parameter type
-  ///
-  /// @param newValue The new updaed value
-  ///
-  /// For curvilinear parameters the directional change of parameters
-  /// causes a recalculation of the surface
-  template <ParID_t par,
-            std::enable_if_t<not std::is_same<typename par_type<par>::type,
-                                              local_parameter>::value,
-                             int> = 0>
-  void
-  set(const GeometryContext& gctx, ParValue_t newValue,unsigned int order)
-  {
-    this->getParameterSet(order).template setParameter<par>(newValue);
-    this->updateGlobalCoordinates(gctx, typename par_type<par>::type(),order);
-    // recreate the surface
-    m_pSurface = Surface::makeShared<PlaneSurface>(
-        this->position(order), this->momentum(order).normalized());
-  }
-  
 
   /// @brief access to the reference surface
   const Surface&
   referenceSurface() const final
   {
     return *m_pSurface;
+  }
+
+  /// @brief access to the reference surface
+  const Surface&
+  referenceSurface(unsigned int id) const  final
+  {
+	TrackParMapConstIter it = std::find_if( this->m_TrackList.begin(), this->m_TrackList.end(), TrackIndexFinder(id));
+	assert( it != this->m_TrackList.end() );
+	return (*it).first.second->referenceSurface();
+  }
+
+  /// @brief update the reference surface
+  void 
+  updateReferenceSurface( const ActsVectorD<3>& /*unused*/, const ActsVectorD<3>& /*unused*/) final
+  {
   }
 
   /// @brief access to the measurement frame, i.e. the rotation matrix with

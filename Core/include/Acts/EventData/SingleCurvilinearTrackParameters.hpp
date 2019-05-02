@@ -12,6 +12,8 @@
 #include "Acts/Surfaces/PlaneSurface.hpp"
 #include "Acts/Utilities/GeometryContext.hpp"
 
+template<typename T> class MultiCurvilinearTrackParameters;
+
 namespace Acts {
 
 /// @brief Charged and Neutrial Curvilinear Track representation
@@ -27,6 +29,7 @@ class SingleCurvilinearTrackParameters
     : public SingleTrackParameters<ChargePolicy>
 {
 public:
+  friend class MultiCurvilinearTrackParameters<ChargePolicy>;
   /// type of covariance matrix
   using CovPtr_t = typename SingleTrackParameters<ChargePolicy>::CovPtr_t;
 
@@ -125,6 +128,13 @@ public:
     }
     return *this;
   }
+  /// @brief clone - charged/netural                                                                                                  
+  //  /// virtual constructor for type creation without casting
+  SingleTrackParameters<ChargePolicy>*
+	clone() const override
+	{
+	  return new SingleCurvilinearTrackParameters<ChargePolicy>(*this);
+	}
 
   /// @brief update of the track parameterisation
   /// only possible on non-const objects, enable for local parameters
@@ -182,6 +192,12 @@ public:
   referenceSurface() const final
   {
     return *m_upSurface;
+  }
+  /// @brief update the reference surface
+  void 
+  updateReferenceSurface(const ActsVectorD<3>& pos, const ActsVectorD<3>& dir) final
+  {
+	m_upSurface = Surface::makeShared<PlaneSurface>(pos,dir);
   }
 
   /// @brief access to the measurement frame, i.e. the rotation matrix with

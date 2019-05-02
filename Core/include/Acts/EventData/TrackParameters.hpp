@@ -21,7 +21,6 @@ using TrackParameters       = SingleTrackParameters<ChargedPolicy>;
 using CurvilinearParameters = SingleCurvilinearTrackParameters<ChargedPolicy>;
 using BoundParameters       = SingleBoundTrackParameters<ChargedPolicy>;
 
-
 using MultipleTrackParameters       = MultiTrackParameters<ChargedPolicy>;
 using MultipleCurvilinearParameters = MultiCurvilinearTrackParameters<ChargedPolicy>;
 using MultipleBoundParameters       = MultiBoundTrackParameters<ChargedPolicy>;

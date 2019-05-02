@@ -39,8 +39,8 @@ target_include_directories (MultiCurvilinearParametersTests PRIVATE ${Boost_INCL
   add_test (NAME MultiCurvilinearParametersUnitTests COMMAND MultiCurvilinearParametersTests)
 acts_add_test_to_cdash_project (PROJECT ACore TEST MultiCurvilinearParametersUnitTests TARGETS MultiCurvilinearParametersTests)
 
-#  add_executable (MultiBoundParametersTests MultiBoundParametersTests.cpp)
-#target_include_directories (MultiBoundParametersTests PRIVATE ${Boost_INCLUDE_DIRS})
-#  target_link_libraries (MultiBoundParametersTests PRIVATE ActsCore ActsTestsCommonHelpers ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} )
-#  add_test (NAME MultiBoundParametersUnitTests COMMAND MultiBoundParametersTests)
-#acts_add_test_to_cdash_project (PROJECT ACore TEST MultiBoundParametersUnitTests TARGETS MultiBoundParametersTests)    
+  add_executable (MultiBoundParametersTests MultiBoundParametersTests.cpp)
+target_include_directories (MultiBoundParametersTests PRIVATE ${Boost_INCLUDE_DIRS})
+  target_link_libraries (MultiBoundParametersTests PRIVATE ActsCore ActsTestsCommonHelpers ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} )
+  add_test (NAME MultiBoundParametersUnitTests COMMAND MultiBoundParametersTests)
+acts_add_test_to_cdash_project (PROJECT ACore TEST MultiBoundParametersUnitTests TARGETS MultiBoundParametersTests)    

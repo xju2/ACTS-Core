@@ -53,6 +53,10 @@ public:
   /// @brief default virtual destructor
   ~SingleTrackParameters() override = default;
 
+  /// @brief virtual constructor
+  virtual SingleTrackParameters<ChargePolicy>*
+	clone() const = 0;       
+
   /// @copydoc TrackParametersBase::position
   ActsVectorD<3>
   position() const final
@@ -100,7 +104,7 @@ public:
   }
 
   void 
-	updateMom( ActsVectorD<3>& mom)                                                                                                     
+	updateMom( ActsVectorD<3>& mom)
 	{
 	  m_vMomentum = mom;
 	}

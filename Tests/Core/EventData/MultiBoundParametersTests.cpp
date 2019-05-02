@@ -9,8 +9,8 @@
 // clang-format off
 #define BOOST_TEST_MODULE BoundParameters Tests
 #define BOOST_TEST_DYN_LINK
-#include <boost/test/included/unit_test.hpp>
 #include <boost/test/unit_test.hpp>
+#include <boost/test/data/test_case.hpp>
 // clang-format on
 
 #include "Acts/EventData/NeutralParameters.hpp"
@@ -36,6 +36,9 @@ namespace Acts {
 
 namespace Test {
 
+  // Create a test context
+  GeometryContext tgContext = GeometryContext();
+
   /// @brief Unit test for parameters at a plane
   ///
   BOOST_DATA_TEST_CASE(
@@ -58,7 +61,7 @@ namespace Test {
           ^ bdata::random((bdata::seed = 1295,
                            bdata::distribution
                            = std::uniform_real_distribution<>(0., M_PI)))
-          ^ bdata::xrange(100),
+          ^ bdata::xrange(1),
       x,
       y,
       z,
@@ -78,7 +81,7 @@ namespace Test {
     transform->pretranslate(center);
     // create the surfacex
     auto bounds   = std::make_shared<RectangleBounds>(100., 100.);
-    auto pSurface = Surface::makeShared<PlaneSurface>(transform, bounds);
+    auto pSurface = Surface::makeShared<PlaneSurface>(transform, bounds);   // surface use +1
 
     // now create parameters on this surface
     // l_x, l_y, phi, theta, q/p (1/p)
@@ -97,43 +100,51 @@ namespace Test {
     Vector3D pos
         = center + pars_array[0] * rot.col(0) + pars_array[1] * rot.col(1);
     // constructor from parameter vector
-    BoundParameters* ataPlane_from_pars = new BoundParameters(nullptr, pars, pSurface);
-	MultipleBoundParameters multi_ataPlane_from_pars(1.,ataPlane_from_pars,pSurface);
+    BoundParameters* ataPlane_from_pars_0 = new BoundParameters(tgContext,nullptr, pars, pSurface); //+2
+    BoundParameters* ataPlane_from_pars_1 = new BoundParameters(tgContext,nullptr, pars, pSurface); //+3
+	MultipleBoundParameters multi_ataPlane_from_pars(0.6,ataPlane_from_pars_0,pSurface);  //+4
+	multi_ataPlane_from_pars.append(0.7,ataPlane_from_pars_1);
+
     MultiConsistencyCheck(multi_ataPlane_from_pars, 0, pos, mom, 1., pars_array);
+    MultiConsistencyCheck(multi_ataPlane_from_pars, 1, pos, mom, 1., pars_array);
+
+	// test the append method
+	MultipleBoundParameters::TrackParMapConstIter it = multi_ataPlane_from_pars.getTrackList().begin();
+    BOOST_CHECK_EQUAL((*it).first.first, 0.7);
+	++it;
+    BOOST_CHECK_EQUAL((*it).first.first, 0.6);
 
     // check shared ownership of same surface
     BOOST_CHECK_EQUAL(&multi_ataPlane_from_pars.referenceSurface(), pSurface.get());
-    BOOST_CHECK_EQUAL(pSurface.use_count(), 3);
+    BOOST_CHECK_EQUAL(pSurface.use_count(), 4);
 
     // check that the reference frame is the rotation matrix
-    CHECK_CLOSE_REL(multi_ataPlane_from_pars.referenceFrame(), rot, 1e-6);
+    CHECK_CLOSE_REL(multi_ataPlane_from_pars.referenceFrame(tgContext), rot, 1e-6);
 
-/*
     /// modification test via setter functions
     double ux = 0.3;
     double uy = 0.4;
 
-    ataPlane_from_pars.set<Acts::eLOC_X>(ux);
-    ataPlane_from_pars.set<Acts::eLOC_Y>(uy);
+    multi_ataPlane_from_pars.set<Acts::eLOC_X>(tgContext,ux,0);
+    multi_ataPlane_from_pars.set<Acts::eLOC_Y>(tgContext,uy,0);
     // we should have a new updated position
     Vector3D lPosition3D(ux, uy, 0.);
     Vector3D uposition = rot * lPosition3D + center;
-    CHECK_CLOSE_REL(uposition, ataPlane_from_pars.position(), 1e-6);
+    CHECK_CLOSE_REL(uposition, multi_ataPlane_from_pars.position(0), 1e-6);
 
     double uphi   = 1.2;
     double utheta = 0.2;
     double uqop   = 0.025;
 
-    ataPlane_from_pars.set<Acts::ePHI>(uphi);
-    ataPlane_from_pars.set<Acts::eTHETA>(utheta);
-    ataPlane_from_pars.set<Acts::eQOP>(uqop);
+    multi_ataPlane_from_pars.set<Acts::ePHI>(tgContext,uphi,0);
+    multi_ataPlane_from_pars.set<Acts::eTHETA>(tgContext,utheta,0);
+    multi_ataPlane_from_pars.set<Acts::eQOP>(tgContext,uqop,0);
     // we should have a new updated momentum
     Vector3D umomentum = 40. * Vector3D(cos(uphi) * sin(utheta),
                                         sin(uphi) * sin(utheta),
                                         cos(utheta));
 
-    CHECK_CLOSE_REL(umomentum, ataPlane_from_pars.momentum(), 1e-6);
-	*/
+    CHECK_CLOSE_REL(umomentum, multi_ataPlane_from_pars.momentum(0), 1e-6);
   }
 }
 }

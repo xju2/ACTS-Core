@@ -214,6 +214,13 @@ public:
 
     return *this;
   }
+  /// @brief clone - charged/netural                                                                                                  
+  //  /// virtual constructor for type creation without casting
+  SingleTrackParameters<ChargePolicy>*
+	clone() const override
+	{
+	  return new SingleBoundTrackParameters<ChargePolicy>(*this);
+	}
 
   /// @brief set method for parameter updates
   /// obviously only allowed on non-const objects
@@ -233,6 +240,11 @@ public:
   referenceSurface() const final
   {
     return *m_pSurface;
+  }
+  /// @brief update the reference surface
+  void 
+  updateReferenceSurface(const ActsVectorD<3>&/*unused*/ , const ActsVectorD<3>& /*unused*/) final
+  {
   }
 
   /// @brief access to the measurement frame, i.e. the rotation matrix with

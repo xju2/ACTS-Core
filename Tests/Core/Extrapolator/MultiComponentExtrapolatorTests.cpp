@@ -176,15 +176,19 @@ namespace Test {
     options.maxStepSize = 10. * units::_cm;
     options.pathLimit   = 25 * units::_cm;
 
-  //  const auto& result = multi_epropagator.propagate(start, options).value();
-  //  if (debugMode) {
-  //    const auto& output = result.get<DebugOutput::result_type>();
-  //    std::cout << ">>> Extrapolation output " << std::endl;
-  //    std::cout << output.debugString << std::endl;
-  //  }
+    const auto& result = multi_epropagator.propagate(start, options).value();
+    if (debugMode) {
+      const auto& output = result.get<DebugOutput::result_type>();
+      std::cout << ">>> Extrapolation output " << std::endl;
+      std::cout << output.debugString << std::endl;
+	// multipar
+	const auto& par = result.endParameters;
+	std::cout<<"curvi par "<<std::endl;
+	std::cout<< par->size()<<std::endl;
+	std::cout<< par->parameters(0)<<std::endl;
+    }
   }
 
-  /*
   // This test case checks that no segmentation fault appears
   // - this tests the same surfaceHit of different stepper
   BOOST_DATA_TEST_CASE(
@@ -292,6 +296,93 @@ namespace Test {
                 == multi_material_collector_result.collected);
     BOOST_CHECK(collector_result.collected == flip_collector_result.collected);
   }
-*/
+
+  // This test case checks that no segmentation fault appears in the mcs
+  // it is to check if the parameter got from multi-propagator same with that got from the single-propagatro
+  BOOST_DATA_TEST_CASE(
+      test_mcs_extrapolation_endpar_,
+      bdata::random((bdata::seed = 0,
+                     bdata::distribution
+                     = std::uniform_real_distribution<>(0.4 * units::_GeV,
+                                                        10. * units::_GeV)))
+          ^ bdata::random((bdata::seed = 1,
+                           bdata::distribution
+                           = std::uniform_real_distribution<>(-M_PI, M_PI)))
+          ^ bdata::random((bdata::seed = 2,
+                           bdata::distribution
+                           = std::uniform_real_distribution<>(1.0, M_PI - 1.0)))
+          ^ bdata::random((bdata::seed = 3,
+                           bdata::distribution
+                           = std::uniform_int_distribution<>(0, 1)))
+          ^ bdata::xrange(ntests),
+      pT,
+      phi,
+      theta,
+      charge,
+      index)
+  {
+
+    double dcharge = -1 + 2 * charge;
+    (void)index;
+
+    // define start parameters
+    double   x  = 0;
+    double   y  = 0;
+    double   z  = 0;
+    double   px = pT * cos(phi);
+    double   py = pT * sin(phi);
+    double   pz = pT / tan(theta);
+    double   q  = dcharge;
+    Vector3D pos(x, y, z);
+    Vector3D mom(px, py, pz);
+    /// a covariance matrix to transport
+    ActsSymMatrixD<5> cov;
+    // take some major correlations (off-diagonals)
+    cov << 10 * units::_mm, 0, 0.123, 0, 0.5, 0, 10 * units::_mm, 0, 0.162, 0,
+        0.123, 0, 0.1, 0, 0, 0, 0.162, 0, 0.1, 0, 0.5, 0, 0, 0,
+        1. / (10 * units::_GeV);
+    auto covPtr = std::make_unique<const ActsSymMatrixD<5>>(cov);
+    CurvilinearParameters start(std::move(covPtr), pos, mom, q);
+
+    using DebugOutput = detail::DebugOutputActor;
+
+    PropagatorOptions<ActionList<DebugOutput>> options(tgContext, mfContext);
+    options.maxStepSize = 10. * units::_cm;
+    options.pathLimit   = 25 * units::_cm;
+    options.debug       = debugMode;
+
+    PropagatorOptions<ActionList<DebugOutput>> multi_options(tgContext, mfContext);
+    multi_options.debug       = debugMode;
+    multi_options.maxStepSize = 10. * units::_cm;
+    multi_options.pathLimit   = 25 * units::_cm;
+
+	// multipar
+    const auto& result = multi_epropagator.propagate(start, multi_options).value();
+	const auto& par = result.endParameters;
+    if (debugMode) {
+      const auto& output = result.get<DebugOutput::result_type>();
+      std::cout << ">>>Multi Stepper Extrapolation output " << std::endl;
+      std::cout << output.debugString << std::endl;
+	  std::cout<< par->size()<<std::endl;
+	  std::cout<<"End: multi curvileaner parameter "<<std::endl;
+	  std::cout<< par->parameters(0)<<std::endl;
+    }
+
+	// singlepar
+    const auto& single_result = epropagator.propagate(start,options).value();
+	const auto& single_par = single_result.endParameters;
+    if (debugMode) {
+      const auto& output = single_result.get<DebugOutput::result_type>();
+      std::cout << ">>> Single Extrapolation output " << std::endl;
+      std::cout << output.debugString << std::endl;
+	  std::cout<<"End: single curvileaner parameter "<<std::endl;
+	  std::cout<< single_par->parameters()<<std::endl;
+    }
+    CHECK_CLOSE_ABS(par->parameters(0)[eLOC_0], single_par->parameters()[eLOC_0], s_onSurfaceTolerance);
+    CHECK_CLOSE_ABS(par->parameters(0)[eLOC_1], single_par->parameters()[eLOC_1], s_onSurfaceTolerance);
+    CHECK_CLOSE_REL(par->parameters(0)[ePHI]  , single_par->parameters()[ePHI], 1e-6);
+    CHECK_CLOSE_REL(par->parameters(0)[eTHETA], single_par->parameters()[eTHETA], 1e-6);
+    CHECK_CLOSE_REL(par->parameters(0)[eQOP]  , single_par->parameters()[eQOP], 1e-6);
+  }
 }  // namespace Test
 }  // namespace Acts

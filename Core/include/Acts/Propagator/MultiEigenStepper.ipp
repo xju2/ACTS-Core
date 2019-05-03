@@ -226,8 +226,6 @@ Acts::MultiEigenStepper<B, C, E, A>::boundState(State& state,
     -> BoundState
 {
   MultipleBoundParameters multiBoundPar(surface.getSharedPtr());
-  std::list<double> pathAccumulatedList;
-  std::list<Jacobian> JacobianList;
   for (auto& tuple_state : state.stateCol) {
     /// if the status is locked or dead, ignore it
     if (std::get<2>(tuple_state) == StateStatus::DEAD) {continue;}
@@ -236,10 +234,6 @@ Acts::MultiEigenStepper<B, C, E, A>::boundState(State& state,
 	if (singlestate.covTransport) {
 	  EigenStepper<B>::covarianceTransport(singlestate, surface, reinitialize);
 	  covPtr = std::make_unique<const Covariance>(singlestate.cov);
-	}
-  // Reset the jacobian to identity
-	if (reinitialize) {
-	  singlestate.jacobian = Jacobian::Identity();
 	}
 
   // Create the bound parameters
@@ -250,12 +244,10 @@ Acts::MultiEigenStepper<B, C, E, A>::boundState(State& state,
                              singlestate.q,
                              surface.getSharedPtr());
   multiBoundPar.append(std::get<1>(tuple_state), parameters );
-  pathAccumulatedList.push_back(singlestate.pathAccumulated);
-  JacobianList.push_back(singlestate.jacobian);
   // Create the bound state
   }
   BoundState bState{
-      std::move(multiBoundPar), JacobianList, pathAccumulatedList};
+      std::move(multiBoundPar), Jacobian::Identity(), state.pathAccumulated};
   /// Return the State
   return bState;
 }
@@ -267,8 +259,6 @@ Acts::MultiEigenStepper<B, C, E, A>::curvilinearState(State& state,
     -> CurvilinearState
 {
   MultipleCurvilinearParameters multiCurvilinearPar;
-  std::list<double> pathAccumulatedList;
-  std::list<Jacobian> JacobianList;
   for (auto& tuple_state : state.stateCol) {
     /// if the status is locked or dead, ignore it
     if (std::get<2>(tuple_state) == StateStatus::DEAD) {continue;}
@@ -278,10 +268,6 @@ Acts::MultiEigenStepper<B, C, E, A>::curvilinearState(State& state,
 	  EigenStepper<B>::covarianceTransport(singlestate, reinitialize);
 	  covPtr = std::make_unique<const Covariance>(singlestate.cov);
 	}
-  // Reset the jacobian to identity
-	if (reinitialize) {
-	  singlestate.jacobian = Jacobian::Identity();
-	}
   // Create the bound parameters
   CurvilinearParameters *parameters = new CurvilinearParameters(
                              std::move(covPtr),
@@ -289,12 +275,10 @@ Acts::MultiEigenStepper<B, C, E, A>::curvilinearState(State& state,
                              singlestate.p * singlestate.dir,
                              singlestate.q);
   multiCurvilinearPar.append(std::get<1>(tuple_state), parameters );
-  pathAccumulatedList.push_back(singlestate.pathAccumulated);
-  JacobianList.push_back(singlestate.jacobian);
-  // Create the bound state
   }
+  // Create the bound state
   CurvilinearState curvState{
-      std::move(multiCurvilinearPar), JacobianList, pathAccumulatedList};
+      std::move(multiCurvilinearPar), Jacobian::Identity(), state.pathAccumulated};
   /// Return the State
   return curvState;
 }

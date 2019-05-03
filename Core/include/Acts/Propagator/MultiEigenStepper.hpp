@@ -82,10 +82,10 @@ public:
     /// @note the coviance matrix is not in use now
     template <typename parameters_t>
     explicit State(std::reference_wrapper<const GeometryContext>      gctx,
-                        std::reference_wrapper<const MagneticFieldContext> mctx,
-                        const parameters_t&                                par,
-                        NavigationDirection ndir = forward,
-                        double ssize = std::numeric_limits<double>::max())
+                   std::reference_wrapper<const MagneticFieldContext> mctx,
+                   const parameters_t&                                par,
+                   NavigationDirection ndir = forward,
+                   double ssize = std::numeric_limits<double>::max())
       : pos(par.position())
       , dir(par.momentum().normalized())
       , p(par.momentum().norm())
@@ -130,7 +130,7 @@ public:
     NavigationDirection navDir;
 
     /// Currently not in used
-    bool covTransport = false;
+    bool       covTransport = false;
     Covariance cov          = Covariance::Zero();
 
     /// accummulated path length state
@@ -261,7 +261,7 @@ public:
   /// Fitter stage
   template <typename options_t>
   std::pair<bool, double>
-  targetSurface(State&      state,
+  targetSurface(State&           state,
                 const Surface*   surface,
                 const options_t& navOpts,
                 const Corrector& navCorr) const;
@@ -281,7 +281,7 @@ public:
   /// the pathAccumulated is a combination calculated in the step()
   /// @to do parameter should be MultiBoundParameters
   BoundState
-  boundState(State&    state,
+  boundState(State&         state,
              const Surface& surface,
              bool           reinitialize = true) const;
 
@@ -303,7 +303,7 @@ public:
   /// only call at navigator, use aborter value to udpate
   /// use a udpate each stepsize with the combination value ?
   void
-  updateStep(State&      state,
+  updateStep(State&           state,
              const Corrector& navCorr,
              double           navigationStep,
              bool             release = false) const;
@@ -314,7 +314,7 @@ public:
   /// this called in StandardAborter, set a pathlimit of the combination
   /// component
   void
-  updateStep(State& state,
+  updateStep(State&      state,
              double      abortStep,
              cstep::Type type = cstep::aborter) const;
 

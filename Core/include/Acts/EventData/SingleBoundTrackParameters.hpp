@@ -217,7 +217,7 @@ public:
 
   /// @brief clone - charged/netural
   //  /// virtual constructor for type creation without casting
-  SingleBoundParameters<ChargePolicy>*
+  SingleBoundTrackParameters<ChargePolicy>*
   clone() const override
   {
     return new SingleBoundTrackParameters<ChargePolicy>(*this);

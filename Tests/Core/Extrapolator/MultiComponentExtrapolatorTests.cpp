@@ -58,7 +58,7 @@ namespace Test {
   Navigator multi_navigator(tGeometry);
 
   using BFieldType               = ConstantBField;
-  using EigenStepperType         = MultiEigenStepper<BFieldType>;
+  using EigenStepperType         = EigenStepper<BFieldType>;
   using EigenPropagatorType      = Propagator<EigenStepperType, Navigator>;
   using MultiEigenStepperType    = MultiEigenStepper<BFieldType>;
   using MultiEigenPropagatorType = Propagator<MultiEigenStepperType, Navigator>;
@@ -75,7 +75,7 @@ namespace Test {
   MultiEigenPropagatorType multi_epropagator(std::move(multi_estepper),
                                              std::move(multi_navigator));
 
-  const int ntests    = 10;
+  const int ntests    = 1;
   bool      debugMode = false;
 
   // A plane selector for the SurfaceCollector

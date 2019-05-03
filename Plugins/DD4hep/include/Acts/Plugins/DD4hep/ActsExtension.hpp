@@ -192,8 +192,7 @@ class ActsExtension : public IActsExtension {
   /// @copydoc IActsExtension::isLayer()
   bool isLayer() const final;
   /// @copydoc IActsExtension::isVolume()
-  bool
-  isVolume() const final;
+  bool isVolume() const final;
   /// @copydoc IActsExtension::hasSupportMaterial()
   bool hasSupportMaterial() const final;
   /// @copydoc IActsExtension::materialBins()
@@ -243,9 +242,7 @@ inline bool ActsExtension::isLayer() const {
   return m_cfg.isLayer;
 }
 
-inline bool
-ActsExtension::isVolume() const
-{
+inline bool ActsExtension::isVolume() const {
   return m_cfg.isVolume;
 }
 

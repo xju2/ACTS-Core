@@ -146,7 +146,8 @@ class TrackingVolume : public Volume {
       const std::string& volumeName = "undefined") {
     return MutableTrackingVolumePtr(new TrackingVolume(
         std::move(htrans), std::move(volumeBounds), std::move(volumeMaterial),
-        std::move(containedLayers), std::move(containedVolumes), std::move(denseVolumes), volumeName));
+        std::move(containedLayers), std::move(containedVolumes),
+        std::move(denseVolumes), volumeName));
   }
 
   /// Return the associated Layer to the global position
@@ -279,8 +280,7 @@ class TrackingVolume : public Volume {
   std::shared_ptr<const TrackingVolumeArray> confinedVolumes() const;
 
   /// Return the confined dense volumes
-  const MutableTrackingVolumeVector
-  denseVolumes() const;
+  const MutableTrackingVolumeVector denseVolumes() const;
 
   /// @brief Visit all sensitive surfaces
   ///
@@ -322,8 +322,7 @@ class TrackingVolume : public Volume {
   /// @param neighbor is the TrackingVolume to be glued
   /// @param bsfNeighbor is the boudnary surface of the neighbor
   void glueTrackingVolume(const GeometryContext& gctx,
-                          BoundarySurfaceFace bsfMine,
-                          TrackingVolume* neighbor,
+                          BoundarySurfaceFace bsfMine, TrackingVolume* neighbor,
                           BoundarySurfaceFace bsfNeighbor);
 
   /// Glue another tracking volume to this one
@@ -436,12 +435,11 @@ class TrackingVolume : public Volume {
       std::shared_ptr<const IVolumeMaterial> volumeMaterial,
       std::unique_ptr<const LayerArray> staticLayerArray = nullptr,
       std::shared_ptr<const TrackingVolumeArray> containedVolumeArray = nullptr,
-      MutableTrackingVolumeVector denseVolumeVector    = {},
+      MutableTrackingVolumeVector denseVolumeVector = {},
       const std::string& volumeName = "undefined");
 
-private:
-  void
-  connectDenseBoundarySurfaces(
+ private:
+  void connectDenseBoundarySurfaces(
       MutableTrackingVolumeVector& confinedDenseVolumes);
 
   /// Create Boundary Surface
@@ -541,9 +539,7 @@ inline const LayerArray* TrackingVolume::confinedLayers() const {
   return m_confinedLayers.get();
 }
 
-inline const MutableTrackingVolumeVector
-TrackingVolume::denseVolumes() const
-{
+inline const MutableTrackingVolumeVector TrackingVolume::denseVolumes() const {
   return m_confinedDenseVolumes;
 }
 

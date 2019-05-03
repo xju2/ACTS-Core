@@ -48,7 +48,7 @@ Acts::TrackingVolume::TrackingVolume(
     std::shared_ptr<const IVolumeMaterial> volumeMaterial,
     std::unique_ptr<const LayerArray> staticLayerArray,
     std::shared_ptr<const TrackingVolumeArray> containedVolumeArray,
-    MutableTrackingVolumeVector                denseVolumeVector,
+    MutableTrackingVolumeVector denseVolumeVector,
     const std::string& volumeName)
     : Volume(std::move(htrans), std::move(volumeBounds)),
       m_volumeMaterial(std::move(volumeMaterial)),
@@ -97,7 +97,8 @@ const Acts::TrackingVolume* Acts::TrackingVolume::lowestTrackingVolume(
   // search for dense volumes
   if (!m_confinedDenseVolumes.empty())
     for (auto& denseVolume : m_confinedDenseVolumes)
-      if (denseVolume->inside(gp, 0.001)) return denseVolume.get();
+      if (denseVolume->inside(gp, 0.001))
+        return denseVolume.get();
 
   // there is no lower sub structure
   return this;
@@ -123,8 +124,8 @@ void Acts::TrackingVolume::sign(GeometrySignature geosign,
   // finally for confined dense volumes
   if (!m_confinedDenseVolumes.empty()) {
     for (auto& volumesIter : m_confinedDenseVolumes) {
-      auto mutableVolumesIter
-          = std::const_pointer_cast<TrackingVolume>(volumesIter);
+      auto mutableVolumesIter =
+          std::const_pointer_cast<TrackingVolume>(volumesIter);
       mutableVolumesIter->sign(geosign, geotype);
     }
   }
@@ -136,10 +137,8 @@ Acts::TrackingVolume::boundarySurfaces() const {
   return (m_boundarySurfaces);
 }
 
-void
-Acts::TrackingVolume::connectDenseBoundarySurfaces(
-    MutableTrackingVolumeVector& confinedDenseVolumes)
-{
+void Acts::TrackingVolume::connectDenseBoundarySurfaces(
+    MutableTrackingVolumeVector& confinedDenseVolumes) {
   if (!confinedDenseVolumes.empty()) {
     BoundaryOrientation bo;
     // Walk over each dense volume
@@ -155,16 +154,16 @@ Acts::TrackingVolume::connectDenseBoundarySurfaces(
 
         // Use mother volume as the opposite direction of the already used
         // direction
-        auto mutableBs
-            = std::const_pointer_cast<BoundarySurfaceT<TrackingVolume>>(
+        auto mutableBs =
+            std::const_pointer_cast<BoundarySurfaceT<TrackingVolume>>(
                 boundSur.at(i));
-        if (mutableBs->m_insideVolume != nullptr
-            && mutableBs->m_outsideVolume == nullptr) {
+        if (mutableBs->m_insideVolume != nullptr &&
+            mutableBs->m_outsideVolume == nullptr) {
           bo = BoundaryOrientation::outsideVolume;
           mutableBs->attachVolume(this, bo);
         } else {
-          if (mutableBs->m_insideVolume == nullptr
-              && mutableBs->m_outsideVolume != nullptr) {
+          if (mutableBs->m_insideVolume == nullptr &&
+              mutableBs->m_outsideVolume != nullptr) {
             bo = BoundaryOrientation::insideVolume;
             mutableBs->attachVolume(this, bo);
           }
@@ -179,9 +178,7 @@ Acts::TrackingVolume::connectDenseBoundarySurfaces(
   }
 }
 
-void
-Acts::TrackingVolume::createBoundarySurfaces()
-{
+void Acts::TrackingVolume::createBoundarySurfaces() {
   // transform Surfaces To BoundarySurfaces
   std::vector<std::shared_ptr<const Surface>> surfaces =
       Volume::volumeBounds().decomposeToSurfaces(m_transform.get());
@@ -206,10 +203,10 @@ Acts::TrackingVolume::createBoundarySurfaces()
   }
 }
 
-void Acts::TrackingVolume::glueTrackingVolume(
-    const GeometryContext& gctx, BoundarySurfaceFace bsfMine,
-    TrackingVolume* neighbor,
-    BoundarySurfaceFace bsfNeighbor) {
+void Acts::TrackingVolume::glueTrackingVolume(const GeometryContext& gctx,
+                                              BoundarySurfaceFace bsfMine,
+                                              TrackingVolume* neighbor,
+                                              BoundarySurfaceFace bsfNeighbor) {
   // find the connection of the two tracking volumes : binR returns the center
   // except for cylindrical volumes
   Vector3D bPosition(binningPosition(gctx, binR));
@@ -442,8 +439,8 @@ void Acts::TrackingVolume::closeGeometry(
 
   if (!m_confinedDenseVolumes.empty()) {
     for (auto& volumesIter : m_confinedDenseVolumes) {
-      auto mutableVolumesIter
-          = std::const_pointer_cast<TrackingVolume>(volumesIter);
+      auto mutableVolumesIter =
+          std::const_pointer_cast<TrackingVolume>(volumesIter);
       mutableVolumesIter->closeGeometry(materialDecorator, volumeMap, vol);
       mutableVolumesIter->setMotherVolume(this);
     }

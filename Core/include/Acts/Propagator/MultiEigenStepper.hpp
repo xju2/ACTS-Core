@@ -69,9 +69,10 @@ public:
 
   /// @note the MultiBoundState/CurvilinearState is defined for Multi Component 
   /// std::tuple<MultiBoundTrackParameters,list<Jacobian>,list<double> or other wise
-  /// structure with Jacobians
-  using BoundState       = std::tuple<MultipleBoundParameters, std::list<Jacobian>, std::list<double> >;
-  using CurvilinearState = std::tuple<MultipleCurvilinearParameters, std::list<Jacobian>, std::list<double> >;
+  /// structure with Jacobians 
+  //  Jacobian is not considered yet 
+  using BoundState       = std::tuple<MultipleBoundParameters, Jacobian, double>;
+  using CurvilinearState = std::tuple<MultipleCurvilinearParameters, Jacobian, double>;
   using SingleStateType  = typename EigenStepper<BField>::State;
 
   /// @brief State for track parameter propagation

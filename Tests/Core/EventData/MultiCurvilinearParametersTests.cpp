@@ -83,8 +83,6 @@ namespace Test {
 	// check the created reference surface is the combination 
     CHECK_CLOSE_REL(multi_curvilinear_pos.referenceSurface().center(tgContext) , pos_combine, 1e-6);
     CHECK_CLOSE_REL(multi_curvilinear_pos.referenceSurface().normal(tgContext) , dir_combine, 1e-6);
-	std::cout<<"from multi "<<multi_curvilinear_pos.referenceSurface(0).center(tgContext)<<std::endl;
-	std::cout<<"from pos0"<<pos0<<std::endl;
 
     // check the reference frame of curvilinear parameters
     // it is the x-y frame of the created surface
@@ -100,7 +98,6 @@ namespace Test {
     /// modification test with set methods
     double ux = 0.1;
     double uy = 0.5;
-	std::cout<<"pos0 : "<<multi_curvilinear_pos.position(0)<<std::endl;
     multi_curvilinear_pos.set<eLOC_0>(tgContext,ux,0);
     multi_curvilinear_pos.set<eLOC_1>(tgContext,uy,0);
     // the local parameter should still be (0,0) for Curvilinear

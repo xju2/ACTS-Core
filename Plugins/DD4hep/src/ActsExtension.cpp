@@ -7,10 +7,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "Acts/Plugins/DD4hep/ActsExtension.hpp"
-
 #include <DD4hep/CartesianGridXY.h>
-#include <boost/algorithm/string.hpp>
-
 #include "Acts/Material/HomogeneousSurfaceMaterial.hpp"
 #include "Acts/Surfaces/PlanarBounds.hpp"
 #include "Acts/Surfaces/RectangleBounds.hpp"

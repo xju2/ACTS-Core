@@ -105,8 +105,11 @@ namespace Test {
         = new BoundParameters(tgContext, nullptr, pars, pSurface);  //+2
     BoundParameters* ataPlane_from_pars_1
         = new BoundParameters(tgContext, nullptr, pars, pSurface);  //+3
-    MultipleBoundParameters multi_ataPlane_from_pars(
-        0.6, ataPlane_from_pars_0, pSurface);  //+4
+
+	// make multi bound par
+    //MultipleBoundParameters multi_ataPlane_from_pars( 0.6, ataPlane_from_pars_0, pSurface);  //+4
+    MultipleBoundParameters multi_ataPlane_from_pars( pSurface );  //+4
+    multi_ataPlane_from_pars.append(0.6, ataPlane_from_pars_0);
     multi_ataPlane_from_pars.append(0.7, ataPlane_from_pars_1);
 
     MultiConsistencyCheck(

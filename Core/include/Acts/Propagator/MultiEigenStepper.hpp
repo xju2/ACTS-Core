@@ -52,14 +52,11 @@ public:
   using Jacobian   = ActsMatrixD<5, 5>;
   using Covariance = ActsSymMatrixD<5>;
 
-  /// @note Currently the BoundState/CurvilinearState is defined for Single
-  /// component which is a combination of all components, the Jacobian for this
-  /// meaning is nonsense
-  /// This should be replaced by
-  /// std::tuple<MultiBoundParameters,list<Jacobian>,list<double> or other wise
+  /// @note the MultiBoundState/CurvilinearState is defined for Multi Component 
+  /// std::tuple<MultiBoundTrackParameters,list<Jacobian>,list<double> or other wise
   /// structure with Jacobians
-  using BoundState       = std::tuple<BoundParameters, Jacobian, double>;
-  using CurvilinearState = std::tuple<CurvilinearParameters, Jacobian, double>;
+  using BoundState       = std::tuple<MultipleBoundParameters, std::list<Jacobian>, std::list<double> >;
+  using CurvilinearState = std::tuple<MultipleCurvilinearParameters, std::list<Jacobian>, std::list<double> >;
   using SingleStateType  = typename EigenStepper<BField>::State;
 
   /// @brief State for track parameter propagation
@@ -279,7 +276,7 @@ public:
   /// @brief get a sinlge parameter of combination of multi component on a
   /// surface, the jocobian is nonsence here
   /// the pathAccumulated is a combination calculated in the step()
-  /// @to do parameter should be MultiBoundParameters
+  /// @to do parameter should be MultiBoundTrackParameters
   BoundState
   boundState(State&         state,
              const Surface& surface,
@@ -288,7 +285,7 @@ public:
   /// @brief get a sinlge parameter of combination of multi component on a
   /// surface, the jocobian is nonsence here
   /// the pathAccumulated is a combination calculated in the step()
-  /// @to do parameter should be MultiCurvilinearParameters
+  /// @to do parameter should be MultiCurvilinearTrackParameters
   CurvilinearState
   curvilinearState(State& state, bool reinitialize = true) const;
 

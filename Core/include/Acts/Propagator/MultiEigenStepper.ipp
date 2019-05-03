@@ -222,21 +222,40 @@ template <typename B, typename C, typename E, typename A>
 auto
 Acts::MultiEigenStepper<B, C, E, A>::boundState(State& state,
                                                 const Surface& surface,
-                                                bool /*unused*/) const
+                                                bool reinitialize) const
     -> BoundState
 {
-  // covariance no use in the mcs
-  std::unique_ptr<const Covariance> covPtr = nullptr;
+  MultipleBoundParameters multiBoundPar(surface.getSharedPtr());
+  std::list<double> pathAccumulatedList;
+  std::list<Jacobian> JacobianList;
+  for (auto& tuple_state : state.stateCol) {
+    /// if the status is locked or dead, ignore it
+    if (std::get<2>(tuple_state) == StateStatus::DEAD) {continue;}
+    auto& singlestate = std::get<0>(tuple_state);
+	std::unique_ptr<const Covariance> covPtr = nullptr;
+	if (singlestate.covTransport) {
+	  EigenStepper<B>::covarianceTransport(singlestate, surface, reinitialize);
+	  covPtr = std::make_unique<const Covariance>(singlestate.cov);
+	}
+  // Reset the jacobian to identity
+	if (reinitialize) {
+	  singlestate.jacobian = Jacobian::Identity();
+	}
+
   // Create the bound parameters
-  BoundParameters parameters(state.geoContext,
+  BoundParameters *parameters = new BoundParameters(singlestate.geoContext,
                              std::move(covPtr),
-                             state.pos,
-                             state.p * state.dir,
-                             state.q,
+                             singlestate.pos,
+                             singlestate.p * singlestate.dir,
+                             singlestate.q,
                              surface.getSharedPtr());
+  multiBoundPar.append(std::get<1>(tuple_state), parameters );
+  pathAccumulatedList.push_back(singlestate.pathAccumulated);
+  JacobianList.push_back(singlestate.jacobian);
   // Create the bound state
+  }
   BoundState bState{
-      std::move(parameters), Jacobian::Identity(), state.pathAccumulated};
+      std::move(multiBoundPar), JacobianList, pathAccumulatedList};
   /// Return the State
   return bState;
 }
@@ -244,17 +263,38 @@ Acts::MultiEigenStepper<B, C, E, A>::boundState(State& state,
 template <typename B, typename C, typename E, typename A>
 auto
 Acts::MultiEigenStepper<B, C, E, A>::curvilinearState(State& state,
-                                                      bool /*unused*/) const
+                                                      bool reinitialize) const
     -> CurvilinearState
 {
-  // covariance no use in the mcs
-  std::unique_ptr<const Covariance> covPtr = nullptr;
-  // Create the curvilinear parameters
-  CurvilinearParameters parameters(
-      std::move(covPtr), state.pos, state.p * state.dir, state.q);
+  MultipleCurvilinearParameters multiCurvilinearPar;
+  std::list<double> pathAccumulatedList;
+  std::list<Jacobian> JacobianList;
+  for (auto& tuple_state : state.stateCol) {
+    /// if the status is locked or dead, ignore it
+    if (std::get<2>(tuple_state) == StateStatus::DEAD) {continue;}
+    auto& singlestate = std::get<0>(tuple_state);
+	std::unique_ptr<const Covariance> covPtr = nullptr;
+	if (singlestate.covTransport) {
+	  EigenStepper<B>::covarianceTransport(singlestate, reinitialize);
+	  covPtr = std::make_unique<const Covariance>(singlestate.cov);
+	}
+  // Reset the jacobian to identity
+	if (reinitialize) {
+	  singlestate.jacobian = Jacobian::Identity();
+	}
+  // Create the bound parameters
+  CurvilinearParameters *parameters = new CurvilinearParameters(
+                             std::move(covPtr),
+                             singlestate.pos,
+                             singlestate.p * singlestate.dir,
+                             singlestate.q);
+  multiCurvilinearPar.append(std::get<1>(tuple_state), parameters );
+  pathAccumulatedList.push_back(singlestate.pathAccumulated);
+  JacobianList.push_back(singlestate.jacobian);
   // Create the bound state
+  }
   CurvilinearState curvState{
-      std::move(parameters), Jacobian::Identity(), state.pathAccumulated};
+      std::move(multiCurvilinearPar), JacobianList, pathAccumulatedList};
   /// Return the State
   return curvState;
 }

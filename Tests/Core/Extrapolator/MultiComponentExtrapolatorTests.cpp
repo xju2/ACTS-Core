@@ -176,14 +176,15 @@ namespace Test {
     options.maxStepSize = 10. * units::_cm;
     options.pathLimit   = 25 * units::_cm;
 
-    const auto& result = multi_epropagator.propagate(start, options).value();
-    if (debugMode) {
-      const auto& output = result.get<DebugOutput::result_type>();
-      std::cout << ">>> Extrapolation output " << std::endl;
-      std::cout << output.debugString << std::endl;
-    }
+  //  const auto& result = multi_epropagator.propagate(start, options).value();
+  //  if (debugMode) {
+  //    const auto& output = result.get<DebugOutput::result_type>();
+  //    std::cout << ">>> Extrapolation output " << std::endl;
+  //    std::cout << output.debugString << std::endl;
+  //  }
   }
 
+  /*
   // This test case checks that no segmentation fault appears
   // - this tests the same surfaceHit of different stepper
   BOOST_DATA_TEST_CASE(
@@ -291,6 +292,6 @@ namespace Test {
                 == multi_material_collector_result.collected);
     BOOST_CHECK(collector_result.collected == flip_collector_result.collected);
   }
-
+*/
 }  // namespace Test
 }  // namespace Acts

@@ -54,7 +54,20 @@ public:
   {
   }
 
-  MultiCurvilinearTrackParameters() = default;
+  //default constructor
+  template <typename T = ChargePolicy,
+            std::enable_if_t<std::is_same<T, ChargedPolicy>::value, int> = 0>
+  MultiCurvilinearTrackParameters()
+    : MultiTrackParameters<ChargePolicy>()
+  {
+  }
+  //default constructor
+  template <typename T = ChargePolicy,
+            std::enable_if_t<std::is_same<T, NeutralPolicy>::value, int> = 0>
+  MultiCurvilinearTrackParameters()
+    : MultiTrackParameters<ChargePolicy>()
+  {
+  }
 
   /// @brief copy constructor - charged/neutral
   /// @param[in] copy The source parameters

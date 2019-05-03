@@ -228,23 +228,26 @@ Acts::MultiEigenStepper<B, C, E, A>::boundState(State& state,
   MultipleBoundParameters multiBoundPar(surface.getSharedPtr());
   for (auto& tuple_state : state.stateCol) {
     /// if the status is locked or dead, ignore it
-    if (std::get<2>(tuple_state) == StateStatus::DEAD) {continue;}
-    auto& singlestate = std::get<0>(tuple_state);
-	std::unique_ptr<const Covariance> covPtr = nullptr;
-	if (singlestate.covTransport) {
-	  EigenStepper<B>::covarianceTransport(singlestate, surface, reinitialize);
-	  covPtr = std::make_unique<const Covariance>(singlestate.cov);
-	}
+    if (std::get<2>(tuple_state) == StateStatus::DEAD) {
+      continue;
+    }
+    auto&                             singlestate = std::get<0>(tuple_state);
+    std::unique_ptr<const Covariance> covPtr      = nullptr;
+    if (singlestate.covTransport) {
+      EigenStepper<B>::covarianceTransport(singlestate, surface, reinitialize);
+      covPtr = std::make_unique<const Covariance>(singlestate.cov);
+    }
 
-  // Create the bound parameters
-  BoundParameters *parameters = new BoundParameters(singlestate.geoContext,
-                             std::move(covPtr),
-                             singlestate.pos,
-                             singlestate.p * singlestate.dir,
-                             singlestate.q,
-                             surface.getSharedPtr());
-  multiBoundPar.append(std::get<1>(tuple_state), parameters );
-  // Create the bound state
+    // Create the bound parameters
+    BoundParameters* parameters
+        = new BoundParameters(singlestate.geoContext,
+                              std::move(covPtr),
+                              singlestate.pos,
+                              singlestate.p * singlestate.dir,
+                              singlestate.q,
+                              surface.getSharedPtr());
+    multiBoundPar.append(std::get<1>(tuple_state), parameters);
+    // Create the bound state
   }
   BoundState bState{
       std::move(multiBoundPar), Jacobian::Identity(), state.pathAccumulated};
@@ -261,24 +264,27 @@ Acts::MultiEigenStepper<B, C, E, A>::curvilinearState(State& state,
   MultipleCurvilinearParameters multiCurvilinearPar;
   for (auto& tuple_state : state.stateCol) {
     /// if the status is locked or dead, ignore it
-    if (std::get<2>(tuple_state) == StateStatus::DEAD) {continue;}
-    auto& singlestate = std::get<0>(tuple_state);
-	std::unique_ptr<const Covariance> covPtr = nullptr;
-	if (singlestate.covTransport) {
-	  EigenStepper<B>::covarianceTransport(singlestate, reinitialize);
-	  covPtr = std::make_unique<const Covariance>(singlestate.cov);
-	}
-  // Create the bound parameters
-  CurvilinearParameters *parameters = new CurvilinearParameters(
-                             std::move(covPtr),
-                             singlestate.pos,
-                             singlestate.p * singlestate.dir,
-                             singlestate.q);
-  multiCurvilinearPar.append(std::get<1>(tuple_state), parameters );
+    if (std::get<2>(tuple_state) == StateStatus::DEAD) {
+      continue;
+    }
+    auto&                             singlestate = std::get<0>(tuple_state);
+    std::unique_ptr<const Covariance> covPtr      = nullptr;
+    if (singlestate.covTransport) {
+      EigenStepper<B>::covarianceTransport(singlestate, reinitialize);
+      covPtr = std::make_unique<const Covariance>(singlestate.cov);
+    }
+    // Create the bound parameters
+    CurvilinearParameters* parameters
+        = new CurvilinearParameters(std::move(covPtr),
+                                    singlestate.pos,
+                                    singlestate.p * singlestate.dir,
+                                    singlestate.q);
+    multiCurvilinearPar.append(std::get<1>(tuple_state), parameters);
   }
   // Create the bound state
-  CurvilinearState curvState{
-      std::move(multiCurvilinearPar), Jacobian::Identity(), state.pathAccumulated};
+  CurvilinearState curvState{std::move(multiCurvilinearPar),
+                             Jacobian::Identity(),
+                             state.pathAccumulated};
   /// Return the State
   return curvState;
 }

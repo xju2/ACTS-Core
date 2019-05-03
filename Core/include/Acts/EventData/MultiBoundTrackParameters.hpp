@@ -66,8 +66,7 @@ public:
   template <typename T = ChargePolicy,
             std::enable_if_t<std::is_same<T, ChargedPolicy>::value, int> = 0>
   MultiBoundTrackParameters(std::shared_ptr<const Surface> surface)
-    : MultiTrackParameters<ChargePolicy>()
-    , m_pSurface(std::move(surface))
+    : MultiTrackParameters<ChargePolicy>(), m_pSurface(std::move(surface))
   {
     assert(m_pSurface);
   }
@@ -76,8 +75,7 @@ public:
   template <typename T = ChargePolicy,
             std::enable_if_t<std::is_same<T, NeutralPolicy>::value, int> = 0>
   MultiBoundTrackParameters(std::shared_ptr<const Surface> surface)
-    : MultiTrackParameters<ChargePolicy>()
-    , m_pSurface(std::move(surface))
+    : MultiTrackParameters<ChargePolicy>(), m_pSurface(std::move(surface))
   {
     assert(m_pSurface);
   }

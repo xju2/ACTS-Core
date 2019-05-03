@@ -67,13 +67,15 @@ public:
   using Jacobian   = ActsMatrixD<5, 5>;
   using Covariance = ActsSymMatrixD<5>;
 
-  /// @note the MultiBoundState/CurvilinearState is defined for Multi Component 
-  /// std::tuple<MultiBoundTrackParameters,list<Jacobian>,list<double> or other wise
-  /// structure with Jacobians 
-  //  Jacobian is not considered yet 
-  using BoundState       = std::tuple<MultipleBoundParameters, Jacobian, double>;
-  using CurvilinearState = std::tuple<MultipleCurvilinearParameters, Jacobian, double>;
-  using SingleStateType  = typename EigenStepper<BField>::State;
+  /// @note the MultiBoundState/CurvilinearState is defined for Multi Component
+  /// std::tuple<MultiBoundTrackParameters,list<Jacobian>,list<double> or other
+  /// wise
+  /// structure with Jacobians
+  //  Jacobian is not considered yet
+  using BoundState = std::tuple<MultipleBoundParameters, Jacobian, double>;
+  using CurvilinearState
+      = std::tuple<MultipleCurvilinearParameters, Jacobian, double>;
+  using SingleStateType = typename EigenStepper<BField>::State;
 
   /// @brief State for track parameter propagation
   ///

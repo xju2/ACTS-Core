@@ -12,7 +12,7 @@
 #include <sstream>
 #include <utility>
 #include "Acts/Extrapolator/MaterialInteractor.hpp"
-#include "Acts/Extrapolator/detail/BetheHitlerEffects.hpp"
+#include "Acts/Extrapolator/detail/EmptyEffect.hpp"
 #include "Acts/Extrapolator/detail/InteractionFormulas.hpp"
 #include "Acts/Material/ISurfaceMaterial.hpp"
 #include "Acts/Material/Material.hpp"
@@ -65,7 +65,8 @@ struct MultiMaterialInteractor
   detail::HighlandScattering scattering;
 
   /// Bethe-Hitler struct
-  detail::BetheHitler Bethe_Hitler;
+  /// currently empty
+  detail::EmptyEffect emptyEffect;
 
   /// Record material in detail
   bool recordInteractions = true;
@@ -252,7 +253,7 @@ struct MultiMaterialInteractor
     const double            E           = std::sqrt(p * p + m * m);
     const double            lbeta       = p / E;
     const double            tInX0       = properties.thicknessInX0();
-    auto                    mixture     = Bethe_Hitler.getMixture(tInX0, p);
+    auto                    mixture     = emptyEffect.getMixture(tInX0, p);
     std::list<tuplestate_t> splitList;
     unsigned int            iComponent = 0;
     while (iComponent < mixture.size()) {

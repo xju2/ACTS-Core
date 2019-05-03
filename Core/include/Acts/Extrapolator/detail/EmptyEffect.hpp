@@ -16,23 +16,23 @@
 
 namespace Acts {
 
-  namespace detail {
-	struct BetheHitler
-	{
-	  const static int N = 2;
-	  struct ComponentValues
-	  {
-		double weight   = 1. / N;
-		double mean     = 0.;
-		double variance = 0.;
-	  };
-	  std::vector<ComponentValues>
-		getMixture(double /*unused*/, double /*unused*/) const
-		{
-		  // make non effect, just means copy the components in material effect
-		  return std::move(std::vector<ComponentValues>(N));
-		}
-	};
-  }
+namespace detail {
+  struct EmptyEffect
+  {
+    const static int N = 2;
+    struct ComponentValues
+    {
+      double weight   = 1. / N;
+      double mean     = 0.;
+      double variance = 0.;
+    };
+    std::vector<ComponentValues>
+    getMixture(double /*unused*/, double /*unused*/) const
+    {
+      // make non effect, just means copy the components in material effect
+      return std::move(std::vector<ComponentValues>(N));
+    }
+  };
+}
 }
 

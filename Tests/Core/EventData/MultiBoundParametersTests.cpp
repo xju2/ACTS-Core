@@ -81,7 +81,8 @@ namespace Test {
     transform->pretranslate(center);
     // create the surfacex
     auto bounds   = std::make_shared<RectangleBounds>(100., 100.);
-    auto pSurface = Surface::makeShared<PlaneSurface>(transform, bounds);   // surface use +1
+    auto pSurface = Surface::makeShared<PlaneSurface>(
+        transform, bounds);  // surface use +1
 
     // now create parameters on this surface
     // l_x, l_y, phi, theta, q/p (1/p)
@@ -100,33 +101,41 @@ namespace Test {
     Vector3D pos
         = center + pars_array[0] * rot.col(0) + pars_array[1] * rot.col(1);
     // constructor from parameter vector
-    BoundParameters* ataPlane_from_pars_0 = new BoundParameters(tgContext,nullptr, pars, pSurface); //+2
-    BoundParameters* ataPlane_from_pars_1 = new BoundParameters(tgContext,nullptr, pars, pSurface); //+3
-	MultipleBoundParameters multi_ataPlane_from_pars(0.6,ataPlane_from_pars_0,pSurface);  //+4
-	multi_ataPlane_from_pars.append(0.7,ataPlane_from_pars_1);
+    BoundParameters* ataPlane_from_pars_0
+        = new BoundParameters(tgContext, nullptr, pars, pSurface);  //+2
+    BoundParameters* ataPlane_from_pars_1
+        = new BoundParameters(tgContext, nullptr, pars, pSurface);  //+3
+    MultipleBoundParameters multi_ataPlane_from_pars(
+        0.6, ataPlane_from_pars_0, pSurface);  //+4
+    multi_ataPlane_from_pars.append(0.7, ataPlane_from_pars_1);
 
-    MultiConsistencyCheck(multi_ataPlane_from_pars, 0, pos, mom, 1., pars_array);
-    MultiConsistencyCheck(multi_ataPlane_from_pars, 1, pos, mom, 1., pars_array);
+    MultiConsistencyCheck(
+        multi_ataPlane_from_pars, 0, pos, mom, 1., pars_array);
+    MultiConsistencyCheck(
+        multi_ataPlane_from_pars, 1, pos, mom, 1., pars_array);
 
-	// test the append method
-	MultipleBoundParameters::TrackParMapConstIter it = multi_ataPlane_from_pars.getTrackList().begin();
+    // test the append method
+    MultipleBoundParameters::TrackParMapConstIter it
+        = multi_ataPlane_from_pars.getTrackList().begin();
     BOOST_CHECK_EQUAL((*it).first.first, 0.7);
-	++it;
+    ++it;
     BOOST_CHECK_EQUAL((*it).first.first, 0.6);
 
     // check shared ownership of same surface
-    BOOST_CHECK_EQUAL(&multi_ataPlane_from_pars.referenceSurface(), pSurface.get());
+    BOOST_CHECK_EQUAL(&multi_ataPlane_from_pars.referenceSurface(),
+                      pSurface.get());
     BOOST_CHECK_EQUAL(pSurface.use_count(), 4);
 
     // check that the reference frame is the rotation matrix
-    CHECK_CLOSE_REL(multi_ataPlane_from_pars.referenceFrame(tgContext), rot, 1e-6);
+    CHECK_CLOSE_REL(
+        multi_ataPlane_from_pars.referenceFrame(tgContext), rot, 1e-6);
 
     /// modification test via setter functions
     double ux = 0.3;
     double uy = 0.4;
 
-    multi_ataPlane_from_pars.set<Acts::eLOC_X>(tgContext,ux,0);
-    multi_ataPlane_from_pars.set<Acts::eLOC_Y>(tgContext,uy,0);
+    multi_ataPlane_from_pars.set<Acts::eLOC_X>(tgContext, ux, 0);
+    multi_ataPlane_from_pars.set<Acts::eLOC_Y>(tgContext, uy, 0);
     // we should have a new updated position
     Vector3D lPosition3D(ux, uy, 0.);
     Vector3D uposition = rot * lPosition3D + center;
@@ -136,9 +145,9 @@ namespace Test {
     double utheta = 0.2;
     double uqop   = 0.025;
 
-    multi_ataPlane_from_pars.set<Acts::ePHI>(tgContext,uphi,0);
-    multi_ataPlane_from_pars.set<Acts::eTHETA>(tgContext,utheta,0);
-    multi_ataPlane_from_pars.set<Acts::eQOP>(tgContext,uqop,0);
+    multi_ataPlane_from_pars.set<Acts::ePHI>(tgContext, uphi, 0);
+    multi_ataPlane_from_pars.set<Acts::eTHETA>(tgContext, utheta, 0);
+    multi_ataPlane_from_pars.set<Acts::eQOP>(tgContext, uqop, 0);
     // we should have a new updated momentum
     Vector3D umomentum = 40. * Vector3D(cos(uphi) * sin(utheta),
                                         sin(uphi) * sin(utheta),
@@ -148,4 +157,3 @@ namespace Test {
   }
 }
 }
-

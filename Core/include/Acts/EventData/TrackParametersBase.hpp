@@ -185,17 +185,17 @@ public:
   getParameterSet() const = 0;
 
   virtual FullParameterSet&
-  getParameterSet() = 0;
+  getParameterSet()
+      = 0;
 
-  virtual void 
-  updateMom( ActsVectorD<3>& mom) = 0; 
+  virtual void updateMom(ActsVectorD<3>& mom) = 0;
 
-  virtual void 
-  updatePos( ActsVectorD<3>& pos) = 0; 
+  virtual void updatePos(ActsVectorD<3>& pos) = 0;
 
   /// @brief update the reference surface with position and direction
-  virtual void 
-  updateReferenceSurface( const ActsVectorD<3>&, const ActsVectorD<3>&) = 0; 
+  virtual void
+  updateReferenceSurface(const ActsVectorD<3>&, const ActsVectorD<3>&)
+      = 0;
 
 protected:
   /// @brief print information to output stream

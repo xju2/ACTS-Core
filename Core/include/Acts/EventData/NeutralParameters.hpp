@@ -24,7 +24,6 @@ using NeutralBoundParameters = SingleBoundTrackParameters<NeutralPolicy>;
 
 using MultipleNeutralParameters = MultiTrackParameters<NeutralPolicy>;
 using MultipleNeutralCurvilinearParameters
-      = MultiCurvilinearTrackParameters<NeutralPolicy>;
-using MultipleNeutralBoundParameters
-      = MultiBoundTrackParameters<NeutralPolicy>;
+    = MultiCurvilinearTrackParameters<NeutralPolicy>;
+using MultipleNeutralBoundParameters = MultiBoundTrackParameters<NeutralPolicy>;
 }  // namespace Acts

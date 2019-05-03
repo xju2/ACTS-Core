@@ -39,15 +39,17 @@ namespace Test {
   template <typename Parameter>
   void
   MultiConsistencyCheck(const Parameter& pars,
-	  				unsigned int order,
-                   const Vector3D&  position,
-                   const Vector3D&  momentum,
-                   double           charge,
-                   std::array<double, 5> values)
+                        unsigned int     order,
+                        const Vector3D&  position,
+                        const Vector3D&  momentum,
+                        double           charge,
+                        std::array<double, 5> values)
   {
     // check parameter vector
-    CHECK_CLOSE_ABS(pars.parameters(order)[eLOC_0], values[0], s_onSurfaceTolerance);
-    CHECK_CLOSE_ABS(pars.parameters(order)[eLOC_1], values[1], s_onSurfaceTolerance);
+    CHECK_CLOSE_ABS(
+        pars.parameters(order)[eLOC_0], values[0], s_onSurfaceTolerance);
+    CHECK_CLOSE_ABS(
+        pars.parameters(order)[eLOC_1], values[1], s_onSurfaceTolerance);
     CHECK_CLOSE_REL(pars.parameters(order)[ePHI], values[2], 1e-6);
     CHECK_CLOSE_REL(pars.parameters(order)[eTHETA], values[3], 1e-6);
     CHECK_CLOSE_REL(pars.parameters(order)[eQOP], values[4], 1e-6);

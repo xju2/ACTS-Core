@@ -7,14 +7,14 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #pragma once
+#include <algorithm>
+#include <assert.h>
+#include <map>
 #include <type_traits>
 #include "Acts/EventData/TrackParametersBase.hpp"
 #include "Acts/EventData/detail/coordinate_transformations.hpp"
 #include "Acts/Utilities/Definitions.hpp"
 #include "Acts/Utilities/GeometryContext.hpp"
-#include <map>
-#include <algorithm>
-#include <assert.h>
 
 namespace Acts {
 
@@ -22,8 +22,8 @@ namespace Acts {
 ///
 /// @brief base class for a multi set of track parameters
 ///
-/// this class represents a multi set of track parameters (used in Gsf or MultiTrack Fitters)
-
+/// this class represents a multi set of track parameters (used in Gsf or
+/// MultiTrack Fitters)
 
 ///
 /// @tparam ChargePolicy type for distinguishing charged and neutral
@@ -49,19 +49,24 @@ public:
   /// type for unique pointer to covariance matrix
   using CovPtr_t = std::unique_ptr<const CovMatrix_t>;
 
-  /// pair of <weight,point_to_track>, when insert a trackParameter, that will allow to sort the track by weight 
-  using WeightedTrackPars = std::pair< double, std::unique_ptr<TrackParametersBase> >;
-  using TrackParMap       = std::map<WeightedTrackPars ,const unsigned int, std::greater<WeightedTrackPars> >;
-  using TrackParMapConstIter   = TrackParMap::const_iterator;
-  using TrackParMapIter   = TrackParMap::iterator;
+  /// pair of <weight,point_to_track>, when insert a trackParameter, that will
+  /// allow to sort the track by weight
+  using WeightedTrackPars
+      = std::pair<double, std::unique_ptr<TrackParametersBase>>;
+  using TrackParMap = std::map<WeightedTrackPars,
+                               const unsigned int,
+                               std::greater<WeightedTrackPars>>;
+  using TrackParMapConstIter = TrackParMap::const_iterator;
+  using TrackParMapIter      = TrackParMap::iterator;
   struct TrackIndexFinder
   {
-	TrackIndexFinder(const unsigned int id) : m_index(id){}
-	bool operator() (const TrackParMap::value_type& trackPar)
-	{
-	  return trackPar.second == m_index;
-	}
-	const unsigned int m_index;
+    TrackIndexFinder(const unsigned int id) : m_index(id) {}
+    bool
+    operator()(const TrackParMap::value_type& trackPar)
+    {
+      return trackPar.second == m_index;
+    }
+    const unsigned int m_index;
   };
 
   /// @brief default virtual destructor
@@ -69,46 +74,49 @@ public:
 
   /// the position()/direction()/momentum() method
   /// @brief get weighted combination of position all contains two format,
-  /// one is to get the combine of the parameters, the other is to get the pos/dir/mom of the index
+  /// one is to get the combine of the parameters, the other is to get the
+  /// pos/dir/mom of the index
   ActsVectorD<3>
   position() const final
   {
-	Vector3D pos = Vector3D(0, 0, 0);
-	for(const auto& trackMapIndex :  m_TrackList) {
-	  	const auto& trackWeightedPair = trackMapIndex.first;
-		pos += trackWeightedPair.first * trackWeightedPair.second->position();
-	}
-	return pos;
+    Vector3D pos = Vector3D(0, 0, 0);
+    for (const auto& trackMapIndex : m_TrackList) {
+      const auto& trackWeightedPair = trackMapIndex.first;
+      pos += trackWeightedPair.first * trackWeightedPair.second->position();
+    }
+    return pos;
   }
 
   /// @brief get the position of a single parameter
-  ActsVectorD<3> 
-  position(unsigned int id) const 
+  ActsVectorD<3>
+  position(unsigned int id) const
   {
-	TrackParMapConstIter it = std::find_if( m_TrackList.begin(), m_TrackList.end(), TrackIndexFinder(id));
-	assert( it != m_TrackList.end() );
-	return (*it).first.second->position();
+    TrackParMapConstIter it = std::find_if(
+        m_TrackList.begin(), m_TrackList.end(), TrackIndexFinder(id));
+    assert(it != m_TrackList.end());
+    return (*it).first.second->position();
   }
 
   /// @copydoc TrackParametersBase::momentum
   ActsVectorD<3>
   momentum() const final
   {
-	Vector3D mom = Vector3D(0, 0, 0);
-	for(const auto& trackMapIndex :  m_TrackList) {
-	  	const auto& trackWeightedPair = trackMapIndex.first;
-		mom += trackWeightedPair.first * trackWeightedPair.second->momentum();
-	}
-	return mom;
+    Vector3D mom = Vector3D(0, 0, 0);
+    for (const auto& trackMapIndex : m_TrackList) {
+      const auto& trackWeightedPair = trackMapIndex.first;
+      mom += trackWeightedPair.first * trackWeightedPair.second->momentum();
+    }
+    return mom;
   }
 
   ///  get the single mom of parameter
-  ActsVectorD<3> 
-  momentum(unsigned int id) const 
+  ActsVectorD<3>
+  momentum(unsigned int id) const
   {
-	TrackParMapConstIter it = std::find_if( m_TrackList.begin(), m_TrackList.end(), TrackIndexFinder(id));
-	assert( it != m_TrackList.end() );
-	return (*it).first.second->momentum();
+    TrackParMapConstIter it = std::find_if(
+        m_TrackList.begin(), m_TrackList.end(), TrackIndexFinder(id));
+    assert(it != m_TrackList.end());
+    return (*it).first.second->momentum();
   }
 
   /// @brief equality operator
@@ -118,7 +126,7 @@ public:
   bool
   operator==(const TrackParametersBase& /*unused*/) const override
   {
-	return true;
+    return true;
   }
 
   /// @copydoc TrackParametersBase::charge
@@ -142,7 +150,7 @@ public:
   /// copy base class
   /// currently get first component parameters
   /// @to do : return combination
-  /// writable  
+  /// writable
   /*temporary*/
   virtual FullParameterSet&
   getParameterSet() final
@@ -152,22 +160,24 @@ public:
 
   /// @brief get single component
   /// const
-  const FullParameterSet& 
-  getParameterSet(unsigned int id) const 
+  const FullParameterSet&
+  getParameterSet(unsigned int id) const
   {
-	TrackParMapConstIter it = std::find_if( m_TrackList.begin(), m_TrackList.end(), TrackIndexFinder(id));
-	assert( it != m_TrackList.end() );
-	return (*it).first.second->getParameterSet();
+    TrackParMapConstIter it = std::find_if(
+        m_TrackList.begin(), m_TrackList.end(), TrackIndexFinder(id));
+    assert(it != m_TrackList.end());
+    return (*it).first.second->getParameterSet();
   }
 
   /// @brief get single component
-  /// writable 
-  virtual FullParameterSet& 
-  getParameterSet(unsigned int id) 
+  /// writable
+  virtual FullParameterSet&
+  getParameterSet(unsigned int id)
   {
-	TrackParMapIter it = std::find_if( m_TrackList.begin(), m_TrackList.end(), TrackIndexFinder(id));
-	assert( it != m_TrackList.end() );
-	return (*it).first.second->getParameterSet();
+    TrackParMapIter it = std::find_if(
+        m_TrackList.begin(), m_TrackList.end(), TrackIndexFinder(id));
+    assert(it != m_TrackList.end());
+    return (*it).first.second->getParameterSet();
   }
 
   /// @brief get single component
@@ -178,41 +188,49 @@ public:
   }
 
   /// @brief return weight
-  double weight(unsigned int id) const
+  double
+  weight(unsigned int id) const
   {
-	TrackParMapIter it = std::find_if( m_TrackList.begin(), m_TrackList.end(), TrackIndexFinder(id));
-	assert( it != m_TrackList.end() );
-	return (*it).first.first;
+    TrackParMapIter it = std::find_if(
+        m_TrackList.begin(), m_TrackList.end(), TrackIndexFinder(id));
+    assert(it != m_TrackList.end());
+    return (*it).first.first;
   }
 
-  /// @brief update mom pos 
-  void 
-  updateMom( ActsVectorD<3>& /*unused*/){} 
+  /// @brief update mom pos
+  void updateMom(ActsVectorD<3>& /*unused*/) {}
 
-  void 
-  updatePos( ActsVectorD<3>& /*unused*/ ){} 
+  void updatePos(ActsVectorD<3>& /*unused*/) {}
 
   /// @brief return the size of track list
-  size_t size() { return m_TrackList.size(); }
+  size_t
+  size()
+  {
+    return m_TrackList.size();
+  }
 
   /// @brief append a component to the track list
-  virtual void append(double weight, TrackParametersBase* pTrackBase)
+  virtual void
+  append(double weight, TrackParametersBase* pTrackBase)
   {
-	WeightedTrackPars weight_parameter(weight,std::unique_ptr<TrackParametersBase>(pTrackBase) );
-	m_TrackList.insert( std::make_pair( std::move(weight_parameter), size() ) );
+    WeightedTrackPars weight_parameter(
+        weight, std::unique_ptr<TrackParametersBase>(pTrackBase));
+    m_TrackList.insert(std::make_pair(std::move(weight_parameter), size()));
   }
 
-  /// @brief get the trackList 
+  /// @brief get the trackList
   /// const
-  const TrackParMap& getTrackList() const
+  const TrackParMap&
+  getTrackList() const
   {
-	return m_TrackList;
+    return m_TrackList;
   }
-  /// @brief get the trackList 
-  /// writable 
-  TrackParMap& getTrackList() 
+  /// @brief get the trackList
+  /// writable
+  TrackParMap&
+  getTrackList()
   {
-	return m_TrackList;
+    return m_TrackList;
   }
 
 protected:
@@ -224,11 +242,12 @@ protected:
   /// @param momentum 3D vector with global momentum
   template <typename T = ChargePolicy,
             std::enable_if_t<std::is_same<T, ChargedPolicy>::value, int> = 0>
-  MultiTrackParameters( double weight, TrackParametersBase* pTrackBase )
+  MultiTrackParameters(double weight, TrackParametersBase* pTrackBase)
     : TrackParametersBase()
   {
-	WeightedTrackPars weight_parameter(weight,std::unique_ptr<TrackParametersBase>(pTrackBase) );
-	m_TrackList.insert( std::make_pair( std::move(weight_parameter),0 ) );
+    WeightedTrackPars weight_parameter(
+        weight, std::unique_ptr<TrackParametersBase>(pTrackBase));
+    m_TrackList.insert(std::make_pair(std::move(weight_parameter), 0));
   }
 
   /// @brief standard constructor for track parameters of neutral particles
@@ -239,11 +258,12 @@ protected:
   /// @param momentum 3D vector with global momentum
   template <typename T = ChargePolicy,
             std::enable_if_t<std::is_same<T, NeutralPolicy>::value, int> = 0>
-  MultiTrackParameters( double weight, TrackParametersBase* pTrackBase )
+  MultiTrackParameters(double weight, TrackParametersBase* pTrackBase)
     : TrackParametersBase()
   {
-	WeightedTrackPars weight_parameter(weight,std::unique_ptr<TrackParametersBase>(pTrackBase) );
-	m_TrackList.insert( std::make_pair( std::move(weight_parameter), 0 ) );
+    WeightedTrackPars weight_parameter(
+        weight, std::unique_ptr<TrackParametersBase>(pTrackBase));
+    m_TrackList.insert(std::make_pair(std::move(weight_parameter), 0));
   }
 
   /// @brief default copy constructor
@@ -259,13 +279,17 @@ protected:
   /// @param rhs object to be copied
   /*unused*/
   MultiTrackParameters<ChargePolicy>&
-  operator=(const MultiTrackParameters<ChargePolicy>& /*unused*/) {}
+  operator=(const MultiTrackParameters<ChargePolicy>& /*unused*/)
+  {
+  }
 
   /// @brief move assignment operator
   ///
   /// @param rhs object to be movied into `*this`
   MultiTrackParameters<ChargePolicy>&
-  operator=(MultiTrackParameters<ChargePolicy>&& /*unused*/) {}
+  operator=(MultiTrackParameters<ChargePolicy>&& /*unused*/)
+  {
+  }
 
   /// @brief update global momentum from current parameter values
   ///
@@ -276,15 +300,20 @@ protected:
   ///       different from Acts::local_parameter
   template <typename T>
   void
-  updateGlobalCoordinates(const GeometryContext& /*gctx*/, const T& /*unused*/, unsigned int id)
+  updateGlobalCoordinates(const GeometryContext& /*gctx*/,
+                          const T& /*unused*/,
+                          unsigned int id)
   {
-    auto vMomentum = detail::coordinate_transformation::parameters2globalMomentum(
-        getParameterSet(id).getParameters());
-	TrackParMapIter it = std::find_if( m_TrackList.begin(), m_TrackList.end(), TrackIndexFinder(id));
-	assert( it != m_TrackList.end() );
-	(*it).first.second->updateMom(vMomentum);
+    auto vMomentum
+        = detail::coordinate_transformation::parameters2globalMomentum(
+            getParameterSet(id).getParameters());
+    TrackParMapIter it = std::find_if(
+        m_TrackList.begin(), m_TrackList.end(), TrackIndexFinder(id));
+    assert(it != m_TrackList.end());
+    (*it).first.second->updateMom(vMomentum);
   }
-  virtual const Surface& referenceSurface(unsigned int id) const =0;
+  virtual const Surface&
+  referenceSurface(unsigned int id) const = 0;
 
   /// @brief update global position from current parameter values
   ///
@@ -293,15 +322,19 @@ protected:
   void
   updateGlobalCoordinates(const GeometryContext& gctx,
                           const local_parameter& /*unused*/,
-						  unsigned int id)
+                          unsigned int id)
   {
-    auto vPosition = detail::coordinate_transformation::parameters2globalPosition(
-        gctx, getParameterSet(id).getParameters(), this->referenceSurface(id));
-	TrackParMapIter it = std::find_if( m_TrackList.begin(), m_TrackList.end(), TrackIndexFinder(id));
-	assert( it != m_TrackList.end() );
-	(*it).first.second->updatePos( vPosition );
+    auto vPosition
+        = detail::coordinate_transformation::parameters2globalPosition(
+            gctx,
+            getParameterSet(id).getParameters(),
+            this->referenceSurface(id));
+    TrackParMapIter it = std::find_if(
+        m_TrackList.begin(), m_TrackList.end(), TrackIndexFinder(id));
+    assert(it != m_TrackList.end());
+    (*it).first.second->updatePos(vPosition);
   }
 
-  TrackParMap 	m_TrackList;
+  TrackParMap m_TrackList;
 };
 }  // namespace Acts

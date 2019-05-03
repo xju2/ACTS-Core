@@ -130,10 +130,9 @@ namespace Test {
     PropagatorOptions<ActionList<DebugOutput>> options(tgContext, mfContext);
     options.maxStepSize = 10. * units::_cm;
     options.pathLimit   = 25 * units::_cm;
-    options.debug       = true;
+    options.debug       = debugMode;
 
     const auto& result = epropagator.propagate(start, options).value();
-
     if (debugMode) {
       const auto& output = result.get<DebugOutput::result_type>();
       std::cout << ">>> Extrapolation output " << std::endl;

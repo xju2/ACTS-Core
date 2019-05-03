@@ -141,16 +141,19 @@ Acts::Propagator<S, N>::propagate(
     auto& propRes = *result;
     /// Convert into return type and fill the result object
     auto  curvState      = m_stepper.curvilinearState(state.stepping, true);
-    auto& curvParameters = std::get<CurvilinearParameters>(curvState);
+    auto& curvParameters = std::get<ReturnParameterType>(curvState);
     // Fill the end parameters
-    propRes.endParameters = std::make_unique<const CurvilinearParameters>(
+    propRes.endParameters = std::make_unique<const ReturnParameterType>(
         std::move(curvParameters));
     // Only fill the transport jacobian when covariance transport was done
+	// the jacobian for multistepper is not considered yet 
+	/*
     if (state.stepping.covTransport) {
       auto& tJacobian = std::get<Jacobian>(curvState);
       propRes.transportJacobian
           = std::make_unique<const Jacobian>(std::move(tJacobian));
     }
+	*/
     return result;
   } else {
     return result.error();
@@ -216,16 +219,19 @@ Acts::Propagator<S, N>::propagate(
     auto& propRes = *result;
     // Compute the final results and mark the propagation as successful
     auto  bs              = m_stepper.boundState(state.stepping, target, true);
-    auto& boundParameters = std::get<BoundParameters>(bs);
+    auto& boundParameters = std::get<return_parameter_type>(bs);
     // Fill the end parameters
     propRes.endParameters
-        = std::make_unique<const BoundParameters>(std::move(boundParameters));
+        = std::make_unique<const return_parameter_type>(std::move(boundParameters));
     // Only fill the transport jacobian when covariance transport was done
+	// the jacobian for multistepper is not considered yet 
+	/*
     if (state.stepping.covTransport) {
       auto& tJacobian = std::get<Jacobian>(bs);
       propRes.transportJacobian
           = std::make_unique<const Jacobian>(std::move(tJacobian));
     }
+	*/
     return result;
   } else {
     return result.error();

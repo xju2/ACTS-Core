@@ -60,6 +60,7 @@ namespace Test {
     multi_curvilinear_pos.append(0.7, curvilinear_pos_1);
     multi_curvilinear_pos.append(0.5, curvilinear_pos_2);
     multi_curvilinear_pos.makeReferenceSurface();
+    BOOST_CHECK_EQUAL( multi_curvilinear_pos.size(), 3);
 
     // test sort method
     MultipleCurvilinearParameters::TrackParMapConstIter it

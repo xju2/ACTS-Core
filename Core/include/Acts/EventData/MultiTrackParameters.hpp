@@ -204,7 +204,7 @@ public:
 
   /// @brief return the size of track list
   size_t
-  size()
+  size() const
   {
     return m_TrackList.size();
   }

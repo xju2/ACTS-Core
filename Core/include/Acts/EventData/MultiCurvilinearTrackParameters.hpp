@@ -199,7 +199,7 @@ public:
   /// For a curvilinear track parameterisation this is identical to the
   /// rotation matrix of the intrinsic planar surface.
   RotationMatrix3D
-  referenceFrame(const GeometryContext& gctx) const
+  referenceFrame(const GeometryContext& gctx) const final
   {
     return m_upSurface->transform(gctx).linear();
   }

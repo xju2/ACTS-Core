@@ -70,7 +70,7 @@ public:
   };
 
   /// @brief default virtual destructor
-  virtual ~MultiTrackParameters() override = default;
+  ~MultiTrackParameters() override = default;
 
   /// the position()/direction()/momentum() method
   /// @brief get weighted combination of position all contains two format,
@@ -152,7 +152,7 @@ public:
   /// @to do : return combination
   /// writable
   /*temporary*/
-  virtual FullParameterSet&
+  FullParameterSet&
   getParameterSet() final
   {
     return m_TrackList.begin()->first.second->getParameterSet();
@@ -198,9 +198,9 @@ public:
   }
 
   /// @brief update mom pos
-  void updateMom(ActsVectorD<3>& /*unused*/) {}
+  void updateMom(ActsVectorD<3>& /*unused*/) final {}
 
-  void updatePos(ActsVectorD<3>& /*unused*/) {}
+  void updatePos(ActsVectorD<3>& /*unused*/) final {}
 
   /// @brief return the size of track list
   size_t

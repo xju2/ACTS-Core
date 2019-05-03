@@ -103,8 +103,8 @@ public:
     return m_oParameters;
   }
 
-  void updateMom(ActsVectorD<3>& mom) { m_vMomentum = mom; }
-  void updatePos(ActsVectorD<3>& pos) { m_vPosition = pos; }
+  void updateMom(ActsVectorD<3>& mom) final { m_vMomentum = mom; }
+  void updatePos(ActsVectorD<3>& pos) final { m_vPosition = pos; }
 
 protected:
   /// @brief standard constructor for track parameters of charged particles
@@ -190,7 +190,7 @@ protected:
   }
 
   /// @copydoc TrackParametersBase::getParameterSet
-  virtual FullParameterSet&
+  FullParameterSet&
   getParameterSet() final
   {
     return m_oParameters;

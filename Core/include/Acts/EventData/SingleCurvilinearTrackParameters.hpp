@@ -130,7 +130,7 @@ public:
     return *this;
   }
   /// @brief clone - charged/netural
-  //  /// virtual constructor for type creation without casting
+  /// virtual constructor for type creation without casting
   SingleTrackParameters<ChargePolicy>*
   clone() const override
   {

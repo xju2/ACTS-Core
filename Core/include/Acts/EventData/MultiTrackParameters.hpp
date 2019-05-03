@@ -266,6 +266,18 @@ protected:
     m_TrackList.insert(std::make_pair(std::move(weight_parameter), 0));
   }
 
+  /// @brief default constructor
+  template <typename T = ChargePolicy,
+            std::enable_if_t<std::is_same<T, ChargedPolicy>::value, int> = 0>
+  MultiTrackParameters()
+    : TrackParametersBase() {}
+
+  /// @brief default constructor
+  template <typename T = ChargePolicy,
+            std::enable_if_t<std::is_same<T, NeutralPolicy>::value, int> = 0>
+  MultiTrackParameters()
+    : TrackParametersBase() {}
+
   /// @brief default copy constructor
   /*unused*/
   MultiTrackParameters(const MultiTrackParameters<ChargePolicy>& copy)

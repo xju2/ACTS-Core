@@ -54,9 +54,9 @@ namespace Test {
     CurvilinearParameters* curvilinear_neg
         = new CurvilinearParameters(nullptr, pos0, mom0, -1.);
 
-    MultipleCurvilinearParameters multi_curvilinear_pos(0.4, curvilinear_pos_0);
-    // MultipleCurvilinearParameters multi_curvilinear_pos;
-    // multi_curvilinear_pos.append(0.4,curvilinear_pos_0);
+    //MultipleCurvilinearParameters multi_curvilinear_pos(0.4, curvilinear_pos_0);
+	MultipleCurvilinearParameters multi_curvilinear_pos;
+	multi_curvilinear_pos.append(0.4, curvilinear_pos_0);
     multi_curvilinear_pos.append(0.7, curvilinear_pos_1);
     multi_curvilinear_pos.append(0.5, curvilinear_pos_2);
     multi_curvilinear_pos.makeReferenceSurface();

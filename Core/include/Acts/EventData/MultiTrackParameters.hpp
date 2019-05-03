@@ -269,7 +269,6 @@ protected:
 
   /// @brief update global momentum from current parameter values
   ///
-  ///
   /// @param[in] gctx is the Context object that is forwarded to the surface
   ///            for local to global coordinate transformation
   ///
@@ -279,7 +278,6 @@ protected:
   void
   updateGlobalCoordinates(const GeometryContext& /*gctx*/, const T& /*unused*/, unsigned int id)
   {
-	std::cout<<"global "<<std::endl;
     auto vMomentum = detail::coordinate_transformation::parameters2globalMomentum(
         getParameterSet(id).getParameters());
 	TrackParMapIter it = std::find_if( m_TrackList.begin(), m_TrackList.end(), TrackIndexFinder(id));
@@ -296,9 +294,7 @@ protected:
   updateGlobalCoordinates(const GeometryContext& gctx,
                           const local_parameter& /*unused*/,
 						  unsigned int id)
-//						  const Surface& surface
   {
-	std::cout<<"local "<<std::endl;
     auto vPosition = detail::coordinate_transformation::parameters2globalPosition(
         gctx, getParameterSet(id).getParameters(), this->referenceSurface(id));
 	TrackParMapIter it = std::find_if( m_TrackList.begin(), m_TrackList.end(), TrackIndexFinder(id));

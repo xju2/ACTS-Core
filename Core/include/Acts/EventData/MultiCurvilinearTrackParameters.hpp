@@ -37,13 +37,11 @@ public:
             std::enable_if_t<std::is_same<T, ChargedPolicy>::value, int> = 0>
   MultiCurvilinearTrackParameters(double weight,TrackParametersBase* pTrackBase)
     : MultiTrackParameters<ChargePolicy>(weight,pTrackBase){}
-//     m_upSurface(Surface::makeShared<PlaneSurface>(pTrackBase->position(), pTrackBase->momentum() )) {}
 
   template <typename T = ChargePolicy,
             std::enable_if_t<std::is_same<T, NeutralPolicy>::value, int> = 0>
   MultiCurvilinearTrackParameters(double weight,TrackParametersBase* pTrackBase)
     : MultiTrackParameters<ChargePolicy>(weight,pTrackBase){}
-//     m_upSurface(Surface::makeShared<PlaneSurface>(pTrackBase->position(), pTrackBase->momentum() )) {}
 
   MultiCurvilinearTrackParameters() = default;
 
@@ -108,16 +106,9 @@ public:
   {
     // set the parameter & update the new global position
     this->getParameterSet(id).template setParameter<par>(newValue);
-    //this->updateGlobalCoordinates(gctx, typename par_type<par>::type(), id, this->referenceSurface(id));
     this->updateGlobalCoordinates(gctx, typename par_type<par>::type(), id);
-	std::cout<<"in set pos dir "<<this->position(id)<<" "<<this->momentum(id).normalized()<<std::endl;
-//	auto pos = this->position(id);
-//	auto dir = this->momentum(id).normalized();
 	// update the referece surface with the aimed parameter 
 	this->updateReferenceSurface( this->position(id), this->momentum(id).normalized(), id);
-    // recreate the surface
-//    m_upSurface = Surface::makeShared<PlaneSurface>(
-//        this->position(), this->momentum().normalized());
     // reset to (0,0)
     this->getParameterSet(id).template setParameter<par>(0.);
 	// update the referece surface with the combination
@@ -144,9 +135,6 @@ public:
     this->updateGlobalCoordinates(gctx, typename par_type<par>::type(), id );
 	// update the referece surface with the aimed parameter 
 	this->updateReferenceSurface( this->position(id), this->momentum(id).normalized(), id);
-    // recreate the surface
-//    m_upSurface = Surface::makeShared<PlaneSurface>(
-//        this->position(id), this->momentum(id).normalized());
 	// update the referece surface with the combination
 	this->updateReferenceSurface( this->position(), this->momentum().normalized());
   }
@@ -192,15 +180,6 @@ public:
   {
     return m_upSurface->transform(gctx).linear();
   }
-/*
-  RotationMatrix3D
-  referenceFrame(const GeometryContext& gctx, const unsigned int id) const 
-  {
-	TrackParMapIter it = std::find_if( this->m_TrackList.begin(), this->m_TrackList.end(), TrackIndexFinder(id));
-	assert( it != this->m_TrackList.end() );
-	return (*it).first.second->referenceSurface().transform(gctx).linear();
-  }
-  */
 
 private:
   std::shared_ptr<PlaneSurface> m_upSurface;

@@ -55,7 +55,7 @@ public:
 
   /// @brief virtual constructor
   virtual SingleTrackParameters<ChargePolicy>*
-	clone() const = 0;       
+  clone() const = 0;
 
   /// @copydoc TrackParametersBase::position
   ActsVectorD<3>
@@ -103,16 +103,8 @@ public:
     return m_oParameters;
   }
 
-  void 
-	updateMom( ActsVectorD<3>& mom)
-	{
-	  m_vMomentum = mom;
-	}
-  void
-	updatePos( ActsVectorD<3>& pos)
-	{
-	  m_vPosition = pos;
-	}
+  void updateMom(ActsVectorD<3>& mom) { m_vMomentum = mom; }
+  void updatePos(ActsVectorD<3>& pos) { m_vPosition = pos; }
 
 protected:
   /// @brief standard constructor for track parameters of charged particles
@@ -122,17 +114,17 @@ protected:
   /// @param position 3D vector with global position
   /// @param momentum 3D vector with global momentum
   template <typename T = ChargePolicy,
-		   std::enable_if_t<std::is_same<T, ChargedPolicy>::value, int> = 0>
-			 SingleTrackParameters(CovPtr_t              cov,
-				 const ParVector_t&    parValues,
-				 const ActsVectorD<3>& position,
-				 const ActsVectorD<3>& momentum)
-			 : TrackParametersBase()
-			   , m_oChargePolicy(
-				   detail::coordinate_transformation::parameters2charge(parValues))
-				  , m_oParameters(std::move(cov), parValues)
-				  , m_vPosition(position)
-				  , m_vMomentum(momentum)
+            std::enable_if_t<std::is_same<T, ChargedPolicy>::value, int> = 0>
+  SingleTrackParameters(CovPtr_t              cov,
+                        const ParVector_t&    parValues,
+                        const ActsVectorD<3>& position,
+                        const ActsVectorD<3>& momentum)
+    : TrackParametersBase()
+    , m_oChargePolicy(
+          detail::coordinate_transformation::parameters2charge(parValues))
+    , m_oParameters(std::move(cov), parValues)
+    , m_vPosition(position)
+    , m_vMomentum(momentum)
   {
   }
 
@@ -143,22 +135,22 @@ protected:
   /// @param position 3D vector with global position
   /// @param momentum 3D vector with global momentum
   template <typename T = ChargePolicy,
-		   std::enable_if_t<std::is_same<T, NeutralPolicy>::value, int> = 0>
-			 SingleTrackParameters(CovPtr_t              cov,
-				 const ParVector_t&    parValues,
-				 const ActsVectorD<3>& position,
-				 const ActsVectorD<3>& momentum)
-			 : TrackParametersBase()
-			   , m_oChargePolicy()
-			   , m_oParameters(std::move(cov), parValues)
-			   , m_vPosition(position)
-			   , m_vMomentum(momentum)
+            std::enable_if_t<std::is_same<T, NeutralPolicy>::value, int> = 0>
+  SingleTrackParameters(CovPtr_t              cov,
+                        const ParVector_t&    parValues,
+                        const ActsVectorD<3>& position,
+                        const ActsVectorD<3>& momentum)
+    : TrackParametersBase()
+    , m_oChargePolicy()
+    , m_oParameters(std::move(cov), parValues)
+    , m_vPosition(position)
+    , m_vMomentum(momentum)
   {
   }
 
   /// @brief default copy constructor
   SingleTrackParameters(const SingleTrackParameters<ChargePolicy>& copy)
-	= default;
+      = default;
 
   /// @brief default move constructor
   SingleTrackParameters(SingleTrackParameters<ChargePolicy>&& copy) = default;
@@ -167,42 +159,42 @@ protected:
   ///
   /// @param rhs object to be copied
   SingleTrackParameters<ChargePolicy>&
-	operator=(const SingleTrackParameters<ChargePolicy>& rhs)
-	{
-	  // check for self-assignment
-	  if (this != &rhs) {
-		m_oChargePolicy = rhs.m_oChargePolicy;
-		m_oParameters   = rhs.m_oParameters;
-		m_vPosition     = rhs.m_vPosition;
-		m_vMomentum     = rhs.m_vMomentum;
-	  }
+  operator=(const SingleTrackParameters<ChargePolicy>& rhs)
+  {
+    // check for self-assignment
+    if (this != &rhs) {
+      m_oChargePolicy = rhs.m_oChargePolicy;
+      m_oParameters   = rhs.m_oParameters;
+      m_vPosition     = rhs.m_vPosition;
+      m_vMomentum     = rhs.m_vMomentum;
+    }
 
-	  return *this;
-	}
+    return *this;
+  }
 
   /// @brief move assignment operator
   ///
   /// @param rhs object to be movied into `*this`
   SingleTrackParameters<ChargePolicy>&
-	operator=(SingleTrackParameters<ChargePolicy>&& rhs)
-	{
-	  // check for self-assignment
-	  if (this != &rhs) {
-		m_oChargePolicy = std::move(rhs.m_oChargePolicy);
-		m_oParameters   = std::move(rhs.m_oParameters);
-		m_vPosition     = std::move(rhs.m_vPosition);
-		m_vMomentum     = std::move(rhs.m_vMomentum);
-	  }
+  operator=(SingleTrackParameters<ChargePolicy>&& rhs)
+  {
+    // check for self-assignment
+    if (this != &rhs) {
+      m_oChargePolicy = std::move(rhs.m_oChargePolicy);
+      m_oParameters   = std::move(rhs.m_oParameters);
+      m_vPosition     = std::move(rhs.m_vPosition);
+      m_vMomentum     = std::move(rhs.m_vMomentum);
+    }
 
-	  return *this;
-	}
+    return *this;
+  }
 
   /// @copydoc TrackParametersBase::getParameterSet
   virtual FullParameterSet&
-	getParameterSet() final
-	{
-	  return m_oParameters;
-	}
+  getParameterSet() final
+  {
+    return m_oParameters;
+  }
 
   /// @brief update global momentum from current parameter values
   ///
@@ -213,30 +205,30 @@ protected:
   /// @note This function is triggered when called with an argument of a type
   ///       different from Acts::local_parameter
   template <typename T>
-	void
-	updateGlobalCoordinates(const GeometryContext& /*gctx*/, const T& /*unused*/)
-	{
-	  m_vMomentum = detail::coordinate_transformation::parameters2globalMomentum(
-		  getParameterSet().getParameters());
-	}
+  void
+  updateGlobalCoordinates(const GeometryContext& /*gctx*/, const T& /*unused*/)
+  {
+    m_vMomentum = detail::coordinate_transformation::parameters2globalMomentum(
+        getParameterSet().getParameters());
+  }
 
   /// @brief update global position from current parameter values
   ///
   /// @note This function is triggered when called with an argument of a type
   /// Acts::local_parameter
   void
-	updateGlobalCoordinates(const GeometryContext& gctx,
-		const local_parameter& /*unused*/)
-	{
-	  m_vPosition = detail::coordinate_transformation::parameters2globalPosition(
-		  gctx, getParameterSet().getParameters(), this->referenceSurface());
-	}
+  updateGlobalCoordinates(const GeometryContext& gctx,
+                          const local_parameter& /*unused*/)
+  {
+    m_vPosition = detail::coordinate_transformation::parameters2globalPosition(
+        gctx, getParameterSet().getParameters(), this->referenceSurface());
+  }
 
-  ChargePolicy m_oChargePolicy;    ///< charge policy object distinguishing
+  ChargePolicy m_oChargePolicy;  ///< charge policy object distinguishing
   /// between charged and neutral tracks
   FullParameterSet m_oParameters;  ///< ParameterSet object holding the
   /// parameter values and covariance matrix
-  ActsVectorD<3> m_vPosition;      ///< 3D vector with global position
-  ActsVectorD<3> m_vMomentum;      ///< 3D vector with global momentum
+  ActsVectorD<3> m_vPosition;  ///< 3D vector with global position
+  ActsVectorD<3> m_vMomentum;  ///< 3D vector with global momentum
 };
 }  // namespace Acts

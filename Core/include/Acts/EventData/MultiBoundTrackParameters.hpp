@@ -14,65 +14,66 @@
 namespace Acts {
 
 template <typename ChargePolicy>
-class MultiBoundTrackParameters
-    : public MultiTrackParameters<ChargePolicy>
+class MultiBoundTrackParameters : public MultiTrackParameters<ChargePolicy>
 {
 public:
   /// type of covariance matrix
   using CovPtr_t = typename MultiTrackParameters<ChargePolicy>::CovPtr_t;
 
-  /// pair of <weight,point_to_track>, when insert a trackParameter, that will allow to sort the track by weight 
-  using WeightedTrackPars = std::pair< double, std::unique_ptr<TrackParametersBase> >;
-  using TrackParMap       = std::map<WeightedTrackPars ,const unsigned int, std::greater<WeightedTrackPars> >;
-  using TrackParMapConstIter   = TrackParMap::const_iterator;
-  using TrackParMapIter   = TrackParMap::iterator;
+  /// pair of <weight,point_to_track>, when insert a trackParameter, that will
+  /// allow to sort the track by weight
+  using WeightedTrackPars
+      = std::pair<double, std::unique_ptr<TrackParametersBase>>;
+  using TrackParMap = std::map<WeightedTrackPars,
+                               const unsigned int,
+                               std::greater<WeightedTrackPars>>;
+  using TrackParMapConstIter = TrackParMap::const_iterator;
+  using TrackParMapIter      = TrackParMap::iterator;
   struct TrackIndexFinder
   {
-	TrackIndexFinder(const unsigned int id) : m_index(id){}
-	bool operator() (const TrackParMap::value_type& trackPar)
-	{
-	  return trackPar.second == m_index;
-	}
-	const unsigned int m_index;
+    TrackIndexFinder(const unsigned int id) : m_index(id) {}
+    bool
+    operator()(const TrackParMap::value_type& trackPar)
+    {
+      return trackPar.second == m_index;
+    }
+    const unsigned int m_index;
   };
 
   template <typename T = ChargePolicy,
             std::enable_if_t<std::is_same<T, ChargedPolicy>::value, int> = 0>
-  MultiBoundTrackParameters(double weight,
-	  TrackParametersBase* pTrackBase,
-	  std::shared_ptr<const Surface> surface )
-    : MultiTrackParameters<ChargePolicy>(weight,pTrackBase),
-     m_pSurface(std::move(surface))
+  MultiBoundTrackParameters(double                         weight,
+                            TrackParametersBase*           pTrackBase,
+                            std::shared_ptr<const Surface> surface)
+    : MultiTrackParameters<ChargePolicy>(weight, pTrackBase)
+    , m_pSurface(std::move(surface))
   {
-	assert(m_pSurface);
+    assert(m_pSurface);
   }
 
   template <typename T = ChargePolicy,
             std::enable_if_t<std::is_same<T, NeutralPolicy>::value, int> = 0>
-  MultiBoundTrackParameters(double weight,
-	  TrackParametersBase* pTrackBase,
-	  std::shared_ptr<const Surface> surface)
-    : MultiTrackParameters<NeutralPolicy>(weight,pTrackBase),
-	m_pSurface(std::move(surface))
+  MultiBoundTrackParameters(double                         weight,
+                            TrackParametersBase*           pTrackBase,
+                            std::shared_ptr<const Surface> surface)
+    : MultiTrackParameters<NeutralPolicy>(weight, pTrackBase)
+    , m_pSurface(std::move(surface))
   {
-	assert(m_pSurface);
+    assert(m_pSurface);
   }
 
   /// @brief copy constructor - charged/neutral
   /// @param[in] copy The source parameters
   /*unused*/
-  MultiBoundTrackParameters(
-      const MultiBoundTrackParameters<ChargePolicy>& copy) 
-	: MultiTrackParameters<ChargePolicy>(copy),
-	m_pSurface(copy.m_pSurface)
+  MultiBoundTrackParameters(const MultiBoundTrackParameters<ChargePolicy>& copy)
+    : MultiTrackParameters<ChargePolicy>(copy), m_pSurface(copy.m_pSurface)
   {
   }
 
   /// @brief move constructor - charged/neutral
   /// @param[in] other The source parameters
   /*unused*/
-  MultiBoundTrackParameters(
-      MultiBoundTrackParameters<ChargePolicy>&& other)
+  MultiBoundTrackParameters(MultiBoundTrackParameters<ChargePolicy>&& other)
     : MultiTrackParameters<ChargePolicy>(std::move(other))
     , m_pSurface(std::move(other.m_pSurface))
   {
@@ -102,11 +103,11 @@ public:
   ///            for local to global coordinate transformation
   template <ParID_t par>
   void
-  set(const GeometryContext& gctx, ParValue_t newValue, unsigned int order )
+  set(const GeometryContext& gctx, ParValue_t newValue, unsigned int order)
   {
     // set the parameter & update the new global position
     this->getParameterSet(order).template setParameter<par>(newValue);
-    this->updateGlobalCoordinates(gctx, typename par_type<par>::type(),order );
+    this->updateGlobalCoordinates(gctx, typename par_type<par>::type(), order);
   }
 
   /// @brief access to the reference surface
@@ -118,16 +119,19 @@ public:
 
   /// @brief access to the reference surface
   const Surface&
-  referenceSurface(unsigned int id) const  final
+  referenceSurface(unsigned int id) const final
   {
-	TrackParMapConstIter it = std::find_if( this->m_TrackList.begin(), this->m_TrackList.end(), TrackIndexFinder(id));
-	assert( it != this->m_TrackList.end() );
-	return (*it).first.second->referenceSurface();
+    TrackParMapConstIter it = std::find_if(this->m_TrackList.begin(),
+                                           this->m_TrackList.end(),
+                                           TrackIndexFinder(id));
+    assert(it != this->m_TrackList.end());
+    return (*it).first.second->referenceSurface();
   }
 
   /// @brief update the reference surface
-  void 
-  updateReferenceSurface( const ActsVectorD<3>& /*unused*/, const ActsVectorD<3>& /*unused*/) final
+  void
+  updateReferenceSurface(const ActsVectorD<3>& /*unused*/,
+                         const ActsVectorD<3>& /*unused*/) final
   {
   }
 

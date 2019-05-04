@@ -384,7 +384,7 @@ Acts::MultiEigenStepper<B, C, E, A>::step(propagator_state_t& state) const
     while (!tryRungeKuttaStep(singlestate.stepSize)) {
       stepSizeScaling = std::min(std::max(0.25,
                                           std::pow((state.options.tolerance
-                                                    / std::abs(error_estimate)),
+                                                    / std::abs(2. * error_estimate)),
                                                    0.25)),
                                  4.);
       if (stepSizeScaling == 1.) {

@@ -74,8 +74,7 @@ namespace Test {
   MultiEigenStepperType    multi_estepper(bField);
   MultiEigenPropagatorType multi_epropagator(std::move(multi_estepper),
                                              std::move(multi_navigator));
-
-  const int ntests    = 1;
+  const int ntests    = 20;
   bool      debugMode = false;
 
   // A plane selector for the SurfaceCollector
@@ -89,7 +88,6 @@ namespace Test {
       return (sf.type() == Surface::Plane);
     }
   };
-
   // A direction changing actor
   // in MultiMaterialInteractor, at each surface the component splits into 2
   // equal ones,
@@ -146,7 +144,6 @@ namespace Test {
       charge,
       index)
   {
-
     double dcharge = -1 + 2 * charge;
     (void)index;
 

@@ -64,7 +64,7 @@ namespace Test {
   EigenStepperType    estepper(bField);
   EigenPropagatorType epropagator(std::move(estepper), std::move(navigator));
 
-  const int ntests    = 100;
+  const int ntests    = 20;
   bool      debugMode = false;
 
   // A plane selector for the SurfaceCollector
@@ -132,6 +132,7 @@ namespace Test {
     options.pathLimit   = 25 * units::_cm;
     options.debug       = debugMode;
 
+
     const auto& result = epropagator.propagate(start, options).value();
     if (debugMode) {
       const auto& output = result.get<DebugOutput::result_type>();
@@ -139,7 +140,6 @@ namespace Test {
       std::cout << output.debugString << std::endl;
     }
   }
-
   // This test case checks that no segmentation fault appears
   // - this tests the collection of surfaces
   BOOST_DATA_TEST_CASE(
@@ -356,6 +356,5 @@ namespace Test {
       CHECK_CLOSE_REL(status.pathLength, options.pathLimit, 1e-3);
     }
   }
-
 }  // namespace Test
 }  // namespace Acts

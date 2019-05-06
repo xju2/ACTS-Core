@@ -148,6 +148,7 @@ void
 Acts::EigenStepper<B, C, E, A>::covarianceTransport(State& state,
                                                     bool reinitialize) const
 {
+  std::cout<<"in EigenStepper1 "<<state.cov<<std::endl;
   // Optimized trigonometry on the propagation direction
   const double x = state.dir(0);  // == cos(phi) * sin(theta)
   const double y = state.dir(1);  // == sin(phi) * sin(theta)
@@ -184,6 +185,8 @@ Acts::EigenStepper<B, C, E, A>::covarianceTransport(State& state,
   jacToCurv(3, 5) = -invSinTheta;
   jacToCurv(4, 6) = 1;
   // Apply the transport from the steps on the jacobian
+  std::cout<<"jacToGlobal "<<state.jacToGlobal<<std::endl;
+  std::cout<<"jacTrans "<<state.jacTransport <<std::endl;
   state.jacToGlobal = state.jacTransport * state.jacToGlobal;
   // Transport the covariance
   ActsRowVectorD<3>       normVec(state.dir);
@@ -194,6 +197,7 @@ Acts::EigenStepper<B, C, E, A>::covarianceTransport(State& state,
       = jacToCurv * (state.jacToGlobal - state.derivative * sfactors);
   // Apply the actual covariance transport
   state.cov = (jacFull * state.cov * jacFull.transpose());
+  std::cout<<"in EigenStepper2 "<<state.cov<<std::endl;
   // Reinitialize if asked to do so
   // this is useful for interruption calls
   if (reinitialize) {
@@ -355,7 +359,6 @@ Acts::EigenStepper<B, C, E, A>::step(propagator_state_t& state) const
             state, *this, state.stepping, h, D)) {
       return EigenStepperError::StepInvalid;
     }
-
     // for moment, only update the transport part
     state.stepping.jacTransport = D * state.stepping.jacTransport;
   } else {

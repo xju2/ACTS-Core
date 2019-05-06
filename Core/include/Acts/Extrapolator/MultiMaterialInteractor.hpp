@@ -191,9 +191,11 @@ struct MultiMaterialInteractor
           // To integrate process noise, we need to transport
           // the covariance to the current position in space
           // the 'true' indicates re-initializaiton of the further transport
+		  std::cout<<"before "<<singlestate.cov<<std::endl;
           if (singlestate.covTransport) {
             stepper.covarianceTransport(singlestate, true);
           }
+		  std::cout<<"after "<<singlestate.cov<<std::endl;
 
           // @brief if meets material surface , split the current single state
           // to get newlist

@@ -27,3 +27,8 @@ add_executable (MultiMaterialInteractionTests MultiMaterialInteractionTests.cpp)
 target_link_libraries (MultiMaterialInteractionTests PRIVATE ActsCore ActsTestsCommonHelpers ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 add_test(NAME MultiMaterialInteractionUnitTests COMMAND MultiMaterialInteractionTests)
 acts_add_test_to_cdash_project (PROJECT ACore TEST MultiMaterialInteractionUnitTests TARGETS MultiMaterialInteractionTests)
+
+add_executable (DistanceTests DistanceTests.cpp)
+target_link_libraries (DistanceTests PRIVATE ActsCore ActsTestsCommonHelpers ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+add_test(NAME DistanceUnitTests COMMAND DistanceTests)
+acts_add_test_to_cdash_project (PROJECT ACore TEST DistanceUnitTests TARGETS DistanceTests)

@@ -73,6 +73,10 @@ struct DefaultExtension
       // Store qop, it is always used if valid
       qop = stepper.charge(state.stepping)
           / units::Nat2SI<units::MOMENTUM>(stepper.momentum(component_state));
+	  std::cout<<"qop in k "<<qop<<std::endl;
+	  std::cout<<"charge "<<stepper.charge(state.stepping)<<std::endl;
+	  std::cout<<"bare mom "<<stepper.momentum(component_state)<<std::endl;
+	  std::cout<<"mom "<<units::Nat2SI<units::MOMENTUM>(stepper.momentum(component_state))<<std::endl;
 
       // Evaluate the k_i
       knew = qop * stepper.direction(component_state).cross(bField);
@@ -80,6 +84,7 @@ struct DefaultExtension
       knew = qop
           * (stepper.direction(component_state) + h * kprev).cross(bField);
     }
+	std::cout<<"qop in k "<<qop<<std::endl;
     return true;
   }
 
@@ -140,12 +145,13 @@ private:
             typename stepper_t,
             typename state_type>
   bool
-  transportMatrix(propagator_state_t& state,
+  transportMatrix(propagator_state_t& /*unused*/,
                   const stepper_t&    stepper,
                   state_type&         component_state,
                   const double        h,
                   ActsMatrixD<7, 7>& D) const
   {
+	std::cout<<"qop "<<qop<<std::endl;
     /// The calculations are based on ATL-SOFT-PUB-2009-002. The update of the
     /// Jacobian matrix is requires only the calculation of eq. 17 and 18.
     /// Since the terms of eq. 18 are currently 0, this matrix is not needed
@@ -165,10 +171,14 @@ private:
     /// constant offset does not exist for rectangular matrix dGdu' (due to the
     /// missing Lambda part) and only exists for dFdu' in dlambda/dlambda.
 
-    auto& sd  = state.stepping.stepData;
+    auto& sd  = component_state.stepData;
     auto  dir = stepper.direction(component_state);
+	std::cout<<"dir: "<<dir<<std::endl;
+	std::cout<<"Bfirst: "<<sd.B_first<<std::endl;
 
+	  std::cout<<"in default ()D1 "<<D<<std::endl;
     D = ActsMatrixD<7, 7>::Identity();
+	  std::cout<<"in default ()D2 "<<D<<std::endl;
 
     double half_h = h * 0.5;
     // This sets the reference to the sub matrices
@@ -178,6 +188,7 @@ private:
     // dGdx is already initialised as (3x3) zero
     auto dGdT = D.block<3, 3>(3, 3);
     auto dGdL = D.block<3, 1>(3, 6);
+	std::cout<<"in default ()D3 "<<D<<std::endl;
 
     ActsMatrixD<3, 3> dk1dT = ActsMatrixD<3, 3>::Zero();
     ActsMatrixD<3, 3> dk2dT = ActsMatrixD<3, 3>::Identity();
@@ -197,6 +208,7 @@ private:
         + qop * half_h * dk2dL.cross(sd.B_middle);
     dk4dL
         = (dir + h * sd.k3).cross(sd.B_last) + qop * h * dk3dL.cross(sd.B_last);
+	std::cout<<"in default ()D4 "<<D<<std::endl;
 
     dk1dT(0, 1) = sd.B_first.z();
     dk1dT(0, 2) = -sd.B_first.y();
@@ -204,20 +216,37 @@ private:
     dk1dT(1, 2) = sd.B_first.x();
     dk1dT(2, 0) = sd.B_first.y();
     dk1dT(2, 1) = -sd.B_first.x();
+	std::cout<<"dk1dT "<<dk1dT<<std::endl;
+	std::cout<<"in default ()D5 "<<D<<std::endl;
+	std::cout<<"qop "<<qop<<std::endl;
     dk1dT *= qop;
+	std::cout<<"dk1dT "<<dk1dT<<std::endl;
+	std::cout<<"in default ()D51 "<<D<<std::endl;
 
     dk2dT += half_h * dk1dT;
+	std::cout<<"in default ()D52 "<<D<<std::endl;
     dk2dT = qop * VectorHelpers::cross(dk2dT, sd.B_middle);
+	std::cout<<"in default ()D53 "<<D<<std::endl;
 
     dk3dT += half_h * dk2dT;
+	std::cout<<"in default ()D54 "<<D<<std::endl;
     dk3dT = qop * VectorHelpers::cross(dk3dT, sd.B_middle);
+	std::cout<<"in default ()D55 "<<D<<std::endl;
 
     dk4dT += h * dk3dT;
+	std::cout<<"in default ()D56 "<<D<<std::endl;
     dk4dT = qop * VectorHelpers::cross(dk4dT, sd.B_last);
+	std::cout<<"in default ()D57 "<<D<<std::endl;
 
     dFdT.setIdentity();
+	std::cout<<"in default ()D58 "<<D<<std::endl;
+	std::cout<<dk1dT<<std::endl;
+	std::cout<<dk2dT<<std::endl;
+	std::cout<<dk3dT<<std::endl;
     dFdT += h / 6. * (dk1dT + dk2dT + dk3dT);
+	std::cout<<"in default ()D59 "<<D<<std::endl;
     dFdT *= h;
+	std::cout<<"in default ()D6 "<<D<<std::endl;
 
     dFdL = conv * (h * h) / 6. * (dk1dL + dk2dL + dk3dL);
 
@@ -225,6 +254,7 @@ private:
 
     dGdL = conv * h / 6. * (dk1dL + 2. * (dk2dL + dk3dL) + dk4dL);
 
+	std::cout<<"in default ()D end "<<D<<std::endl;
     return true;
   }
 };

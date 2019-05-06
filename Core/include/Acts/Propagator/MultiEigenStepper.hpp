@@ -349,6 +349,13 @@ public:
          const Vector3D&  udirection,
          double           up) const;
 
+  void
+  covarianceTransport(SingleStateType& singlestate, bool reinitialize = false) const;
+  void
+  covarianceTransport(SingleStateType&         singlestate,
+                      const Surface& surface,
+                      bool           reinitialize = true) const;
+
   /// Perform a Runge-Kutta track parameter propagation step
   ///
   /// @param [in,out] state is the propagation state associated with the track

@@ -307,6 +307,22 @@ Acts::MultiEigenStepper<B, C, E, A>::update(SingleStateType& singlestate,
   EigenStepper<B>::update(singlestate, uposition, udirection, up);
 }
 
+/// cov transport
+template <typename B, typename C, typename E, typename A>
+void
+Acts::MultiEigenStepper<B, C, E, A>::covarianceTransport(SingleStateType& singlestate,
+                                            bool reinitialize) const
+{
+  EigenStepper<B>::covarianceTransport(singlestate, reinitialize);
+}
+
+template <typename B, typename C, typename E, typename A>
+void
+Acts::MultiEigenStepper<B, C, E, A>::covarianceTransport(SingleStateType& singlestate, const Surface& surface, bool reinitialize) const
+{
+  EigenStepper<B>::covarianceTransport(singlestate, surface, reinitialize);
+}
+
 template <typename B, typename C, typename E, typename A>
 template <typename propagator_state_t>
 Acts::Result<double>
@@ -330,6 +346,7 @@ Acts::MultiEigenStepper<B, C, E, A>::step(propagator_state_t& state) const
 
     // First Runge-Kutta point (at current position)
     sd.B_first = getField(singlestate, singlestate.pos);
+	std::cout<<"in step "<<sd.B_first<<std::endl;
     if (!singlestate.extension.validExtensionForStep(state, *this, singlestate)
         || !singlestate.extension.k1(
                state, *this, singlestate, sd.k1, sd.B_first)) {
@@ -414,6 +431,8 @@ Acts::MultiEigenStepper<B, C, E, A>::step(propagator_state_t& state) const
       }
 
       // for moment, only update the transport part
+	  std::cout<<"in step()D "<<D<<std::endl;
+	  std::cout<<"in step() jacTransport "<<singlestate.jacTransport<<std::endl;
       singlestate.jacTransport = D * singlestate.jacTransport;
     } else {
       if (!singlestate.extension.finalize(state, *this, singlestate, h)) {

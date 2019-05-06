@@ -218,7 +218,7 @@ private:
             typename stepper_t,
             typename state_type>
   bool
-  transportMatrix(propagator_state_t& state,
+  transportMatrix(propagator_state_t& /*unused*/,
                   const stepper_t&    stepper,
                   state_type&         component_state,
                   const double        h,
@@ -244,7 +244,7 @@ private:
     /// constant offset does not exist for rectangular matrix dFdu' (due to the
     /// missing Lambda part) and only exists for dGdu' in dlambda/dlambda.
 
-    auto& sd  = state.stepping.stepData;
+    auto& sd  = component_state.stepData;
     auto  dir = stepper.direction(component_state);
 
     D                   = ActsMatrixD<7, 7>::Identity();

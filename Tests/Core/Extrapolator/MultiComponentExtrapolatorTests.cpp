@@ -119,7 +119,6 @@ namespace Test {
       }
     }
   };
-
   // This test case checks that no segmentation fault appears in the mcs
   // the basic multi stepper propagate
   BOOST_DATA_TEST_CASE(

@@ -132,7 +132,6 @@ namespace Test {
     options.pathLimit   = 25 * units::_cm;
     options.debug       = debugMode;
 
-
     const auto& result = epropagator.propagate(start, options).value();
     if (debugMode) {
       const auto& output = result.get<DebugOutput::result_type>();

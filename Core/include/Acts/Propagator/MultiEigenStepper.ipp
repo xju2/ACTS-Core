@@ -382,11 +382,12 @@ Acts::MultiEigenStepper<B, C, E, A>::step(propagator_state_t& state) const
     // Select and adjust the appropriate Runge-Kutta step size as given
     // ATL-SOFT-PUB-2009-001
     while (!tryRungeKuttaStep(singlestate.stepSize)) {
-      stepSizeScaling = std::min(std::max(0.25,
-                                          std::pow((state.options.tolerance
-                                                    / std::abs(2. * error_estimate)),
-                                                   0.25)),
-                                 4.);
+      stepSizeScaling
+          = std::min(std::max(0.25,
+                              std::pow((state.options.tolerance
+                                        / std::abs(2. * error_estimate)),
+                                       0.25)),
+                     4.);
       if (stepSizeScaling == 1.) {
         break;
       }

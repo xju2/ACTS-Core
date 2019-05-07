@@ -58,13 +58,12 @@ namespace Test {
   using BFieldType          = ConstantBField;
   using EigenStepperType    = EigenStepper<BFieldType>;
   using EigenPropagatorType = Propagator<EigenStepperType, Navigator>;
-
   const double        Bz = 2. * units::_T;
-  BFieldType          bField(0, 0, Bz);
+  BFieldType          bField(0, 0, 0.);
   EigenStepperType    estepper(bField);
   EigenPropagatorType epropagator(std::move(estepper), std::move(navigator));
 
-  const int ntests    = 20;
+  const int ntests    = 2;
   bool      debugMode = false;
 
   // A plane selector for the SurfaceCollector
@@ -139,6 +138,8 @@ namespace Test {
       std::cout << output.debugString << std::endl;
     }
   }
+
+  /*
   // This test case checks that no segmentation fault appears
   // - this tests the collection of surfaces
   BOOST_DATA_TEST_CASE(
@@ -217,7 +218,6 @@ namespace Test {
                 .value()
                 .endParameters;
       BOOST_CHECK(cresult != nullptr);
-      std::cout << cresult->parameters() << std::endl;
     }
   }
 
@@ -335,7 +335,6 @@ namespace Test {
         1. / (10 * units::_GeV);
     auto covPtr = std::make_unique<const ActsSymMatrixD<5>>(cov);
     CurvilinearParameters start(std::move(covPtr), pos, mom, q);
-
     // Action list and abort list
     using DebugOutput = detail::DebugOutputActor;
 
@@ -355,5 +354,6 @@ namespace Test {
       CHECK_CLOSE_REL(status.pathLength, options.pathLimit, 1e-3);
     }
   }
+  */
 }  // namespace Test
 }  // namespace Acts

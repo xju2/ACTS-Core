@@ -64,7 +64,7 @@ namespace Test {
   using MultiEigenPropagatorType = Propagator<MultiEigenStepperType, Navigator>;
 
   const double Bz = 2. * units::_T;
-  BFieldType   bField(0, 0, Bz);
+  BFieldType   bField(0, 0, 0.);
 
   // define the scs
   EigenStepperType    estepper(bField);
@@ -74,7 +74,7 @@ namespace Test {
   MultiEigenStepperType    multi_estepper(bField);
   MultiEigenPropagatorType multi_epropagator(std::move(multi_estepper),
                                              std::move(multi_navigator));
-  const int ntests    = 20;
+  const int ntests    = 1;
   bool      debugMode = false;
 
   // A plane selector for the SurfaceCollector
@@ -185,6 +185,7 @@ namespace Test {
     }
   }
 
+  /*
   // This test case checks that no segmentation fault appears
   // - this tests the same surfaceHit of different stepper
   BOOST_DATA_TEST_CASE(
@@ -390,5 +391,6 @@ namespace Test {
     CHECK_CLOSE_REL(
         par->parameters(0)[eQOP], single_par->parameters()[eQOP], 1e-6);
   }
+  */
 }  // namespace Test
 }  // namespace Acts

@@ -55,6 +55,7 @@ using InteractionPointVec = std::vector<Acts::InteractionPoint>;
 /// This is a plugin to the Propagator that
 /// performs material interaction on the currentSurface
 /// of the Propagagor state
+template<typename extensioneffect_t= detail::EmptyEffect>
 struct MultiMaterialInteractor
 {
   // Configuration for this MultiMaterialInteractor
@@ -66,7 +67,7 @@ struct MultiMaterialInteractor
 
   /// Bethe-Hitler struct
   /// currently empty
-  detail::EmptyEffect emptyEffect;
+  extensioneffect_t extensionEffect;
 
   /// Record material in detail
   bool recordInteractions = true;
@@ -253,12 +254,14 @@ struct MultiMaterialInteractor
     const double            E           = std::sqrt(p * p + m * m);
     const double            lbeta       = p / E;
     const double            tInX0       = properties.thicknessInX0();
-    auto                    mixture     = emptyEffect.getMixture(tInX0, p);
+    auto                    mixture     = extensionEffect(tInX0, p);
     std::list<tuplestate_t> splitList;
     unsigned int            iComponent = 0;
     while (iComponent < mixture.size()) {
       // energy loss
       const double dE = mixture[iComponent].mean;
+	  std::cout<<"E+dE / m "<<E<<","<<dE<<" "<<m<<std::endl;
+	  // when kinematically allowed
       if (E + dE > m) {
         // p
         const double newP = std::sqrt((E + dE) * (E + dE) - m * m);
@@ -311,8 +314,10 @@ struct MultiMaterialInteractor
         double newWeight = pdfWeight * weight;
         splitList.push_back(
             std::make_tuple(std::move(state), newWeight, status));
-        iComponent++;
+		++iComponent;
       }
+	  // do nothing 
+	 else ++iComponent;
     }
     return std::move(splitList);
   }

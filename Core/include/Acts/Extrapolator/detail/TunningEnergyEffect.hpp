@@ -17,21 +17,27 @@
 namespace Acts {
 
 namespace detail {
-  struct EmptyEffect
+  struct TunningEnergyEffect 
   {
     const static int N = 2;
     struct ComponentValues
     {
-      double weight   = 1. / N;
-      double mean     = 0.;
-      double variance = 0.;
+      double weight; 
+      double mean;
+      double variance; 
     };
 
     std::vector<ComponentValues>
     operator()(double /*noused*/, double /*noused*/) const
     {
       // make non effect, just means copy the components in material effect
-      return std::move(std::vector<ComponentValues>(N));
+	  ComponentValues comp1{0.7,-0.01,0.01};
+	  ComponentValues comp2{0.3,-0.02,0.01};
+	  std::vector<ComponentValues> compVec;
+	  compVec.push_back(comp1);
+	  compVec.push_back(comp2);
+	  return std::move(compVec);
+
     }
   };
 }

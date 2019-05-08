@@ -185,7 +185,6 @@ namespace Test {
     }
   }
 
-  /*
   // This test case checks that no segmentation fault appears
   // - this tests the same surfaceHit of different stepper
   BOOST_DATA_TEST_CASE(
@@ -247,14 +246,16 @@ namespace Test {
     multi_options.pathLimit   = 25 * units::_cm;
     multi_options.debug       = debugMode;
 
-    PropagatorOptions<ActionList<PlaneCollector, MultiMaterialInteractor>>
+
+	using MultiMaterial = MultiMaterialInteractor<>;
+    PropagatorOptions<ActionList<PlaneCollector, MultiMaterial>>
         multi_material_options(tgContext, mfContext);
     multi_material_options.maxStepSize = 10. * units::_cm;
     multi_material_options.pathLimit   = 25 * units::_cm;
     multi_material_options.debug       = debugMode;
 
     PropagatorOptions<ActionList<PlaneCollector,
-                                 MultiMaterialInteractor,
+                                 MultiMaterial,
                                  DirChangeActor>>
         flip_options(tgContext, mfContext);
     flip_options.maxStepSize = 10. * units::_cm;
@@ -391,6 +392,6 @@ namespace Test {
     CHECK_CLOSE_REL(
         par->parameters(0)[eQOP], single_par->parameters()[eQOP], 1e-6);
   }
-  */
+  
 }  // namespace Test
 }  // namespace Acts

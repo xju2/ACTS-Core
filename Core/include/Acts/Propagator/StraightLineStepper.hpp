@@ -75,7 +75,13 @@ class StraightLineStepper {
           q(par.charge()),
           navDir(ndir),
           stepSize(ssize),
-          geoContext(gctx) {}
+          geoContext(gctx) {
+      // Throw an exception if the navigation is set to anyDirection
+      if (ndir == anyDirection) {
+        throw std::invalid_argument(
+            "StraihgLineStepper::State with anyDirection");
+      }
+    }
 
     /// Boolean to indiciate if you need covariance transport
     bool covTransport = false;

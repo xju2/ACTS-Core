@@ -11,16 +11,16 @@
 #include <cmath>
 #include <functional>
 #include <limits>
+#include <stdexcept>
 #include "Acts/EventData/TrackParameters.hpp"
 #include "Acts/Propagator/DefaultExtension.hpp"
 #include "Acts/Propagator/DenseEnvironmentExtension.hpp"
+#include "Acts/Propagator/EigenStepperError.hpp"
 #include "Acts/Propagator/StepperExtensionList.hpp"
 #include "Acts/Propagator/detail/Auctioneer.hpp"
 #include "Acts/Utilities/Intersection.hpp"
-#include "Acts/Utilities/Units.hpp"
-
-#include "Acts/Propagator/EigenStepperError.hpp"
 #include "Acts/Utilities/Result.hpp"
+#include "Acts/Utilities/Units.hpp"
 
 namespace Acts {
 
@@ -93,6 +93,10 @@ class EigenStepper {
       // remember the start parameters
       startPos = pos;
       startDir = dir;
+      // Throw an exception if the navigation is set to anyDirection
+      if (ndir == anyDirection) {
+        throw std::invalid_argument("EigenStepper::State with anyDirection");
+      }
       // Init the jacobian matrix if needed
       if (par.covariance()) {
         // Get the reference surface for navigation

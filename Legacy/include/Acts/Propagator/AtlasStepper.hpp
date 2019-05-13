@@ -10,6 +10,7 @@
 
 #include <cmath>
 #include <functional>
+#include <stdexcept>
 #include "Acts/EventData/TrackParameters.hpp"
 #include "Acts/Geometry/GeometryContext.hpp"
 #include "Acts/Propagator/detail/ConstrainedStep.hpp"
@@ -76,6 +77,11 @@ class AtlasStepper {
           stepSize(ndir * std::abs(ssize)),
           fieldCache(mctx),
           geoContext(gctx) {
+      // Throw an exception if the navigation is set to anyDirection
+      if (ndir == anyDirection) {
+        throw std::invalid_argument("EigenStepper::State with anyDirection");
+      }
+
       // The rest of this constructor is copy&paste of AtlasStepper::update() -
       // this is a nasty but working solution for the stepper state without
       // functions

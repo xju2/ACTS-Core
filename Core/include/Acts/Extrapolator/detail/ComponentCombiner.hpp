@@ -20,10 +20,10 @@ namespace Acts {
 	struct ComponentCombiner{
 
 	  template< typename weight_parameter_t>
-		weight_parameter_t&	
+		weight_parameter_t*
 		operator()(const weight_parameter_t& uncombined1, const weight_parameter_t& uncombined2) const
 		{
-			return uncombined1;
+			return new weight_parameter_t;
 		} //end of operator()
 
 	};

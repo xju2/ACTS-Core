@@ -55,9 +55,35 @@ struct ComponentReduction
 //	result.distance.push_back ( klDist(trackMap.begin()->first,(++trackMap.begin())->first) );
 
 	using TrackParMap = typename std::remove_reference<decltype(trackMap)>::type;
+	// the aim merging map
 	TrackParMap& unmergedMap = trackMap;
+	// the empty map to merge
 	TrackParMap mergedMap;
+	size_t numberOfComponents = unmergedMap.size();
+	while ( numberOfComponents > constraintNum ){
+	  if( !unmergedMap.empty() ) unmergedMap.clear();
+	  while ( numberOfComponents > constraintNum && !unmergedMap.empty() ) {
+		if( unmergedMap.size() > 1 ){
+		  auto mergedComponentIter = pairWithMinimumDistance(trackMap);
+//		  if (mergedComponentIter){
+			auto& combinedComponent = *combiner(trackMap.begin()->first, mergedComponentIter->first);
+			unmergedMap.erase(mergedComponentIter);
+			unmergedMap.erase(trackMap.begin());
+			mergedMap.insert( std::make_pair(std::move(combinedComponent),unmergedMap.size()) );
+//		  }
+//		  else {
+//			unmergedMap.erase( trackMap.begin() );
+//		  }
+		  --numberOfComponents;
+		}
+		else{
+		  mergedMap.insert( std::move( *trackMap.begin() ));
+		}
+	  }
+	  if( unmergedMap.empty() && numberOfComponents > constraintNum ) unmergedMap = mergedMap; //move
+	}
 
+	/*
 	if( unmergedMap.size()+mergedMap.size() > constraintNum ) {
 	  if( unmergedMap.empty() ) unmergedMap.clear();
 		if( unmergedMap.size()+mergedMap.size() > constraintNum && !unmergedMap.empty() ){
@@ -69,6 +95,7 @@ struct ComponentReduction
 		}
 		if( unmergedMap.size()+mergedMap.size() > constraintNum) unmergedMap = mergedMap;
 	}
+	*/
 
 	}
   }
@@ -92,8 +119,7 @@ struct ComponentReduction
 			minmumDistSet = true;
 		  }
 	  }
-	  if( it_record == nullptr ) return nullptr;
-	  else return it;
+	  return it;
 
 	}
   } 

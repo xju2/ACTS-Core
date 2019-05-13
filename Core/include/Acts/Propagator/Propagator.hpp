@@ -61,6 +61,16 @@ struct PropagatorResult : private detail::Extendable<result_list...> {
 /// @tparam aborter_list_t List of abort conditions tested after each
 ///    propagation step using the current propagation and stepper state
 ///
+/// The propagator options are concentrating all per-call optional parts
+/// of the propagation setup:
+/// This starts with the configuration of the
+/// functionality per call, done with the ActionList<> and the AbortList<>
+/// templates. Then, it contains also the contextual information, i.e. the
+/// geometrical context and the magnetic field context of the call in case
+/// of multiple alignments or changing magnetic fields.
+/// Furthermore, it allows to the steering behavior including direction
+/// wrt momentum, target and overstep tolerances and maximum step size and
+/// propagation path
 template <typename action_list_t = ActionList<>,
           typename aborter_list_t = AbortList<>>
 struct PropagatorOptions {
@@ -108,7 +118,9 @@ struct PropagatorOptions {
     return eoptions;
   }
 
-  /// Propagation direction
+  /// Propagation direction with respect to momentum direction
+  /// Only forward / backward are allowed, anyDireciton would throw
+  /// an exception
   NavigationDirection direction = forward;
 
   /// The |pdg| code for (eventual) material integration - pion default
@@ -143,7 +155,7 @@ struct PropagatorOptions {
   size_t debugMsgWidth = 50;     ///< the mesage width
 
   // Configurations for Stepper
-  /// Tolerance for the error of the integration
+  /// Tolerance for the relative error of the integration
   double tolerance = 1e-4;
 
   /// Cut-off value for the step size

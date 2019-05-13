@@ -38,6 +38,11 @@ target_link_libraries (NavigatorTests PRIVATE ActsCore ActsTestsCommonHelpers ${
 add_test(NAME NavigatorUnitTests COMMAND NavigatorTests)
 acts_add_test_to_cdash_project (PROJECT ACore TEST NavigatorUnitTests TARGETS NavigatorTests)
 
+add_executable (OversteppingTests OversteppingTests.cpp)
+target_link_libraries (OversteppingTests PRIVATE ActsCore ActsTestsCommonHelpers ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+add_test(NAME OversteppingUnitTests COMMAND NavigatorTests)
+acts_add_test_to_cdash_project (PROJECT ACore TEST OversteppingUnitTests TARGETS OversteppingTests)
+
 add_executable (MaterialCollectionTests MaterialCollectionTests.cpp)
 target_link_libraries (MaterialCollectionTests PRIVATE ActsCore ActsTestsCommonHelpers ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 add_test(NAME MaterialCollectionUnitTests COMMAND MaterialCollectionTests)

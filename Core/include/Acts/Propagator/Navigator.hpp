@@ -398,7 +398,7 @@ class Navigator {
     return;
   }
 
- private:
+ protected:
   /// --------------------------------------------------------------------
   /// Initialize call - start of propagation
   ///

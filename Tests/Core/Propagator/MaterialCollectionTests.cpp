@@ -55,8 +55,7 @@ CylindricalTrackingGeometry cGeometry(tgContext);
 auto tGeometry = cGeometry();
 
 // create a navigator for this tracking geometry
-Navigator navigatorES(tGeometry);
-Navigator navigatorSL(tGeometry);
+Navigator navigator(tGeometry);
 
 using BField = ConstantBField;
 using StepCorrector = detail::RelativePathCorrector;
@@ -67,11 +66,10 @@ using StraightLinePropagator = Propagator<StraightLineStepper, Navigator>;
 const double Bz = 2. * units::_T;
 BField bField(0, 0, Bz);
 EigenStepper estepper(bField);
-EigenPropagator epropagator(std::move(estepper), std::move(navigatorES));
+EigenPropagator epropagator(std::move(estepper), navigator);
 
 StraightLineStepper slstepper;
-StraightLinePropagator slpropagator(std::move(slstepper),
-                                    std::move(navigatorSL));
+StraightLinePropagator slpropagator(std::move(slstepper), navigator);
 const int ntests = 500;
 const int skip = 0;
 bool debugModeFwd = false;

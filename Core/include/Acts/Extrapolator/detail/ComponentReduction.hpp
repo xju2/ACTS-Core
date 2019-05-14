@@ -31,7 +31,7 @@ struct ComponentReduction
   using Covariance = ActsSymMatrixD<5>;
 
   /// the number of component constrained in propagate
-  int constraintNum = 12;
+  static const int constraintNum = 12;
 
   template <typename propagator_state_t, typename stepper_t>
   void
@@ -49,11 +49,38 @@ struct ComponentReduction
     if (state.navigation.currentSurface
         && state.navigation.currentSurface->surfaceMaterial()) {
 		  
-	  // Get the multi bound parameter
+	//stepper.outPut(state.stepping);
+	
+	// Get the multi bound parameter
     auto  bs = stepper.boundState(state.stepping, *state.navigation.currentSurface, true);
 	auto& trackMap = std::get<MultipleBoundParameters>(bs).getTrackList();
 //	result.distance.push_back ( klDist(trackMap.begin()->first,(++trackMap.begin())->first) );
+	auto combinedParameter = combiner( state.stepping.geoContext, *state.navigation.currentSurface, trackMap.begin()->first,(++trackMap.begin())->first);
+	MultipleBoundParameters newMultiBoundPar((*state.navigation.currentSurface).getSharedPtr());
+	// lazy append
+	newMultiBoundPar.append( combinedParameter.first, combinedParameter.second );
+	// update the stateCol
+	stepper.update(state.stepping, newMultiBoundPar);
 
+	//stepper.outPut(state.stepping);
+
+	std::cout<<"print parameter "<<std::endl;
+	std::cout<<"parameters 1 "<<std::endl;
+	std::cout<<"par weight "<<trackMap.begin()->first.first<<std::endl;
+	std::cout<<"par        "<<trackMap.begin()->first.second->parameters()<<std::endl;
+	std::cout<<"cov 	  "<<*trackMap.begin()->first.second->covariance()<<std::endl;
+	std::cout<<"parameters 1 "<<std::endl;
+	std::cout<<"par weight "<<(++trackMap.begin())->first.first<<std::endl;
+	std::cout<<"par        "<<(++trackMap.begin())->first.second->parameters()<<std::endl;
+	std::cout<<"cov 	  "<<*(++trackMap.begin())->first.second->covariance()<<std::endl;
+	std::cout<<"after combine "<<std::endl;
+	std::cout<<"par weight "<<combinedParameter.first<<std::endl;
+	std::cout<<"par "<<combinedParameter.second->parameters()<<std::endl;
+	std::cout<<"cov "<<*combinedParameter.second->covariance()<<std::endl;
+	std::cout<<std::endl;
+
+
+	/*
 	using TrackParMap = typename std::remove_reference<decltype(trackMap)>::type;
 	// the aim merging map
 	TrackParMap& unmergedMap = trackMap;
@@ -82,24 +109,11 @@ struct ComponentReduction
 	  }
 	  if( unmergedMap.empty() && numberOfComponents > constraintNum ) unmergedMap = mergedMap; //move
 	}
-
-	/*
-	if( unmergedMap.size()+mergedMap.size() > constraintNum ) {
-	  if( unmergedMap.empty() ) unmergedMap.clear();
-		if( unmergedMap.size()+mergedMap.size() > constraintNum && !unmergedMap.empty() ){
-		  auto mergedComponentIter = pairWithMinimumDistance(trackMap);
-		  auto combinedComponent = combiner(trackMap.begin()->first, mergedComponentIter->first);
-		  unmergedMap.erase(mergedComponentIter);
-		  unmergedMap.erase(trackMap.begin());
-		  mergedMap.insert(std::make_pair(std::move(combinedComponent),unmergedMap.size()) );
-		}
-		if( unmergedMap.size()+mergedMap.size() > constraintNum) unmergedMap = mergedMap;
-	}
 	*/
 
 	}
   }
-
+/*
   template<typename TrackParMap>
 	auto 
   pairWithMinimumDistance(const TrackParMap& unmergedMap) const 
@@ -123,6 +137,7 @@ struct ComponentReduction
 
 	}
   } 
+  */
 
 };
 

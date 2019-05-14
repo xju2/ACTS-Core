@@ -102,7 +102,7 @@ namespace Test {
 	using ComponentReduction = detail::ComponentReduction;
 	using MultiMaterialEffect= MultiMaterialInteractor<detail::TunningEnergyEffect>;
 
-    PropagatorOptions<ActionList<MultiMaterialEffect,ComponentReduction>, AbortList<detail::EndOfWorldReached>>
+    PropagatorOptions<ActionList<MultiMaterialEffect,ComponentReduction>, AbortList<detail::EndOfWorldReached> >
         rOptions(tgContext, mfContext);
     rOptions.debug = debugMode;
 

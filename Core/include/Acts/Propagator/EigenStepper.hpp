@@ -307,7 +307,7 @@ public:
   /// @param [in,out] state State object that will be updated
   /// @param [in] pars Parameters that will be written into @p state
   void
-  update(State& state, const BoundParameters& pars) const;
+  update(State& state, const TrackParametersBase& pars) const;
 
   /// Method to update momentum, direction and p
   ///

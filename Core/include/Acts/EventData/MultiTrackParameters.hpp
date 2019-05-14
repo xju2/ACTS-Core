@@ -214,9 +214,27 @@ public:
   append(double weight, TrackParametersBase* pTrackBase)
   {
     WeightedTrackPars weight_parameter(
-        weight, std::unique_ptr<TrackParametersBase>(pTrackBase));
+        weight, std::unique_ptr<TrackParametersBase>(pTrackBase) );
     m_TrackList.insert(std::make_pair(std::move(weight_parameter), size()));
   }
+  /// @brief append a component to the track list
+  virtual void
+  append(double weight, std::unique_ptr<TrackParametersBase> pTrackBase)
+  {
+    WeightedTrackPars weight_parameter(
+        weight, std::unique_ptr<TrackParametersBase>(std::move(pTrackBase)) );
+    m_TrackList.insert(std::make_pair(std::move(weight_parameter), size()));
+  }
+
+  /*
+  virtual void
+  append(std::pair<>double weight, TrackParametersBase* pTrackBase)
+  {
+    WeightedTrackPars weight_parameter(
+        weight, std::unique_ptr<TrackParametersBase>(pTrackBase) );
+    m_TrackList.insert(std::make_pair(std::move(weight_parameter), size()));
+  }
+  */
 
   /// @brief get the trackList
   /// const

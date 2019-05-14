@@ -120,7 +120,7 @@ Acts::EigenStepper<B, C, E, A>::curvilinearState(State& state,
 template <typename B, typename C, typename E, typename A>
 void
 Acts::EigenStepper<B, C, E, A>::update(State& state,
-                                       const BoundParameters& pars) const
+                                       const TrackParametersBase& pars) const
 {
   const auto& mom = pars.momentum();
   state.pos       = pars.position();

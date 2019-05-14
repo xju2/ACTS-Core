@@ -96,14 +96,15 @@ namespace Test {
     SingleCurvilinearTrackParameters<ChargedPolicy> rStart(
         std::move(covPtr), rPos, rMom, 1.);
 
-    PropagatorOptions<ActionList<DebugOutput, MultiMaterialInteractor>,
+	using EmptyMultiMaterialInteractor = MultiMaterialInteractor<>;
+    PropagatorOptions<ActionList<DebugOutput, EmptyMultiMaterialInteractor>,
                       AbortList<detail::EndOfWorldReached>>
         rOptions(tgContext, mfContext);
     rOptions.debug = debugMode;
 
     auto result = multiPropagator.propagate(rStart, rOptions).value();
     auto numOfComponents
-        = result.template get<MultiMaterialInteractor::result_type>()
+        = result.template get<EmptyMultiMaterialInteractor::result_type>()
               .numComponents;
     if (debugMode) {
       const auto debugString
@@ -120,7 +121,7 @@ namespace Test {
     // Test for each surface all material interaction recorded are the same
     // because the component split don't change anything
     const auto& material_interactions_result
-        = result.template get<MultiMaterialInteractor::result_type>()
+        = result.template get<EmptyMultiMaterialInteractor::result_type>()
               .multiMaterialInteractions;
     for (const auto& materialInteractionPair : material_interactions_result) {
       const auto& materialInteractionVec = materialInteractionPair.second;

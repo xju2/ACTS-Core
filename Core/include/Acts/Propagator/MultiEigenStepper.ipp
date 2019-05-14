@@ -291,6 +291,36 @@ Acts::MultiEigenStepper<B, C, E, A>::curvilinearState(State& state,
 
 template <typename B, typename C, typename E, typename A>
 void
+Acts::MultiEigenStepper<B, C, E, A>::update(State& state,
+                                            const MultipleBoundParameters& pars) const
+{
+  auto& trackMap = pars.getTrackList();
+  size_t trackMapSize = trackMap.size();
+//  typename (decltype(trackMap)::const_iterator it = trackMap.begin();
+	auto it = trackMap.begin();
+
+  for (auto& tuple_state : state.stateCol) {
+	auto& singlestate = std::get<0>(tuple_state);
+	// Get the BoundParameters
+	if( it!= trackMap.end() ){
+	const double weight = it->first.first;
+//	const auto& boundPar = *it->first.second;
+	// update track state with new bound parameter
+	EigenStepper<B>::update(singlestate, *it->first.second);
+	// update track state weight 
+	std::get<1>(tuple_state) = weight;
+	++it;
+	}
+	else {
+	  std::get<2>(tuple_state) = StateStatus::DEAD; 
+	}
+  }
+  deleteComponents(state);
+  normalizeComponents(state);
+}
+
+template <typename B, typename C, typename E, typename A>
+void
 Acts::MultiEigenStepper<B, C, E, A>::update(SingleStateType& singlestate,
                                             const BoundParameters& pars) const
 {

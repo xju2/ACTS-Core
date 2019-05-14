@@ -260,7 +260,7 @@ struct MultiMaterialInteractor
     while (iComponent < mixture.size()) {
       // energy loss
       const double dE = mixture[iComponent].mean;
-	  std::cout<<"E+dE / m "<<E<<","<<dE<<" "<<m<<std::endl;
+//	  std::cout<<"E+dE / m "<<E<<","<<dE<<" "<<m<<std::endl;
 	  // when kinematically allowed
       if (E + dE > m) {
         // p

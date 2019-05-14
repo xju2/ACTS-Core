@@ -338,6 +338,10 @@ public:
              double      abortStep,
              cstep::Type type = cstep::aborter) const;
 
+  /// @brief update for the mulit state, update each singlestate to some parameters
+  void
+  update(State& state, const MultipleBoundParameters& pars) const;
+
   /// @brief update for the single state, update singlestate to some parameters
   void
   update(SingleStateType& singlestate, const BoundParameters& pars) const;

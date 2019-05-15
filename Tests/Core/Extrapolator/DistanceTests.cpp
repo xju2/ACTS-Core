@@ -107,8 +107,9 @@ namespace Test {
     rOptions.debug = debugMode;
 
     auto result = multiPropagator.propagate(rStart, rOptions).value();
-	std::vector<double> distance = result.get<ComponentReduction::result_type>().distance;
-	for( auto dis : distance ) std::cout<<"distance result "<<dis<<std::endl;
+
+	//std::vector<double> distance = result.get<ComponentReduction::result_type>().distance;
+	//for( auto dis : distance ) std::cout<<"distance result "<<dis<<std::endl;
   }
 }
 }

@@ -99,9 +99,27 @@ struct PropagatorState {
       return VoidIntersectionCorrector();
     }
 
-    bool surfaceReached(const State& state, const Surface* surface) const {
-      return surface->isOnSurface(tgContext, position(state), direction(state),
-                                  true);
+    /// Tests if the state reached a surface
+    ///
+    /// @param [in] state State that is tests
+    /// @param [in] surface Surface that is tested
+    ///
+    /// @return Boolean statement if surface is reached by state
+    SurfaceTarget surfaceReached(State& state, const Surface& surface) const {
+      /// intersect, and allow a on surface tolerance
+      auto intersect = surface.intersectionEstimate(
+          tgContext, position(state), direction(state), anyDirection, true);
+      // The surface is reached within tolerance
+      if (intersect and intersect.pathLength * intersect.pathLength <
+                            s_onSurfaceTolerance * s_onSurfaceTolerance) {
+        return SurfaceTarget::onSurface;
+      } else if (intersect) {
+        // The surface is not reached, update the target
+        state.stepSize.update(intersect.pathLength, Cstep::actor, true);
+        return intersect.pathLength > 0 ? SurfaceTarget::onApproach
+                                        : SurfaceTarget::overstepped;
+      }
+      return SurfaceTarget::missed;
     }
 
     BoundState boundState(State& state, const Surface& surface,

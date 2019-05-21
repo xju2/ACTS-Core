@@ -93,7 +93,7 @@ namespace concept {
         static_assert(momentum_exists, "momentum method not found");
         constexpr static bool charge_exists = has_method<const S, double, charge_t, const state&>;
         static_assert(charge_exists, "charge method not found");
-        constexpr static bool surface_reached_exists = has_method<const S, bool, surface_reached_t, const state&, const Surface*>;
+        constexpr static bool surface_reached_exists = has_method<const S, SurfaceTarget, surface_reached_t, state&, const Surface&>;
         static_assert(surface_reached_exists, "surfaceReached method not found");
         constexpr static bool bound_state_method_exists= has_method<const S, typename S::BoundState, bound_state_method_t, state&, const Surface&, bool>;
         static_assert(bound_state_method_exists, "boundState method not found");

@@ -117,11 +117,12 @@ class Navigator {
   using ExternalSurfaces = std::multimap<const Layer*, const Surface*>;
 
   /// The navigation stage
-  enum struct Stage : int {
+  enum struct TargetStage : int {
     undefined = 0,
-    surfaceTarget = 1,
-    layerTarget = 2,
-    boundaryTarget = 3
+    targetSet = 1,
+    surfaceTarget = 2,
+    layerTarget = 3,
+    boundaryTarget = 4
   };
 
   /// Constructor with shared tracking geometry
@@ -198,7 +199,7 @@ class Navigator {
     /// Navigation state : a break has been detected
     bool navigationBreak = false;
     // The navigation stage (@todo: integrate break, target)
-    Stage navigationStage = Stage::undefined;
+    TargetStage targetStage = TargetStage::undefined;
   };
 
   /// @brief Navigator status call, will be called in two modes
@@ -228,7 +229,7 @@ class Navigator {
     }
 
     // Set the navigation stage
-    state.navigation.navigationStage = Stage::undefined;
+    state.navigation.targetStage = TargetStage::undefined;
 
     // Call the navigation helper prior to actual navigation
     debugLog(state, [&] { return std::string("Entering navigator::status."); });
@@ -245,8 +246,10 @@ class Navigator {
 
     // (b) Status call within propagation loop
     // Try finding status of surfaces
-    if (status(state, stepper, state.navigation.navSurfaces,
-               state.navigation.navSurfaceIter)) {
+    SurfaceTarget sTarget =
+        checkStatus(state, stepper, state.navigation.navSurfaces,
+                    state.navigation.navSurfaceIter);
+    if (sTarget != SurfaceTarget::missed) {
       debugLog(state,
                [&] { return std::string("Status: in surface handling."); });
       if (state.navigation.currentSurface) {
@@ -257,12 +260,14 @@ class Navigator {
             state.navigation.navSurfaces.end()) {
           ++state.navigation.navLayerIter;
         }
+      } else {
+        // Set the navigation stage to surface target
+        state.navigation.targetStage = TargetStage::targetSet;
       }
-      // Set the navigation stage to surface target
-      state.navigation.navigationStage = Stage::surfaceTarget;
       // Try finding status of layer
-    } else if (status(state, stepper, state.navigation.navLayers,
-                      state.navigation.navLayerIter)) {
+    } else if (checkStatus(state, stepper, state.navigation.navLayers,
+                           state.navigation.navLayerIter) and
+               state.navigation.targetStage != TargetStage::targetSet) {
       debugLog(state,
                [&] { return std::string("Status: in layer handling."); });
       if (state.navigation.currentSurface != nullptr) {
@@ -273,16 +278,17 @@ class Navigator {
         auto navCorr = stepper.corrector(state.stepping);
         if (resolveSurfaces(state, stepper, navCorr)) {
           // Set the navigation stage back to surface handling
-          state.navigation.navigationStage = Stage::surfaceTarget;
+          state.navigation.targetStage = TargetStage::surfaceTarget;
           return;
         }
       } else {
         // Set the navigation stage to layer target
-        state.navigation.navigationStage = Stage::layerTarget;
+        state.navigation.targetStage = TargetStage::layerTarget;
       }
       // Try finding status of boundaries
-    } else if (status(state, stepper, state.navigation.navBoundaries,
-                      state.navigation.navBoundaryIter)) {
+    } else if (checkStatus(state, stepper, state.navigation.navBoundaries,
+                           state.navigation.navBoundaryIter) and
+               state.navigation.targetStage != TargetStage::targetSet) {
       debugLog(state,
                [&] { return std::string("Stauts: in boundary handling."); });
 
@@ -309,6 +315,10 @@ class Navigator {
             return std::string(
                 "No more volume to progress to, stopping navigation.");
           });
+          // if there was no target surface, this does count as target reached
+          if (state.navigation.targetSurface == nullptr) {
+            state.navigation.targetReached = true;
+          }
           // Navigation break & release navigation stepping
           state.navigation.navigationBreak = true;
           state.stepping.stepSize.release(Cstep::actor);
@@ -322,16 +332,21 @@ class Navigator {
         }
       } else {
         // Set the navigation stage back to boundary target
-        state.navigation.navigationStage = Stage::boundaryTarget;
+        state.navigation.targetStage = TargetStage::boundaryTarget;
       }
     } else if (state.navigation.currentVolume ==
-               state.navigation.targetVolume) {
+                   state.navigation.targetVolume and
+               state.navigation.targetStage != TargetStage::targetSet) {
       debugLog(state, [&] {
         return std::string("No further navigation action, proceed to target.");
       });
       // Set navigation break and release the navigation step size
       state.navigation.navigationBreak = true;
       state.stepping.stepSize.release(Cstep::actor);
+    } else if (state.navigation.targetStage == TargetStage::targetSet) {
+      debugLog(state, [&] {
+        return std::string("Current navigation surface not yet been hit.");
+      });
     } else {
       debugLog(state, [&] {
         return std::string("Status could not be determined - good luck.");
@@ -359,6 +374,11 @@ class Navigator {
       return;
     }
 
+    // Check if the target is set already - then don't do anything
+    if (state.navigation.targetStage == TargetStage::targetSet) {
+      return;
+    }
+
     // Call the navigation helper prior to actual navigation
     debugLog(state, [&] { return std::string("Entering navigator::target."); });
 
@@ -372,11 +392,11 @@ class Navigator {
     }
 
     // Try targeting the surfaces - then layers - then boundaries
-    if (state.navigation.navigationStage <= Stage::surfaceTarget and
+    if (state.navigation.targetStage <= TargetStage::surfaceTarget and
         targetSurfaces(state, stepper, navCorr)) {
       debugLog(state,
                [&] { return std::string("Target set to next surface."); });
-    } else if (state.navigation.navigationStage <= Stage::layerTarget and
+    } else if (state.navigation.targetStage <= TargetStage::layerTarget and
                targetLayers(state, stepper, navCorr)) {
       debugLog(state, [&] { return std::string("Target set to next layer."); });
     } else if (targetBoundaries(state, stepper, navCorr)) {
@@ -495,19 +515,28 @@ class Navigator {
   /// @return boolean return triggers exit to stepper
   template <typename propagator_state_t, typename stepper_t,
             typename navigation_surfaces_t, typename navigation_iter_t>
-  bool status(propagator_state_t& state, const stepper_t& stepper,
-              navigation_surfaces_t& navSurfaces,
-              const navigation_iter_t& navIter) const {
+  SurfaceTarget checkStatus(propagator_state_t& state, const stepper_t& stepper,
+                            navigation_surfaces_t& navSurfaces,
+                            const navigation_iter_t& navIter) const {
     // No surfaces, status check will be done on layer
     if (navSurfaces.empty() or navIter == navSurfaces.end()) {
-      return false;
+      return SurfaceTarget::missed;
     }
     // Take the current surface
     auto surface = navIter->representation;
+
+    debugLog(state, [&] {
+      std::stringstream dstream;
+      dstream << "Check status of surface ";
+      dstream << surface->geoID().toString();
+      return dstream.str();
+    });
+
     // Check if we are at a surface
     // If we are on the surface pointed at by the iterator, we can make
     // it the current one to pass it to the other actors
-    if (stepper.surfaceReached(state.stepping, surface)) {
+    SurfaceTarget sTarget = stepper.surfaceReached(state.stepping, *surface);
+    if (sTarget == SurfaceTarget::onSurface) {
       debugLog(state, [&] {
         return std::string("Status Surface successfully hit, storing it.");
       });
@@ -521,9 +550,24 @@ class Navigator {
           return dstream.str();
         });
       }
+    } else if (sTarget == SurfaceTarget::onApproach) {
+      debugLog(state, [&] {
+        return std::string("Surface not yet reached, re-set as target.");
+      });
+      state.navigation.targetStage = TargetStage::targetSet;
+    } else if (sTarget == SurfaceTarget::overstepped) {
+      debugLog(state, [&] {
+        return std::string(
+            "Surface target overstepped, re-set as (reverted) target.");
+      });
+      state.navigation.targetStage = TargetStage::targetSet;
+    } else {
+      debugLog(state, [&] {
+        return std::string("Surface can not be reached, dropping it.");
+      });
     }
     // Return a positive status: either on it, or on the way
-    return true;
+    return sTarget;
   }
 
   /// Loop over surface candidates here:
@@ -1181,8 +1225,9 @@ class Navigator {
         return true;
       }
       // the only advance could have been to the target
-      if (stepper.surfaceReached(state.stepping,
-                                 state.navigation.targetSurface)) {
+      SurfaceTarget sTarget = stepper.surfaceReached(
+          state.stepping, *state.navigation.targetSurface);
+      if (sTarget == SurfaceTarget::onSurface) {
         // set the target surface
         state.navigation.currentSurface = state.navigation.targetSurface;
 

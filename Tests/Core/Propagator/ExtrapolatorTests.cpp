@@ -308,15 +308,8 @@ BOOST_DATA_TEST_CASE(
   options.pathLimit = 1500. * units::_mm;
 
   const auto& status = epropagator.propagate(start, options).value();
-  // this test assumes state.options.loopFraction = 0.5
-  // maximum momentum allowed
-  double pmax = units::SI2Nat<units::MOMENTUM>(
-      options.pathLimit * bField.getField(pos).norm() / M_PI);
-  if (mom.norm() < pmax) {
-    BOOST_CHECK_LT(status.pathLength, options.pathLimit);
-  } else {
-    CHECK_CLOSE_REL(status.pathLength, options.pathLimit, 1e-3);
-  }
+
+  BOOST_CHECK_LT(status.pathLength, options.pathLimit);
 }
 
 }  // namespace Test

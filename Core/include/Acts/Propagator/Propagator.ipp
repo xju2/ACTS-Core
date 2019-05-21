@@ -58,7 +58,8 @@ auto Acts::Propagator<S, N>::propagate_impl(propagator_state_t& state) const
       // navigator status call - action list - aborter list - target call
       m_navigator.status(state, m_stepper);
       state.options.actionList(state, m_stepper, result);
-      if (state.options.abortList(result, state, m_stepper)) {
+      if (state.options.abortList(result, state, m_stepper) or
+          state.navigation.targetReached) {
         terminatedNormally = true;
         break;
       }

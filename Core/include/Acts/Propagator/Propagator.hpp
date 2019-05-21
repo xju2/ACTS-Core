@@ -141,6 +141,9 @@ struct PropagatorOptions {
   /// Required tolerance to reach target (surface, pathlength)
   double targetTolerance = s_onSurfaceTolerance;
 
+  /// Overstepping tolerance
+  double oversteppingTolerance = 1. * units::_mm;
+
   /// Loop protection step, it adapts the pathLimit
   bool loopProtection = true;
   double loopFraction = 0.5;  ///< Allowed loop fraction, 1 is a full loop

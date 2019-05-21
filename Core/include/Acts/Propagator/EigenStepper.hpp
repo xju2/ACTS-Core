@@ -214,9 +214,22 @@ class EigenStepper {
   /// @param [in] surface Surface that is tested
   ///
   /// @return Boolean statement if surface is reached by state
-  bool surfaceReached(const State& state, const Surface* surface) const {
-    return surface->isOnSurface(state.geoContext, position(state),
-                                direction(state), true);
+  SurfaceTarget surfaceReached(State& state, const Surface& surface) const {
+    /// intersect, and allow a on surface tolerance
+    auto intersect =
+        surface.intersectionEstimate(state.geoContext, position(state),
+                                     direction(state), anyDirection, true);
+    // The surface is reached within tolerance
+    if (intersect and intersect.pathLength * intersect.pathLength <
+                          s_onSurfaceTolerance * s_onSurfaceTolerance) {
+      return SurfaceTarget::onSurface;
+    } else if (intersect) {
+      // The surface is not reached, update the target
+      state.stepSize.update(intersect.pathLength, cstep::actor, true);
+      return intersect.pathLength > 0 ? SurfaceTarget::onApproach
+                                      : SurfaceTarget::overstepped;
+    }
+    return SurfaceTarget::missed;
   }
 
   /// Create and return the bound state at the current position

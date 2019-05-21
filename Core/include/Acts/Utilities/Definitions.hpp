@@ -38,6 +38,14 @@ static const double s_onSurfaceTolerance = 10e-5 * units::_mm;
 /// validity tested with IntegrationTests/PropagationTest
 static const double s_curvilinearProjTolerance = 0.999995;
 
+/// @enum SurfaceTarget
+enum SurfaceTarget : int {
+  missed = 0,
+  onApproach = 1,
+  overstepped = 2,
+  onSurface = 3
+};
+
 /// @enum NavigationDirection
 /// The navigation direciton is always with
 /// respect to a given momentum or direction

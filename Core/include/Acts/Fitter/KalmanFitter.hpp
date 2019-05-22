@@ -12,6 +12,7 @@
 #include <memory>
 #include "Acts/EventData/Measurement.hpp"
 #include "Acts/EventData/MeasurementHelpers.hpp"
+#include "Acts/EventData/MultiTrajectory.hpp"
 #include "Acts/EventData/TrackParameters.hpp"
 #include "Acts/EventData/TrackState.hpp"
 #include "Acts/EventData/TrackStateSorters.hpp"
@@ -224,7 +225,12 @@ class KalmanFitter {
     /// created for every propagation/extrapolation step
     struct this_result {
       // Fitted states that the actor has handled.
-      std::vector<TrackStateType> fittedStates = {};
+      MultiTrajectory<source_link_t> fittedStates;
+
+      // This is the index of the 'tip' of the track stored in multitrajectory.
+      // Since this KF only stores one trajectory, it is unambiguous.
+      // SIZE_MAX is the start of a trajectory.
+      size_t trackTip = SIZE_MAX;
 
       // The optional Parameters at the provided surface
       boost::optional<BoundParameters> fittedParameters;
@@ -337,28 +343,49 @@ class KalmanFitter {
         // Screen output message
         ACTS_VERBOSE("Measurement surface " << surface->geoID().toString()
                                             << " detected.");
+        // add a full TrackState entry multi trajectory
+        // (this allocates storage for all components, we will set them later)
+        result.trackTip = result.fittedStates.addTrackState(
+            TrackStatePropMask::All, result.trackTip);
 
-        // create track state on the vector from sourcelink
-        result.fittedStates.emplace_back(sourcelink_it->second);
-        TrackStateType& trackState = result.fittedStates.back();
+        // now get track state proxy back
+        auto trackState = result.fittedStates.getTrackState(result.trackTip);
+
+        // assign the source link to the track state
+        trackState.uncalibrated() = sourcelink_it->second;
 
         // Transport & bind the state to the current surface
-        std::tuple<BoundParameters,
-                   typename TrackStateType::Parameters::CovMatrix_t, double>
-            boundState = stepper.boundState(state.stepping, *surface, true);
+        auto [boundParams, jacobian, pathLength] =
+            stepper.boundState(state.stepping, *surface, true);
+
         // Fill the track state
-        trackState.parameter.predicted = std::get<0>(boundState);
-        trackState.parameter.jacobian = std::get<1>(boundState);
-        trackState.parameter.pathLength = std::get<2>(boundState);
+        trackState.predicted() = boundParams.parameters();
+        trackState.predictedCovariance() = *boundParams.covariance();
+        trackState.jacobian() = jacobian;
+        trackState.pathLength() = pathLength;
+
+        // We have predicted parameters, so calibrate the uncalibrated input
+        // measuerement
+        std::visit(
+            [&](const auto& calibrated) {
+              trackState.setCalibrated(calibrated);
+            },
+            m_calibrator(trackState.uncalibrated(), trackState.predicted()));
 
         // If the update is successful, set covariance and
         if (m_updater(state.geoContext, trackState)) {
           // Update the stepping state
           ACTS_VERBOSE("Filtering step successful, updated parameters are : \n"
-                       << *trackState.parameter.filtered);
-          // update stepping state using filtered parameters
-          // after kalman update
-          stepper.update(state.stepping, *trackState.parameter.filtered);
+                       << trackState.filtered().transpose());
+          // update stepping state using filtered parameters after kalman update
+          // We need to (re-)construct a BoundParameters instance here, which is
+          // a bit awkward.
+          // @TODO: Make this unnecessary
+          BoundParameters bPars(state.options.geoContext,
+                                std::make_unique<BoundParameters::CovMatrix_t>(
+                                    trackState.filteredCovariance()),
+                                trackState.filtered(), surface->getSharedPtr());
+          stepper.update(state.stepping, bPars);
         }
         // We count the processed state
         ++result.processedStates;
@@ -383,28 +410,27 @@ class KalmanFitter {
       // Remember you smoothed the track states
       result.smoothed = true;
 
-      // Sort the TrackStates according to the path length
-      TrackStatePathLengthSorter plSorter;
-      std::sort(result.fittedStates.begin(), result.fittedStates.end(),
-                plSorter);
       // Screen output for debugging
-      ACTS_VERBOSE("Apply smoothing on " << result.fittedStates.size()
-                                         << " filtered track states.");
-      // Smooth the track states and obtain the last smoothed track parameters
-      const auto& smoothedPars =
-          m_smoother(state.geoContext, result.fittedStates);
-      // Update the stepping parameters - in order to progress to destination
-      if (smoothedPars) {
-        // Update the stepping state
-        ACTS_VERBOSE(
-            "Smoothing successful, updating stepping state, "
-            "set target surface.");
-        stepper.update(state.stepping, smoothedPars.get());
-        // Reverse the propagation direction
-        state.stepping.stepSize =
-            detail::ConstrainedStep(-1. * state.options.maxStepSize);
-        state.options.direction = backward;
+      if (logger().doPrint(Logging::VERBOSE)) {
+        // need to count track states
+        size_t nStates = 0;
+        result.fittedStates.visitBackwards(result.trackTip,
+                                           [&](const auto) { nStates++; });
+        ACTS_VERBOSE("Apply smoothing on " << nStates
+                                           << " filtered track states.");
       }
+      // Smooth the track states and obtain the last smoothed track parameters
+      parameters_t smoothedPars =
+          m_smoother(state.geoContext, result.fittedStates, result.trackTip);
+      // Update the stepping parameters - in order to progress to destination
+      ACTS_VERBOSE(
+          "Smoothing successful, updating stepping state, "
+          "set target surface.");
+      stepper.update(state.stepping, smoothedPars);
+      // Reverse the propagation direction
+      state.stepping.stepSize =
+          detail::ConstrainedStep(-1. * state.options.maxStepSize);
+      state.options.direction = backward;
     }
 
     /// Pointer to a logger that is owned by the parent, KalmanFilter
@@ -425,6 +451,6 @@ class KalmanFitter {
     /// The Surface beeing
     detail::SurfaceReached targetReached;
   };
-};
+};  // namespace Acts
 
 }  // namespace Acts

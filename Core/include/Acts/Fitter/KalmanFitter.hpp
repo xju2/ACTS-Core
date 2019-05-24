@@ -20,6 +20,8 @@
 #include "Acts/MagneticField/MagneticFieldContext.hpp"
 #include "Acts/Propagator/AbortList.hpp"
 #include "Acts/Propagator/ActionList.hpp"
+#include "Acts/Propagator/MaterialInteractor.hpp"
+#include "Acts/Propagator/Navigator.hpp"
 #include "Acts/Propagator/Propagator.hpp"
 #include "Acts/Propagator/detail/ConstrainedStep.hpp"
 #include "Acts/Propagator/detail/StandardAborters.hpp"
@@ -160,8 +162,9 @@ class KalmanFitter {
     // Create the ActionList and AbortList
     using KalmanActor = Actor<source_link_t, parameters_t>;
     using KalmanResult = typename KalmanActor::result_type;
-    using Actors = ActionList<KalmanActor>;
-    using Aborters = AbortList<>;
+    using Actors = ActionList<MaterialInteractor<preInteraction>, KalmanActor,
+                              MaterialInteractor<postInteraction>>;
+    using Aborters = AbortList<detail::EndOfWorldReached>;
 
     // Create relevant options for the propagation options
     PropagatorOptions<Actors, Aborters> kalmanOptions(

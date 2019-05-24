@@ -69,12 +69,13 @@ class ApproachDescriptor {
   /// @param gpos is the position from start of the search
   /// @param gdir is the direction at the start of the search
   /// @param bcheck is the boundary check directive
+  /// @param bwdTolerance is the backward tolerance for the interseciton check
   /// @param correciton is the function pointer to a corrector
   ///
   /// @return is a surface intersection
   virtual ObjectIntersection<Surface> approachSurface(
       const GeometryContext& gctx, const Vector3D& pos, const Vector3D& gdir,
-      NavigationDirection navDir, const BoundaryCheck& bcheck,
+      const BoundaryCheck& bcheck, double bwdTolerance,
       CorrFnc correct = nullptr) const = 0;
 
   /// Tet to all the contained surfaces

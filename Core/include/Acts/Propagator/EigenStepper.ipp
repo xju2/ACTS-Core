@@ -270,7 +270,8 @@ Acts::Result<double> Acts::EigenStepper<B, C, E, A>::step(
     // If step size becomes too small the particle remains at the initial
     // place
     if (state.stepping.stepSize * state.stepping.stepSize <
-        state.options.stepSizeCutOff * state.options.stepSizeCutOff) {
+            state.options.stepSizeCutOff * state.options.stepSizeCutOff ||
+        state.stepping.stepSize == std::numeric_limits<double>::infinity()) {
       // Not moving due to too low momentum needs an aborter
       return EigenStepperError::StepSizeStalled;
     }

@@ -99,11 +99,11 @@ BOOST_AUTO_TEST_CASE(LineSurface_allNamedMethods_test) {
   //
   // intersectionEstimate
   const Vector3D direction{0., 1., 2.};
-  NavigationDirection navDir = anyDirection;
+  NavigationDirection navDir = forward;
   BoundaryCheck bcheck(false);
   auto intersection = line.intersectionEstimate(
-      tgContext, {0., 0., 0.}, direction.normalized(), navDir, bcheck);
-  BOOST_CHECK(intersection.valid);
+      tgContext, {0., 0., 0.}, navDir * direction.normalized(), bcheck, 0.);
+  BOOST_CHECK(intersection);
   Vector3D expectedIntersection(0, 1., 2.);
   CHECK_CLOSE_ABS(intersection.position, expectedIntersection,
                   1e-6);  // need more tests..

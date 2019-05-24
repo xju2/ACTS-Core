@@ -106,43 +106,10 @@ inline const RotationMatrix3D DiscSurface::initJacobianToLocal(
 
 inline Intersection DiscSurface::intersectionEstimate(
     const GeometryContext& gctx, const Vector3D& gpos, const Vector3D& gdir,
-    NavigationDirection navDir, const BoundaryCheck& bcheck,
-    CorrFnc correct) const {
-  // minimize the call to transform()
-  const auto& tMatrix = transform(gctx).matrix();
-  const Vector3D pnormal = tMatrix.block<3, 1>(0, 2).transpose();
-  const Vector3D pcenter = tMatrix.block<3, 1>(0, 3).transpose();
-  // return solution and path
-  Vector3D solution(0., 0., 0.);
-  double path = std::numeric_limits<double>::infinity();
-  // lemma : the solver -> should catch current values
-  auto solve = [&solution, &path, &pnormal, &pcenter, &navDir](
-                   const Vector3D& lpos, const Vector3D& ldir) -> bool {
-    double denom = ldir.dot(pnormal);
-    if (denom != 0.0) {
-      path = (pnormal.dot((pcenter - lpos))) / (denom);
-      solution = (lpos + path * ldir);
-    }
-    // is valid if it goes into the right direction
-    return ((navDir == 0) || path * navDir >= 0.);
-  };
-  // solve first
-  bool valid = solve(gpos, gdir);
-  // if configured to correct, do it and solve again
-  if (correct) {
-    // copy as the corrector may change them
-    Vector3D lposc = gpos;
-    Vector3D ldirc = gdir;
-    if (correct(lposc, ldirc, path)) {
-      valid = solve(lposc, ldirc);
-    }
-  }
-  // evaluate (if necessary in terms of boundaries)
-  // @todo: speed up isOnSurface - we know that it is on surface
-  //  all we need is to check if it's inside bounds in 3D space
-  valid = bcheck ? (valid && isOnSurface(gctx, solution, gdir, bcheck)) : valid;
-  // return the result
-  return Intersection(solution, path, valid);
+    const BoundaryCheck& bcheck, double bwdTolerance, CorrFnc correct) const {
+  // Call the common method for planar surfaces
+  return planarIntersectionEstimate(*this, gctx, gpos, gdir, bcheck,
+                                    bwdTolerance, correct);
 }
 
 inline const Vector3D DiscSurface::normal(const GeometryContext& gctx,

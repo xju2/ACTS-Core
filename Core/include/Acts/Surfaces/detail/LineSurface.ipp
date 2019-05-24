@@ -12,14 +12,14 @@
 
 inline void LineSurface::localToGlobal(const GeometryContext& gctx,
                                        const Vector2D& lpos,
-                                       const Vector3D& mom,
+                                       const Vector3D& gmom,
                                        Vector3D& gpos) const {
   const auto& sTransform = transform(gctx);
   const auto& tMatrix = sTransform.matrix();
   Vector3D lineDirection(tMatrix(0, 2), tMatrix(1, 2), tMatrix(2, 2));
 
   // get the vector perpendicular to the momentum and the straw axis
-  Vector3D radiusAxisGlobal(lineDirection.cross(mom));
+  Vector3D radiusAxisGlobal(lineDirection.cross(gmom));
   Vector3D locZinGlobal = sTransform * Vector3D(0., 0., lpos[eLOC_Z]);
   // add eLOC_R * radiusAxis
   gpos = Vector3D(locZinGlobal + lpos[eLOC_R] * radiusAxisGlobal.normalized());
@@ -27,7 +27,7 @@ inline void LineSurface::localToGlobal(const GeometryContext& gctx,
 
 inline bool LineSurface::globalToLocal(const GeometryContext& gctx,
                                        const Vector3D& gpos,
-                                       const Vector3D& mom,
+                                       const Vector3D& gmom,
                                        Vector2D& lpos) const {
   using VectorHelpers::perp;
 
@@ -41,7 +41,7 @@ inline bool LineSurface::globalToLocal(const GeometryContext& gctx,
   Vector3D sCenter(tMatrix(0, 3), tMatrix(1, 3), tMatrix(2, 3));
   Vector3D decVec(gpos - sCenter);
   // assign the right sign
-  double sign = ((lineDirection.cross(mom)).dot(decVec) < 0.) ? -1. : 1.;
+  double sign = ((lineDirection.cross(gmom)).dot(decVec) < 0.) ? -1. : 1.;
   lpos[eLOC_R] *= sign;
   return true;
 }
@@ -52,11 +52,11 @@ inline std::string LineSurface::name() const {
 
 inline const RotationMatrix3D LineSurface::referenceFrame(
     const GeometryContext& gctx, const Vector3D& /*unused*/,
-    const Vector3D& mom) const {
+    const Vector3D& gmom) const {
   RotationMatrix3D mFrame;
   const auto& tMatrix = transform(gctx).matrix();
   Vector3D measY(tMatrix(0, 2), tMatrix(1, 2), tMatrix(2, 2));
-  Vector3D measX(measY.cross(mom).normalized());
+  Vector3D measX(measY.cross(gmom).normalized());
   Vector3D measDepth(measX.cross(measY));
   // assign the columnes
   mFrame.col(0) = measX;
@@ -67,18 +67,18 @@ inline const RotationMatrix3D LineSurface::referenceFrame(
 }
 
 inline double LineSurface::pathCorrection(const GeometryContext& /*unused*/,
-                                          const Vector3D& /*pos*/,
-                                          const Vector3D& /*mom*/) const {
+                                          const Vector3D& /*unused*/,
+                                          const Vector3D& /*unused*/) const {
   return 1.;
 }
 
 inline const Vector3D LineSurface::binningPosition(
-    const GeometryContext& gctx, BinningValue /*bValue*/) const {
+    const GeometryContext& gctx, BinningValue /*unused*/) const {
   return center(gctx);
 }
 
 inline const Vector3D LineSurface::normal(const GeometryContext& gctx,
-                                          const Vector2D& /*lpos*/) const {
+                                          const Vector2D& /*unused*/) const {
   const auto& tMatrix = transform(gctx).matrix();
   return Vector3D(tMatrix(0, 2), tMatrix(1, 2), tMatrix(2, 2));
 }
@@ -92,8 +92,7 @@ inline const SurfaceBounds& LineSurface::bounds() const {
 
 inline Intersection LineSurface::intersectionEstimate(
     const GeometryContext& gctx, const Vector3D& gpos, const Vector3D& gdir,
-    NavigationDirection navDir, const BoundaryCheck& bcheck,
-    CorrFnc correct) const {
+    const BoundaryCheck& bcheck, double bwdTolerance, CorrFnc correct) const {
   // following nominclature found in header file and doxygen documentation
   // line one is the straight track
   Vector3D ma = gpos;
@@ -106,14 +105,32 @@ inline Intersection LineSurface::intersectionEstimate(
   Vector3D mab(mb - ma);
   double eaTeb = ea.dot(eb);
   double denom = 1 - eaTeb * eaTeb;
+
+  //  lemma not to evaluate the intersection status
+  auto status = [&bwdTolerance](double path) -> IntersectionStatus {
+    if (path * path > 0.) {
+      return IntersectionStatus::reachable;
+    }
+    if (path * path < bwdTolerance * bwdTolerance) {
+      return IntersectionStatus::overstepped;
+    }
+    if (path * path < s_onSurfaceTolerance * s_onSurfaceTolerance) {
+      return IntersectionStatus::onSurface;
+    }
+    return IntersectionStatus::unreachable;
+  };
+
   // validity parameter
-  bool valid = false;
+  auto istatus = IntersectionStatus::unreachable;
+
+  // evaluate validaty in terms of bounds
+  Vector3D result{0., 0., 0.};
+
   if (denom * denom > s_onSurfaceTolerance * s_onSurfaceTolerance) {
     double u = (mab.dot(ea) - mab.dot(eb) * eaTeb) / denom;
-    // evaluate in terms of direction
-    valid = (navDir * u >= 0);
+    istatus = status(u);
     // evaluate validaty in terms of bounds
-    Vector3D result = (ma + u * ea);
+    result = (ma + u * ea);
     // update if you have a correction
     if (correct && correct(ma, ea, u)) {
       // update everything that is in relation to ea
@@ -123,25 +140,27 @@ inline Intersection LineSurface::intersectionEstimate(
         u = (mab.dot(ea) - mab.dot(eb) * eaTeb) / denom;
         result = (ma + u * ea);
         // if you have specified a navigation direction, valid mean path > 0.
-        valid = (navDir * u >= 0);
-      } else {
-        valid = false;
+        istatus = status(u);
       }
     }
-    // it just needs to be a insideBounds() check
-    // @todo there should be a faster check possible
-    valid = bcheck ? (valid && isOnSurface(gctx, result, gdir, bcheck)) : valid;
+    // Evaluate boundaries if necessary, since the solution was done in global
+    // frame a global to local is necessary for the boundary check
+    if (bcheck && istatus != IntersectionStatus::unreachable) {
+      istatus = isOnSurface(gctx, result, gdir, bcheck)
+                    ? istatus
+                    : IntersectionStatus::missed;
+    }
     // return the result with validity
-    return Intersection(result, u, valid);
+    return Intersection(result, u, istatus);
   }
   // return a false intersection
-  return Intersection(gpos, std::numeric_limits<double>::max(), false);
+  return Intersection(gpos, std::numeric_limits<double>::max(), istatus);
 }
 
 inline void LineSurface::initJacobianToGlobal(const GeometryContext& gctx,
                                               BoundToFreeMatrix& jacobian,
                                               const Vector3D& gpos,
-                                              const Vector3D& dir,
+                                              const Vector3D& gdir,
                                               const BoundVector& pars) const {
   // The trigonometry required to convert the direction to spherical
   // coordinates and then compute the sines and cosines again can be
@@ -149,9 +168,9 @@ inline void LineSurface::initJacobianToGlobal(const GeometryContext& gctx,
   //
   // Here, we can avoid it because the direction is by definition a unit
   // vector, with the following coordinate conversions...
-  const double x = dir(0);  // == cos(phi) * sin(theta)
-  const double y = dir(1);  // == sin(phi) * sin(theta)
-  const double z = dir(2);  // == cos(theta)
+  const double x = gdir(0);  // == cos(phi) * sin(theta)
+  const double y = gdir(1);  // == sin(phi) * sin(theta)
+  const double z = gdir(2);  // == cos(theta)
 
   // ...which we can invert to directly get the sines and cosines:
   const double cos_theta = z;
@@ -160,7 +179,7 @@ inline void LineSurface::initJacobianToGlobal(const GeometryContext& gctx,
   const double cos_phi = x * inv_sin_theta;
   const double sin_phi = y * inv_sin_theta;
   // retrieve the reference frame
-  const auto rframe = referenceFrame(gctx, gpos, dir);
+  const auto rframe = referenceFrame(gctx, gpos, gdir);
   // the local error components - given by the reference frame
   jacobian.topLeftCorner<3, 2>() = rframe.topLeftCorner<3, 2>();
   // the momentum components
@@ -173,7 +192,7 @@ inline void LineSurface::initJacobianToGlobal(const GeometryContext& gctx,
   jacobian(7, eT) = 1;
 
   // the projection of direction onto ref frame normal
-  double ipdn = 1. / dir.dot(rframe.col(2));
+  double ipdn = 1. / gdir.dot(rframe.col(2));
   // build the cross product of d(D)/d(ePHI) components with y axis
   auto dDPhiY = rframe.block<3, 1>(0, 1).cross(jacobian.block<3, 1>(3, ePHI));
   // and the same for the d(D)/d(eTheta) components
@@ -189,15 +208,15 @@ inline void LineSurface::initJacobianToGlobal(const GeometryContext& gctx,
 }
 
 inline const BoundRowVector LineSurface::derivativeFactors(
-    const GeometryContext& gctx, const Vector3D& pos, const Vector3D& dir,
+    const GeometryContext& gctx, const Vector3D& gpos, const Vector3D& gdir,
     const RotationMatrix3D& rft, const BoundToFreeMatrix& jac) const {
   // the vector between position and center
-  ActsRowVectorD<3> pc = (pos - center(gctx)).transpose();
+  ActsRowVectorD<3> pc = (gpos - center(gctx)).transpose();
   // the longitudinal component vector (alogn local z)
   ActsRowVectorD<3> locz = rft.block<1, 3>(1, 0);
   // build the norm vector comonent by subtracting the longitudinal one
-  double long_c = locz * dir;
-  ActsRowVectorD<3> norm_vec = dir.transpose() - long_c * locz;
+  double long_c = locz * gdir;
+  ActsRowVectorD<3> norm_vec = gdir.transpose() - long_c * locz;
   // calculate the s factors for the dependency on X
   const BoundRowVector s_vec = norm_vec * jac.topLeftCorner<3, BoundParsDim>();
   // calculate the d factors for the dependency on Tx

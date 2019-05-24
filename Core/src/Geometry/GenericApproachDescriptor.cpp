@@ -1,6 +1,6 @@
 // This file is part of the Acts project.
 //
-// Copyright (C) 2018 CERN for the benefit of the Acts project
+// Copyright (C) 2018-2019 CERN for the benefit of the Acts project
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -19,28 +19,21 @@ void Acts::GenericApproachDescriptor::registerLayer(const Layer& lay) {
 }
 
 Acts::ObjectIntersection<Acts::Surface>
-Acts::GenericApproachDescriptor::approachSurface(const GeometryContext& gctx,
-                                                 const Vector3D& gpos,
-                                                 const Vector3D& gdir,
-                                                 NavigationDirection navDir,
-                                                 const BoundaryCheck& bcheck,
-                                                 CorrFnc corrfnc) const {
+Acts::GenericApproachDescriptor::approachSurface(
+    const GeometryContext& gctx, const Vector3D& gpos, const Vector3D& gdir,
+    const BoundaryCheck& bcheck, double bwdTolerance, CorrFnc corrfnc) const {
   // the intersection estimates
   std::vector<ObjectIntersection<Surface>> sIntersections;
   sIntersections.reserve(m_surfaceCache.size());
   for (auto& sf : m_surfaceCache) {
     // intersect
-    auto intersection =
-        sf->intersectionEstimate(gctx, gpos, gdir, navDir, bcheck, corrfnc);
-    sIntersections.push_back(
-        ObjectIntersection<Surface>(intersection, sf, navDir));
+    auto intersection = sf->intersectionEstimate(gctx, gpos, gdir, bcheck,
+                                                 bwdTolerance, corrfnc);
+    sIntersections.push_back(ObjectIntersection<Surface>(intersection, sf));
   }
   // sort depedning on the navigation direction
-  if (navDir == forward) {
-    std::sort(sIntersections.begin(), sIntersections.end());
-  } else {
-    std::sort(sIntersections.begin(), sIntersections.end(), std::greater<>());
-  }
+  std::sort(sIntersections.begin(), sIntersections.end());
+
   // return what you have
   return (*sIntersections.begin());
 }

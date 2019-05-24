@@ -54,7 +54,11 @@ struct NavigationOptions {
   /// Target surface to exclude
   const Surface* targetSurface = nullptr;
 
+  /// The path limit used for the navigation checks
   double pathLimit = std::numeric_limits<double>::max();
+
+  /// Overstep options
+  double overstepLimit = s_onSurfaceTolerance;
 
   /// Constructor
   ///
@@ -581,7 +585,7 @@ class Navigator {
 
     // Create the navigaton options, the surfaces have initially be ordered
     // so, to catch overstepping anyDirection is allowed here
-    NavigationOptions<Surface> navOpts(anyDirection, true);
+    NavigationOptions<Surface> navOpts(forward, true);
     navOpts.pathLimit = state.stepping.stepSize.value(Cstep::aborter);
 
     // Loop over the navigation surfaces

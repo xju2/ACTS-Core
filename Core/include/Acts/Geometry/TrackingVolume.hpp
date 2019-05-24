@@ -46,11 +46,11 @@ using LayerArray = BinnedArray<LayerPtr>;
 using LayerVector = std::vector<LayerPtr>;
 
 // full intersection with Layer
-using LayerIntersection = FullIntersection<Layer, Surface>;
+using LayerIntersection = ObjectIntersection<Layer, Surface>;
 
 // full intersection with surface
 using BoundaryIntersection =
-    FullIntersection<BoundarySurfaceT<TrackingVolume>, Surface>;
+    ObjectIntersection<BoundarySurfaceT<TrackingVolume>, Surface>;
 
 /// @class TrackingVolume
 ///

@@ -154,10 +154,8 @@ struct SurfaceReached {
     if (state.navigation.targetReached) {
       return true;
     }
-    // Check if the cache filled the currentSurface - or if we are on the
-    // surface
-    // @todo - do not apply the isOnSurface check here, but handle by the
-    // intersectionEstimate
+    // If we have a currentSurface and this one is the targetSurface
+    // the surface is reached
     if ((state.navigation.currentSurface &&
          state.navigation.currentSurface == &targetSurface)) {
       targetDebugLog(state, "x", [&] {
@@ -168,17 +166,22 @@ struct SurfaceReached {
       state.navigation.targetReached = true;
       return true;
     }
-    // Calculate the distance to the surface
+
+    // Calculate the distance to the target surface
     const double tolerance = state.options.targetTolerance;
+
+    // Get the intersection
     const auto intersection = targetSurface.intersectionEstimate(
         state.geoContext, stepper.position(state.stepping),
-        stepper.direction(state.stepping), anyDirection);
-    const double distance = intersection.pathLength;
+        state.options.direction * stepper.direction(state.stepping),
+        state.options.targetBoundaryCheck, state.options.overstepLimit);
+
+    double distance = intersection.pathLength;
     // Adjust the step size so that we cannot cross the target surface
     state.stepping.stepSize.update(distance, ConstrainedStep::aborter);
-    // return true if you fall below tolerance
-    bool targetReached = (distance * distance <= tolerance * tolerance);
-    if (targetReached) {
+
+    if (intersection.status == IntersectionStatus::onSurface) {
+      // Screen output
       targetDebugLog(state, "x", [&] {
         std::stringstream dstream;
         dstream << "Target surface reached at distance (tolerance) ";
@@ -195,17 +198,35 @@ struct SurfaceReached {
       });
       // reaching the target calls a navigation break
       state.navigation.targetReached = true;
-    } else {
+
+    } else if (intersection.status == IntersectionStatus::reachable) {
       targetDebugLog(state, "o", [&] {
+        /// update the step size
         std::stringstream dstream;
+        dstream << "Target surface reachable ..." << '\n';
         dstream << "Target stepSize (surface) updated to ";
         dstream << state.stepping.stepSize.toString();
         return dstream.str();
       });
+    } else if (intersection.status == IntersectionStatus::overstepped) {
+      targetDebugLog(state, "o", [&] {
+        /// update the step size
+        std::stringstream dstream;
+        dstream << "Target surface overstepped ..." << '\n';
+        dstream << "Target stepSize (surface) updated to ";
+        dstream << state.stepping.stepSize.toString();
+        return dstream.str();
+      });
+    } else {
+      /// update the step size
+      targetDebugLog(state, "o", [&] {
+        std::stringstream dstream;
+        dstream << "Target surface can not be reached ...";
+        return dstream.str();
+      });
     }
-
     // path limit check
-    return targetReached;
+    return state.navigation.targetReached;
   }
 };
 

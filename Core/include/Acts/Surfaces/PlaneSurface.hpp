@@ -18,6 +18,7 @@
 #include "Acts/Surfaces/InfiniteBounds.hpp"
 #include "Acts/Surfaces/PlanarBounds.hpp"
 #include "Acts/Surfaces/Surface.hpp"
+#include "Acts/Surfaces/detail/PlanarHelper.hpp"
 #include "Acts/Utilities/Definitions.hpp"
 
 namespace Acts {
@@ -137,26 +138,26 @@ class PlaneSurface : public Surface {
   /// @param gctx The current geometry context object, e.g. alignment
   /// @param gpos global 3D position - considered to be on surface but not
   /// inside bounds (check is done)
-  /// @param mom global 3D momentum representation (optionally ignored)
+  /// @param gmom global 3D momentum representation (optionally ignored)
   /// @param lpos local 2D position to be filled (given by reference for method
   /// symmetry)
   ///
   /// @return boolean indication if operation was successful (fail means global
   /// position was not on surface)
   bool globalToLocal(const GeometryContext& gctx, const Vector3D& gpos,
-                     const Vector3D& mom, Vector2D& lpos) const override;
+                     const Vector3D& gmom, Vector2D& lpos) const override;
 
   /// Method that calculates the correction due to incident angle
   ///
   /// @param pos global 3D position - considered to be on surface but not
   /// inside bounds (check is done)
-  /// @param mom global 3D momentum representation (optionally ignored)
+  /// @param gmom global 3D momentum representation (optionally ignored)
   ///
   /// @note this is the final implementation of the pathCorrection function
   ///
   /// @return a double representing the scaling factor
   double pathCorrection(const GeometryContext& gctx, const Vector3D& pos,
-                        const Vector3D& mom) const final;
+                        const Vector3D& gmom) const final;
 
   /// @brief Straight line intersection schema
   ///
@@ -164,8 +165,9 @@ class PlaneSurface : public Surface {
   /// @param gpos The start position of the intersection attempt
   /// @param gdir The direction of the interesection attempt,
   ///       @note expected to be normalized
-  /// @param navDir The navigation direction with respect to the momentum
   /// @param bcheck The boundary check directive
+  /// @param bwdTolerance a tolerance for which an intersection is accepted
+  ///        in opposite direction
   /// @param correct is a corrector function (e.g. for curvature correction)
   ///
   /// <b>mathematical motivation:</b>
@@ -188,8 +190,8 @@ class PlaneSurface : public Surface {
   /// @return the Intersection object
   Intersection intersectionEstimate(const GeometryContext& gctx,
                                     const Vector3D& gpos, const Vector3D& gdir,
-                                    NavigationDirection navDir = forward,
                                     const BoundaryCheck& bcheck = false,
+                                    double bwdTolerance = s_onSurfaceTolerance,
                                     CorrFnc correct = nullptr) const final;
 
   /// Return properly formatted class name for screen output

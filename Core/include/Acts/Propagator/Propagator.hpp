@@ -93,7 +93,9 @@ struct PropagatorOptions {
     eoptions.maxSteps = maxSteps;
     eoptions.maxStepSize = maxStepSize;
     eoptions.targetTolerance = targetTolerance;
+    eoptions.targetBoundaryCheck = targetBoundaryCheck;
     eoptions.pathLimit = pathLimit;
+    eoptions.overstepLimit = overstepLimit;
     eoptions.loopProtection = loopProtection;
     eoptions.loopFraction = loopFraction;
     // Output option
@@ -108,7 +110,7 @@ struct PropagatorOptions {
     return eoptions;
   }
 
-  /// Propagation direction
+  /// Propagation direction: forward/backward w.r.t momentum
   NavigationDirection direction = forward;
 
   /// The |pdg| code for (eventual) material integration - pion default
@@ -126,8 +128,14 @@ struct PropagatorOptions {
   /// Absolute maximum path length
   double pathLimit = std::numeric_limits<double>::max();
 
+  /// Absolute allowed overstepping limit
+  double overstepLimit = 0.1 * units::_mm;
+
   /// Required tolerance to reach target (surface, pathlength)
   double targetTolerance = s_onSurfaceTolerance;
+
+  /// Target Boundary check
+  BoundaryCheck targetBoundaryCheck = true;
 
   /// Loop protection step, it adapts the pathLimit
   bool loopProtection = true;

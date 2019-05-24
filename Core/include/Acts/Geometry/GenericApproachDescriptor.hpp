@@ -57,12 +57,13 @@ class GenericApproachDescriptor : public ApproachDescriptor {
   /// @param gpos is the global position to start the approach from
   /// @param gdir is the momentum vector
   /// @param bcheck is the boundary check prescription
+  /// @param bwdTolerance is the backward tolerance
   /// @param corrfnc is an noption correction function
   ///
   /// @return : a boolean indicating if an actual intersection had been tried
   ObjectIntersection<Surface> approachSurface(
       const GeometryContext& gctx, const Vector3D& gpos, const Vector3D& gdir,
-      NavigationDirection navDir, const BoundaryCheck& bcheck,
+      const BoundaryCheck& bcheck, double bwdTolerance,
       CorrFnc corrfnc = nullptr) const override;
 
   /// return all contained surfaces of this approach descriptor

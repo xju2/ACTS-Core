@@ -18,6 +18,7 @@
 #include "Acts/Surfaces/InfiniteBounds.hpp"
 #include "Acts/Surfaces/PolyhedronRepresentation.hpp"
 #include "Acts/Surfaces/Surface.hpp"
+#include "Acts/Surfaces/detail/PlanarHelper.hpp"
 #include "Acts/Utilities/Definitions.hpp"
 
 namespace Acts {
@@ -156,13 +157,13 @@ class DiscSurface : public Surface {
   ///
   /// @param gctx The current geometry context object, e.g. alignment
   /// @param lpos local 2D posittion in specialized surface frame
-  /// @param mom global 3D momentum representation (optionally ignored)
+  /// @param gmom global 3D momentum representation (optionally ignored)
   /// @param gpos global 3D position to be filled (given by reference for method
   /// symmetry)
   ///
   /// @note the momentum is ignored for Disc surfaces in this calculateion
   void localToGlobal(const GeometryContext& gctx, const Vector2D& lpos,
-                     const Vector3D& mom, Vector3D& gpos) const final;
+                     const Vector3D& gmom, Vector3D& gpos) const final;
 
   /// Global to local transformation
   /// @note the momentum is ignored for Disc surfaces in this calculateion
@@ -170,14 +171,14 @@ class DiscSurface : public Surface {
   /// @param gctx The current geometry context object, e.g. alignment
   /// @param gpos global 3D position - considered to be on surface but not
   /// inside bounds (check is done)
-  /// @param mom global 3D momentum representation (optionally ignored)
+  /// @param gmom global 3D momentum representation (optionally ignored)
   /// @param lpos local 2D position to be filled (given by reference for method
   /// symmetry)
   ///
   /// @return boolean indication if operation was successful (fail means global
   /// position was not on surface)
   bool globalToLocal(const GeometryContext& gctx, const Vector3D& gpos,
-                     const Vector3D& mom, Vector2D& lpos) const final;
+                     const Vector3D& gmom, Vector2D& lpos) const final;
 
   /// Special method for DiscSurface : local<->local transformations polar <->
   /// cartesian
@@ -199,20 +200,20 @@ class DiscSurface : public Surface {
   /// cartesian
   ///
   /// @param gctx The current geometry context object, e.g. alignment
-  /// @param locpol is a local position in polar coordinates
+  /// @param lpolar is a local position in polar coordinates
   ///
   /// @return values is local 2D position in cartesian coordinates
-  const Vector2D localPolarToLocalCartesian(const Vector2D& locpol) const;
+  const Vector2D localPolarToLocalCartesian(const Vector2D& lpolar) const;
 
   /// Special method for DiscSurface :  local<->global transformation when
   /// provided cartesian coordinates
   ///
   /// @param gctx The current geometry context object, e.g. alignment
-  /// @param lpos is local 2D position in cartesian coordinates
+  /// @param lcart is local 2D position in cartesian coordinates
   ///
   /// @return value is a global cartesian 3D position
   const Vector3D localCartesianToGlobal(const GeometryContext& gctx,
-                                        const Vector2D& lpos) const;
+                                        const Vector2D& lcart) const;
 
   /// Special method for DiscSurface : global<->local from cartesian coordinates
   ///
@@ -233,12 +234,12 @@ class DiscSurface : public Surface {
   /// @param gctx The current geometry context object, e.g. alignment
   /// @param jacobian The jacobian to be initialized
   /// @param gpos The global position of the parameters
-  /// @param dir The direction at of the parameters
+  /// @param gdir The direction at of the parameters
   ///
   /// @param pars The paranmeters vector
   void initJacobianToGlobal(const GeometryContext& gctx,
                             BoundToFreeMatrix& jacobian, const Vector3D& gpos,
-                            const Vector3D& dir,
+                            const Vector3D& gdir,
                             const BoundVector& pars) const final;
 
   /// Initialize the jacobian from global to local
@@ -249,33 +250,32 @@ class DiscSurface : public Surface {
   /// @param gctx The current geometry context object, e.g. alignment
   /// @param jacobian The jacobian to be initialized
   /// @param gpos The global position of the parameters
-  /// @param dir The direction at of the parameters
+  /// @param gdir The direction at of the parameters
   ///
   /// @return the transposed reference frame (avoids recalculation)
   const RotationMatrix3D initJacobianToLocal(const GeometryContext& gctx,
                                              FreeToBoundMatrix& jacobian,
                                              const Vector3D& gpos,
-                                             const Vector3D& dir) const final;
+                                             const Vector3D& gdir) const final;
 
   /// Path correction due to incident of the track
   ///
   /// @param gctx The current geometry context object, e.g. alignment
-  /// @param pos The global position as a starting point
-  /// @param mom The global momentum at the starting point
+  /// @param gpos The global position as a starting point
+  /// @param gmom The global momentum at the starting point
   /// @return The correction factor due to incident
-  double pathCorrection(const GeometryContext& gctx, const Vector3D& pos,
-                        const Vector3D& mom) const final;
+  double pathCorrection(const GeometryContext& gctx, const Vector3D& gpos,
+                        const Vector3D& gmom) const final;
 
   /// @brief Straight line intersection schema
-  ///
-  /// navDir=anyDirection is to provide the closest solution
   ///
   /// @param gctx The current geometry context object, e.g. alignment
   /// @param gpos The global position as a starting point
   /// @param gdir The global direction at the starting point
   ///        @note expected to be normalized (no checking)
-  /// @param navDir is a navigation direction
   /// @param bcheck The boundary check prescription
+  /// @param bwdTolerance a tolerance for which an intersection is accepted
+  ///        in opposite direction
   /// @param correct is a corrector function (e.g. for curvature correction)
   ///
   ///  <b>mathematical motivation:</b>
@@ -297,8 +297,8 @@ class DiscSurface : public Surface {
   /// @return is the surface intersection object
   Intersection intersectionEstimate(const GeometryContext& gctx,
                                     const Vector3D& gpos, const Vector3D& gdir,
-                                    NavigationDirection navDir = forward,
                                     const BoundaryCheck& bcheck = false,
+                                    double bwdTolerance = s_onSurfaceTolerance,
                                     CorrFnc correct = nullptr) const final;
 
   /// Return properly formatted class name for screen output

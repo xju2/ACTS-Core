@@ -242,27 +242,22 @@ const SurfaceIntersection Layer::surfaceOnApproach(
       // in a connected geometry this is only a pointer comparison
       if (options.startObject &&
           asf == &(options.startObject->surfaceRepresentation())) {
-        Intersection nIntersection(position, 0., true);
-        return SurfaceIntersection(nIntersection, asf, options.navDir);
+        Intersection nIntersection(position, 0., IntersectionStatus::onSurface);
+        return SurfaceIntersection(nIntersection, asf);
       }
     }
     // that's the collect trigger for always collecting
     // let's find the most suitable approach surface
     SurfaceIntersection aSurface = m_approachDescriptor->approachSurface(
-        gctx, position, direction, options.navDir, options.boundaryCheck,
-        corrfnc);
-    if (aSurface.intersection.valid) {
+        gctx, position, options.navDir * direction, options.boundaryCheck,
+        options.overstepLimit, corrfnc);
+    if (aSurface.intersection) {
       return (aSurface);
     }
   }
 
+  // If we have no approach descriptor, there;s only a representing surface
   const Surface& rSurface = surfaceRepresentation();
-
-  // if we have no approach descriptor - we have no sensitive surfaces
-  if (rSurface.isOnSurface(gctx, position, direction, options.boundaryCheck)) {
-    Intersection nIntersection(position, 0., true);
-    return SurfaceIntersection(nIntersection, &rSurface, options.navDir);
-  }
 
   // create the intersection with the surface representation
   return rSurface.surfaceIntersectionEstimate(gctx, position, direction,

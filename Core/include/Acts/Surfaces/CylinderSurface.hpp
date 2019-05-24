@@ -121,11 +121,11 @@ class CylinderSurface : public Surface {
   ///
   /// @param gctx The current geometry context object, e.g. alignment
   /// @param gpos is the position where the measurement frame is defined
-  /// @param mom is the momentum vector (ignored)
+  /// @param gmom is the momentum vector (ignored)
   /// @return rotation matrix that defines the measurement frame
   const RotationMatrix3D referenceFrame(const GeometryContext& gctx,
                                         const Vector3D& gpos,
-                                        const Vector3D& mom) const final;
+                                        const Vector3D& gmom) const final;
 
   /// Return the surface type
   SurfaceType type() const override;
@@ -167,21 +167,21 @@ class CylinderSurface : public Surface {
   ///
   /// @param gctx The current geometry context object, e.g. alignment
   /// @param lpos is the local position to be transformed
-  /// @param mom is the global momentum (ignored in this operation)
+  /// @param gmom is the global momentum (ignored in this operation)
   /// @param gpos is the global position shich is filled
   void localToGlobal(const GeometryContext& gctx, const Vector2D& lpos,
-                     const Vector3D& mom, Vector3D& gpos) const final;
+                     const Vector3D& gmom, Vector3D& gpos) const final;
 
   /// Global to local transfomration
   ///
   /// @param gctx The current geometry context object, e.g. alignment
   /// @param gpos is the global position to be transformed
-  /// @param mom is the global momentum (ignored in this operation)
+  /// @param gmom is the global momentum (ignored in this operation)
   /// @param lpos is hte local position to be filled
   ///
   /// @return is a boolean indicating if the transformation succeeded
   bool globalToLocal(const GeometryContext& gctx, const Vector3D& gpos,
-                     const Vector3D& mom, Vector2D& lpos) const final;
+                     const Vector3D& gmom, Vector2D& lpos) const final;
 
   /// Straight line intersection schema - provides closest intersection
   ///  and (signed) path length
@@ -190,8 +190,9 @@ class CylinderSurface : public Surface {
   /// @param gpos is the global position as a starting point
   /// @param gdir is the global direction at the starting point, expected to
   ///  be normalized
-  /// @param navDir The navigation direction with respect to the momentum
   /// @param bcheck is the boundary check
+  /// @param bwdTolerance a tolerance for which an intersection is accepted
+  ///        in opposite direction
   /// @param correct is an optional correction function pointer that
   ///        allows to update the intial estimate
   ///
@@ -228,19 +229,19 @@ class CylinderSurface : public Surface {
   /// @return is the intersection object
   Intersection intersectionEstimate(const GeometryContext& gctx,
                                     const Vector3D& gpos, const Vector3D& gdir,
-                                    NavigationDirection navDir = forward,
                                     const BoundaryCheck& bcheck = false,
+                                    double bwdTolerance = s_onSurfaceTolerance,
                                     CorrFnc correct = nullptr) const final;
 
   /// Path correction due to incident of the track
   ///
   /// @param gctx The current geometry context object, e.g. alignment
   /// @param gpos is the global position as a starting point
-  /// @param mom is the global momentum at the starting point
+  /// @param gmom is the global momentum at the starting point
   ///
   /// @return is the correction factor due to incident
   double pathCorrection(const GeometryContext& gctx, const Vector3D& gpos,
-                        const Vector3D& mom) const final;
+                        const Vector3D& gmom) const final;
 
   /// Return method for properly formatted output string
   std::string name() const override;

@@ -11,36 +11,30 @@
 ///////////////////////////////////////////////////////////////////
 
 inline Intersection ConeSurface::intersectionEstimate(
-    const GeometryContext& gctx, const Vector3D& gpos, const Vector3D& gmom,
-    NavigationDirection navDir, const BoundaryCheck& bcheck,
-    CorrFnc correct) const {
-  // check if you need
-  bool needsTransform = (Surface::m_transform) ? true : false;
-
-  // create the points
-  Vector3D point1 = gpos;
-  Vector3D initialdir = gmom.normalized();
-  Vector3D direction = initialdir;
+    const GeometryContext& gctx, const Vector3D& gpos, const Vector3D& gdir,
+    const BoundaryCheck& bcheck, double bwdTolerance, CorrFnc correct) const {
+  // Transform into the local frame of the surface, context resolved
+  const Transform3D& ctxtrans = transform(gctx);
+  const Transform3D invTrans = ctxtrans.inverse();
+  Vector3D point1 = invTrans * gpos;
+  Vector3D direction = invTrans.linear() * gdir;
 
   // what you need at the and
   Vector3D solution(0, 0, 0);
   double path = 0.;
-  bool valid = false;
+
+  double tan2Alpha = bounds().tanAlpha() * bounds().tanAlpha();
 
   // break condition for the loop
-  bool correctionDone = false;
+  // bool correctionDone = false;
 
-  // make the loop including the potential correction
-  do {
-    if (needsTransform) {
-      Transform3D invTrans = transform(gctx).inverse();
-      point1 = invTrans * gpos;
-      direction = invTrans.linear() * direction;
-    }
+  // lemma : the solver ->  catches & modifies current values
+  auto solve = [&solution, &path, &point1, &direction, &tan2Alpha,
+                &bwdTolerance]() -> IntersectionStatus {
+    auto istatus = IntersectionStatus::unreachable;
 
     // see the header for the formula derivation
-    double tan2Alpha = bounds().tanAlpha() * bounds().tanAlpha(),
-           A = direction.x() * direction.x() + direction.y() * direction.y() -
+    double A = direction.x() * direction.x() + direction.y() * direction.y() -
                tan2Alpha * direction.z() * direction.z(),
            B = 2 * (direction.x() * point1.x() + direction.y() * point1.y() -
                     tan2Alpha * direction.z() * point1.z()),
@@ -50,10 +44,11 @@ inline Intersection ConeSurface::intersectionEstimate(
       A += 1e-16;  // avoid division by zero
     }
 
-    // use Andreas' quad solver, much more stable than what I wrote
+    // quadratic equation solver
     detail::RealQuadraticEquation solns(A, B, C);
-
+    // Only continue if you have at least one solution
     if (solns.solutions != 0) {
+      // take t1 first
       double t1 = solns.first;
       Vector3D soln1Loc(point1 + t1 * direction);
 
@@ -62,58 +57,73 @@ inline Intersection ConeSurface::intersectionEstimate(
         // set the solution
         solution = soln1Loc;
         path = t1;
-        // check the validity given the navigation direction
-        valid = (t1 * navDir >= 0.);
-        // there's two solutions
+        // possible statii: reachable, overstepped, unreachable
+        // (on surface will be determined generally later)
+        istatus = t1 > 0. ? IntersectionStatus::reachable
+                          : (t1 * t1 < bwdTolerance * bwdTolerance)
+                                ? IntersectionStatus::overstepped
+                                : istatus;
       } else if (solns.solutions == 2) {
         // get the second solution
         double t2 = solns.second;
         Vector3D soln2Loc(point1 + t2 * direction);
-        // both solutions have the same sign - or you don't care
-        // then take the closer one
-        if (t1 * t2 > 0. || (navDir == 0)) {
+
+        // decide between t1 and t2 - both same direction
+        if (t1 * t2 > 0.) {
           if (t1 * t1 < t2 * t2) {
-            solution = soln1Loc;
             path = t1;
+            solution = soln1Loc;
           } else {
-            solution = soln2Loc;
             path = t2;
+            solution = soln2Loc;
           }
+          // status is this case is: reachable, overstepped, unreachable
+          // (on surface will be determined generally later)
+          istatus = t1 > 0. ? IntersectionStatus::reachable
+                            : (t1 * t1 < bwdTolerance * bwdTolerance)
+                                  ? IntersectionStatus::overstepped
+                                  : istatus;
         } else {
-          if (navDir * t1 > 0.) {
-            solution = soln1Loc;
-            path = t1;
-          } else {
-            solution = soln2Loc;
-            path = t2;
+          // we should be reachable in any case
+          istatus = IntersectionStatus::reachable;
+          // different directions, in principle chose the forward one
+          path = t1 > 0. ? t1 : t2;
+          double otherPath = t1 < 0. ? t1 : t2;
+          double otherPath2 = otherPath * otherPath;
+          // otherPath is allowed to overwrite path if it's within Bwd tolerance
+          // and in absolute terms smaller then the path
+          if (otherPath2 < bwdTolerance * bwdTolerance &&
+              otherPath2 < path * path) {
+            path = otherPath;
+            istatus = IntersectionStatus::overstepped;
           }
         }
       }
+      // overwrite with on surface status
+      istatus = (path * path < s_onSurfaceTolerance * s_onSurfaceTolerance)
+                    ? IntersectionStatus::onSurface
+                    : istatus;
     }
-    // set the validity flag
-    valid = (navDir * path >= 0.);
+    return istatus;
+  };
 
-    // break if there's nothing to correct
-    if (correct && !correctionDone) {
-      // reset to initial position and direction
-      point1 = gpos;
-      direction = initialdir;
-      if (correct(point1, direction, path)) {
-        correctionDone = true;
-      } else {
-        break;
-      }
-    } else {
-      break;
-    }
-  } while (true);
-
-  // transform back if needed
-  if (m_transform) {
-    solution = transform(gctx) * solution;
+  auto istatus = solve();
+  // if configured, correct and solve again
+  if (correct && correct(point1, direction, path)) {
+    istatus = solve();
   }
-  // check validity
-  valid = bcheck ? (valid && isOnSurface(gctx, solution, gmom, bcheck)) : valid;
+
+  // transform back into the surface frame
+  solution = ctxtrans * solution;
+
+  // Evaluate boundaries if necessary, since the solution was done in global
+  // frame a global to local is necessary for the boundary check
+  if (bcheck && istatus != IntersectionStatus::unreachable) {
+    istatus = isOnSurface(gctx, solution, gdir, bcheck)
+                  ? istatus
+                  : IntersectionStatus::missed;
+  }
+
   // set the result navigation direction
-  return Intersection(solution, path, valid);
+  return Intersection(solution, path, istatus);
 }

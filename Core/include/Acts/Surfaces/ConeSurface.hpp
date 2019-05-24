@@ -108,22 +108,22 @@ class ConeSurface : public Surface {
   ///  - the default implementation is the the RotationMatrix3D of the transform
   ///
   /// @param gctx The current geometry context object, e.g. alignment
-  /// @param pos is the global position where the measurement frame is
+  /// @param gpos is the global position where the measurement frame is
   /// constructed
-  /// @param mom is the momentum used for the measurement frame construction
+  /// @param gmom is the momentum used for the measurement frame construction
   /// @return matrix that indicates the measurement frame
   const RotationMatrix3D referenceFrame(const GeometryContext& gctx,
-                                        const Vector3D& pos,
-                                        const Vector3D& mom) const final;
+                                        const Vector3D& gpos,
+                                        const Vector3D& gmom) const final;
 
   /// Return method for surface normal information
   ///
   /// @param gctx The current geometry context object, e.g. alignment
-  /// @param lp is the local position on the cone for which the normal vector
+  /// @param lpos is the local position on the cone for which the normal vector
   /// is requested
   /// @return Vector3D normal vector in global frame
   const Vector3D normal(const GeometryContext& gctx,
-                        const Vector2D& lp) const final;
+                        const Vector2D& lpos) const final;
 
   /// Return method for surface normal information
   ///
@@ -151,29 +151,30 @@ class ConeSurface : public Surface {
   ///
   /// @param gctx The current geometry context object, e.g. alignment
   /// @param lpos is the local position to be transformed
-  /// @param mom is the global momentum (ignored in this operation)
+  /// @param gmom is the global momentum (ignored in this operation)
   /// @param gpos is the global position shich is filled
   void localToGlobal(const GeometryContext& gctx, const Vector2D& lpos,
-                     const Vector3D& mom, Vector3D& gpos) const final;
+                     const Vector3D& gmom, Vector3D& gpos) const final;
 
   /// Global to local transfomration
   ///
   /// @param gctx The current geometry context object, e.g. alignment
   /// @param gpos is the global position to be transformed
-  /// @param mom is the global momentum (ignored in this operation)
+  /// @param gmom is the global momentum (ignored in this operation)
   /// @param lpos is hte local position to be filled
   /// @return is a boolean indicating if the transformation succeeded
   bool globalToLocal(const GeometryContext& gctx, const Vector3D& gpos,
-                     const Vector3D& mom, Vector2D& lpos) const final;
+                     const Vector3D& gmom, Vector2D& lpos) const final;
 
   /// @brief Straight line intersection schema - provides closest intersection
   /// and (signed) path length
   ///
   /// @param gctx The current geometry context object, e.g. alignment
   /// @param gpos The start position for the intersection
-  /// @param gmom The start momentum for the intersection (will be normalized)
-  /// @param navDir The navigation direction with respect to the momentum
+  /// @param gdir The start direction for the intersection (expected normalized)
   /// @param bcheck The boundary check to be used in this directive
+  /// @param bwdTolerance a tolerance for which an intersection is accepted
+  ///        in opposite direction
   /// @param correct is an (optional) correction function pointer
   ///
   /// <b>mathematical motivation:</b>
@@ -210,9 +211,9 @@ class ConeSurface : public Surface {
   ///
   /// @return is the Intersection object
   Intersection intersectionEstimate(const GeometryContext& gctx,
-                                    const Vector3D& gpos, const Vector3D& gmom,
-                                    NavigationDirection navDir,
+                                    const Vector3D& gpos, const Vector3D& gdir,
                                     const BoundaryCheck& bcheck = false,
+                                    double bwdTolerance = s_onSurfaceTolerance,
                                     CorrFnc correct = nullptr) const final;
 
   /// the pathCorrection for derived classes with thickness

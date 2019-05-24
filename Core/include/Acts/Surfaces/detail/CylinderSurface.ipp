@@ -18,8 +18,7 @@ inline const Vector3D CylinderSurface::rotSymmetryAxis(
 
 inline Intersection CylinderSurface::intersectionEstimate(
     const GeometryContext& gctx, const Vector3D& gpos, const Vector3D& gdir,
-    NavigationDirection navDir, const BoundaryCheck& bcheck,
-    CorrFnc correct) const {
+    const BoundaryCheck& bcheck, double bwdTolerance, CorrFnc correct) const {
   // create line parameters
   Vector3D lpos = gpos;
   Vector3D ldir = gdir;
@@ -31,9 +30,9 @@ inline Intersection CylinderSurface::intersectionEstimate(
   Vector3D solution(0, 0, 0);
   double path = 0.;
 
-  // lemma : the solver -> should catch current values
+  // lemma : the solver ->  catches & modifies current values
   auto solve = [&solution, &path, &lpos, &ldir, &ccenter, &caxis,
-                &navDir](double R) -> bool {
+                &bwdTolerance](double R) -> IntersectionStatus {
     // check documentation for explanation
     Vector3D pc = lpos - ccenter;
     Vector3D pcXcd = pc.cross(caxis);
@@ -44,30 +43,53 @@ inline Intersection CylinderSurface::intersectionEstimate(
     // and solve the qaudratic equation - todo, validity check
     detail::RealQuadraticEquation qe(a, b, c);
     // check how many solution you have
-    if (qe.solutions == 0) {
-      return false;
+    auto istatus = IntersectionStatus::unreachable;
+    if (qe.solutions != 0) {
+      // now try to understand the solutions
+      // both are solvable into the same direction
+      if (qe.first * qe.second > 0.) {
+        path =
+            qe.first * qe.first < qe.second * qe.second ? qe.first : qe.second;
+        istatus = IntersectionStatus::reachable;
+      } else {
+        istatus = IntersectionStatus::reachable;
+        // different directions, in principle chose the forward one
+        path = qe.first > 0. ? qe.first : qe.second;
+        double otherPath = qe.first < 0. ? qe.first : qe.second;
+        double otherPath2 = otherPath * otherPath;
+        // otherPath is allowed to overwrite path if it's within Bwd tolerance
+        // and in absolute terms smaller then the path
+        if (otherPath2 < bwdTolerance * bwdTolerance &&
+            otherPath2 < path * path) {
+          path = otherPath;
+          istatus = IntersectionStatus::overstepped;
+        }
+      }
+      istatus = (path * path < s_onSurfaceTolerance * s_onSurfaceTolerance)
+                    ? IntersectionStatus::onSurface
+                    : istatus;
+
+      // return the solution
+      solution = lpos + path * ldir;
+      // is valid if it goes into the right direction
     }
-    // chose the solution
-    path = ((navDir == 0) || qe.first * qe.second > 0.)
-               ? (qe.first * qe.first < qe.second * qe.second ? qe.first
-                                                              : qe.second)
-               : (navDir * qe.first >= 0. ? qe.first : qe.second);
-    // return the solution
-    solution = lpos + path * ldir;
-    // is valid if it goes into the right direction
-    return (path * navDir >= 0.);
+    return istatus;
   };
 
   // solve for radius R
   double R = bounds().r();
-  bool valid = solve(R);
+  auto istatus = solve(R);
   // if configured, correct and solve again
   if (correct && correct(lpos, ldir, path)) {
-    valid = solve(R);
+    istatus = solve(R);
   }
-  // update for inside if requested :
-  // @todo fix this : fast inside bounds check needed
-  valid = bcheck ? (valid && isOnSurface(gctx, solution, gdir, bcheck)) : valid;
+  // Evaluate boundaries if necessary, since the solution was done in global
+  // frame a global to local is necessary for the boundary check
+  if (bcheck && istatus != IntersectionStatus::unreachable) {
+    istatus = isOnSurface(gctx, solution, gdir, bcheck)
+                  ? istatus
+                  : IntersectionStatus::missed;
+  }
   // now return
-  return Intersection(solution, path, valid);
+  return Intersection(solution, path, istatus);
 }

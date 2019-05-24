@@ -22,9 +22,7 @@ namespace Acts {
 /// @tparam propagator_state_t Type of the object for navigation state
 /// @tparam object_t Type of the object for navigation to check against
 template <typename object_t>
-struct NavigationOptions
-{
-
+struct NavigationOptions {
   /// The navigation direction
   NavigationDirection navDir = forward;
 
@@ -56,22 +54,17 @@ struct NavigationOptions
   /// @param sobject Start object to check against
   /// @param eobject End object to check against
   /// @param maxStepLength Maximal step length to check against
-  NavigationOptions(NavigationDirection ndir,
-                    BoundaryCheck       bcheck,
-                    bool                resolves = true,
-                    bool                resolvem = true,
-                    bool                resolvep = false,
-                    const object_t*     sobject  = nullptr,
-                    const object_t*     eobject  = nullptr)
-    : navDir(ndir)
-    , boundaryCheck(std::move(bcheck))
-    , resolveSensitive(resolves)
-    , resolveMaterial(resolvem)
-    , resolvePassive(resolvep)
-    , startObject(sobject)
-    , endObject(eobject)
-    , pathLimit(ndir * std::numeric_limits<double>::max())
-  {
-  }
+  NavigationOptions(NavigationDirection ndir, BoundaryCheck bcheck,
+                    bool resolves = true, bool resolvem = true,
+                    bool resolvep = false, const object_t* sobject = nullptr,
+                    const object_t* eobject = nullptr)
+      : navDir(ndir),
+        boundaryCheck(std::move(bcheck)),
+        resolveSensitive(resolves),
+        resolveMaterial(resolvem),
+        resolvePassive(resolvep),
+        startObject(sobject),
+        endObject(eobject),
+        pathLimit(ndir * std::numeric_limits<double>::max()) {}
 };
-}
+}  // namespace Acts

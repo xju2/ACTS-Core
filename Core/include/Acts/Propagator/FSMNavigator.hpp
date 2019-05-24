@@ -8,8 +8,8 @@
 
 #pragma once
 
-#include "Acts/Detector/TrackingGeometry.hpp"
-#include "Acts/Detector/TrackingVolume.hpp"
+#include "Acts/Geometry/TrackingGeometry.hpp"
+#include "Acts/Geometry/TrackingVolume.hpp"
 #include "Acts/Propagator/NavigationOptions.hpp"
 #include "Acts/Propagator/detail/ConstrainedStep.hpp"
 #include "Acts/Utilities/Definitions.hpp"
@@ -22,50 +22,36 @@
 
 namespace Acts {
 
-class FSMNavigator
-{
-
-  struct states
-  {
-    struct Init
-    {
+class FSMNavigator {
+  struct states {
+    struct Init {
       constexpr static std::string_view name = "Init";
     };
 
-    struct VolumeToVolume
-    {
+    struct VolumeToVolume {
       constexpr static std::string_view name = "VolumeToVolume";
     };
 
-    struct LayerToLayer
-    {
+    struct LayerToLayer {
       constexpr static std::string_view name = "LayerToLayer";
     };
   };
 
-  struct events
-  {
-    struct Status
-    {
+  struct events {
+    struct Status {
       constexpr static std::string_view name = "Status";
     };
-    struct Target
-    {
+    struct Target {
       constexpr static std::string_view name = "Target";
     };
-    struct ResolveLayers
-    {
+    struct ResolveLayers {
       constexpr static std::string_view name = "ResolveLayers";
     };
   };
 
-public:
-  struct State : FiniteStateMachine<State,
-                                    states::Init,
-                                    states::VolumeToVolume,
-                                    states::LayerToLayer>
-  {
-
+ public:
+  struct State : FiniteStateMachine<State, states::Init, states::VolumeToVolume,
+                                    states::LayerToLayer> {
     /// Externally provided surfaces - these are tried to be hit
     std::multimap<const Layer*, const Surface*> externalSurfaces = {};
 
@@ -89,7 +75,7 @@ public:
     /// Navigation state: the target surface
     const Surface* targetSurface = nullptr;
 
-    std::vector<LayerIntersection>           navLayers;
+    std::vector<LayerIntersection> navLayers;
     std::vector<LayerIntersection>::iterator navLayerIter;
 
     friend FSMNavigator;
@@ -97,25 +83,19 @@ public:
 
     // everything below is private to the FSMNavigator, and shouldn't be touched
     // from the outside
-  private:
-    std::string
-    volstr(const TrackingVolume& tv) const
-    {
+   private:
+    std::string volstr(const TrackingVolume& tv) const {
       std::stringstream ss;
       ss << tv.volumeName() << " " << tv.geoID().toString();
       return ss.str();
     }
 
     template <typename propagator_state_t, typename corrector_t>
-    void
-    updateStep(propagator_state_t& state,
-               const corrector_t&  /*navCorr*/,
-               double              navigationStep,
-               bool                release = false) const
-    {
+    void updateStep(propagator_state_t& state, const corrector_t& /*navCorr*/,
+                    double navigationStep, bool release = false) const {
       //  update the step
-      state.stepping.stepSize.update(
-          navigationStep, detail::ConstrainedStep::actor, release);
+      state.stepping.stepSize.update(navigationStep,
+                                     detail::ConstrainedStep::actor, release);
       ACTS_DEBUG("Navigation stepSize " << (release ? "released and " : "")
                                         << "updated to "
                                         << state.stepping.stepSize.toString());
@@ -134,16 +114,12 @@ public:
     // Finite State event handlers and state enter/exit callbacks
 
     template <typename propagator_state_t, typename stepper_t>
-    event_return
-    on_event(const states::Init&,
-             const events::Status&,
-             const FSMNavigator& navigator,
-             propagator_state_t& state,
-             const stepper_t&    stepper)
-    {
+    event_return on_event(const states::Init&, const events::Status&,
+                          const FSMNavigator& navigator,
+                          propagator_state_t& state, const stepper_t& stepper) {
       // get the world volume
-      state.navigation.worldVolume
-          = navigator.m_cfg.trackingGeometry->highestTrackingVolume();
+      state.navigation.worldVolume =
+          navigator.m_cfg.trackingGeometry->highestTrackingVolume();
 
       // in any case, we start from the start surface
       state.navigation.currentSurface = state.navigation.startSurface;
@@ -154,14 +130,14 @@ public:
 
       // we need to figure out the current volume.
       // If we're on a layer, then we can ask the layer what it's volume is
-      if (state.navigation.startSurface
-          && state.navigation.startSurface->associatedLayer()) {
+      if (state.navigation.startSurface &&
+          state.navigation.startSurface->associatedLayer()) {
         ACTS_DEBUG("Fast start initialization through layer association");
 
-        state.navigation.startLayer
-            = state.navigation.startSurface->associatedLayer();
-        state.navigation.startVolume
-            = state.navigation.startLayer->trackingVolume();
+        state.navigation.startLayer =
+            state.navigation.startSurface->associatedLayer();
+        state.navigation.startVolume =
+            state.navigation.startLayer->trackingVolume();
         // is also the current volume
         state.navigation.currentVolume = state.navigation.startVolume;
       } else {
@@ -171,19 +147,19 @@ public:
                    << toString(stepper.position(state.stepping))
                    << " and direction "
                    << toString(stepper.direction(state.stepping)));
-        state.navigation.startVolume
-            = navigator.m_cfg.trackingGeometry->lowestTrackingVolume(
+        state.navigation.startVolume =
+            navigator.m_cfg.trackingGeometry->lowestTrackingVolume(
                 state.geoContext, stepper.position(state.stepping));
-        state.navigation.startLayer = state.navigation.startVolume
-            ? state.navigation.startVolume->associatedLayer(
-                  state.geoContext, stepper.position(state.stepping))
-            : nullptr;
+        state.navigation.startLayer =
+            state.navigation.startVolume
+                ? state.navigation.startVolume->associatedLayer(
+                      state.geoContext, stepper.position(state.stepping))
+                : nullptr;
         // Set the start volume as current volume
         state.navigation.currentVolume = state.navigation.startVolume;
         if (state.navigation.startVolume) {
           ACTS_DEBUG("Start volume resolved: "
-                     << state.navigation.startVolume->volumeName()
-                     << " "
+                     << state.navigation.startVolume->volumeName() << " "
                      << state.navigation.startVolume->geoID().toString());
         }
       }
@@ -192,13 +168,10 @@ public:
     }
 
     template <typename propagator_state_t, typename stepper_t>
-    event_return
-    on_event(const states::Init&,
-             const events::Target&,
-             const FSMNavigator& /*navigator*/,
-             propagator_state_t& state,
-             const stepper_t& /*stepper*/)
-    {
+    event_return on_event(const states::Init&, const events::Target&,
+                          const FSMNavigator& /*navigator*/,
+                          propagator_state_t& state,
+                          const stepper_t& /*stepper*/) {
       ACTS_DEBUG("Initial target call.");
 
       // do we have a target surface?
@@ -213,15 +186,10 @@ public:
     }
 
     template <typename propagator_state_t, typename stepper_t>
-    void
-    on_enter(const states::VolumeToVolume&,
-             const FSMNavigator& navigator,
-             propagator_state_t& state,
-             const stepper_t&    stepper)
-    {
+    void on_enter(const states::VolumeToVolume&, const FSMNavigator& navigator,
+                  propagator_state_t& state, const stepper_t& stepper) {
       ACTS_DEBUG("Entering volume: "
-                 << state.navigation.currentVolume->volumeName()
-                 << " "
+                 << state.navigation.currentVolume->volumeName() << " "
                  << state.navigation.currentVolume->geoID().toString());
 
       // figure out the volume type, currently, we only support layer based
@@ -230,34 +198,25 @@ public:
     }
 
     template <typename propagator_state_t, typename stepper_t>
-    event_return
-    on_event(const states::VolumeToVolume&,
-             const events::ResolveLayers&,
-             const FSMNavigator& navigator,
-             propagator_state_t& state,
-             const stepper_t&    stepper)
-    {
+    event_return on_event(const states::VolumeToVolume&,
+                          const events::ResolveLayers&,
+                          const FSMNavigator& navigator,
+                          propagator_state_t& state, const stepper_t& stepper) {
       ACTS_DEBUG("Resolving layers for volume "
                  << volstr(*state.navigation.currentVolume));
-      NavigationOptions<Layer> navOpts(state.stepping.navDir,
-                                       true,
-                                       navigator.m_cfg.resolveSensitive,
-                                       navigator.m_cfg.resolveMaterial,
-                                       navigator.m_cfg.resolvePassive,
-                                       startLayer,
-                                       nullptr);
-      navOpts.pathLimit
-          = state.stepping.stepSize.value(detail::ConstrainedStep::aborter);
+      NavigationOptions<Layer> navOpts(
+          state.stepping.navDir, true, navigator.m_cfg.resolveSensitive,
+          navigator.m_cfg.resolveMaterial, navigator.m_cfg.resolvePassive,
+          startLayer, nullptr);
+      navOpts.pathLimit =
+          state.stepping.stepSize.value(detail::ConstrainedStep::aborter);
 
       auto navCorr = stepper.corrector(state.stepping);
 
-      state.navigation.navLayers
-          = state.navigation.currentVolume->compatibleLayers(
-              state.geoContext,
-              stepper.position(state.stepping),
-              stepper.direction(state.stepping),
-              navOpts,
-              navCorr);
+      state.navigation.navLayers =
+          state.navigation.currentVolume->compatibleLayers(
+              state.geoContext, stepper.position(state.stepping),
+              stepper.direction(state.stepping), navOpts, navCorr);
 
       ACTS_DEBUG("Found " << state.navigation.navLayers.size()
                           << " layer candidates");
@@ -267,169 +226,130 @@ public:
       if (logger().doPrint(Logging::DEBUG)) {
         std::stringstream ss;
         ss << "Layer candidates found at path(s): ";
-        for (const auto & [ ix, layer, surface, dir ] :
+        for (const auto& [ix, layer, surface, dir] :
              state.navigation.navLayers) {
           ss << ix.pathLength << " ";
         }
         ACTS_DEBUG(ss.str());
       }
 
-      updateStep(state,
-                 navCorr,
+      updateStep(state, navCorr,
                  state.navigation.navLayerIter->intersection.pathLength);
 
       return states::LayerToLayer{};
     }
-    
-    template <typename propagator_state_t, typename stepper_t>
-    event_return
-    on_event(const states::LayerToLayer&,
-             const events::Status&,
-             const FSMNavigator& navigator,
-             propagator_state_t& state,
-             const stepper_t&    stepper)
-    {
-      // did we hit the layer?
-      const Surface* layerSurface = state.navigation.navLayerIter->representation;
-      if(stepper.surfaceReached(state.stepping, layerSurface)) {
-        state.navigation.currentSurface = layerSurface;
-        if(layerSurface != nullptr) {
-          ACTS_DEBUG("Layer hit, current surface is now" << layerSurface->geoID().toString());
-        }
-        return std::nullopt; // stay in state
-      }
-      else {
-        ACTS_DEBUG("Layer not hit. Continue");
-        return std::nullopt; // stay in state
-      }
 
+    template <typename propagator_state_t, typename stepper_t>
+    event_return on_event(const states::LayerToLayer&, const events::Status&,
+                          const FSMNavigator& navigator,
+                          propagator_state_t& state, const stepper_t& stepper) {
+      // did we hit the layer?
+      const Surface* layerSurface =
+          state.navigation.navLayerIter->representation;
+      if (stepper.surfaceReached(state.stepping, layerSurface)) {
+        state.navigation.currentSurface = layerSurface;
+        if (layerSurface != nullptr) {
+          ACTS_DEBUG("Layer hit, current surface is now"
+                     << layerSurface->geoID().toString());
+        }
+        return std::nullopt;  // stay in state
+      } else {
+        ACTS_DEBUG("Layer not hit. Continue");
+        return std::nullopt;  // stay in state
+      }
     }
 
     template <typename propagator_state_t, typename stepper_t>
-    event_return
-    on_event(const states::LayerToLayer&,
-             const events::Target&,
-             const FSMNavigator& navigator,
-             propagator_state_t& state,
-             const stepper_t&    stepper)
-    {
+    event_return on_event(const states::LayerToLayer&, const events::Target&,
+                          const FSMNavigator& navigator,
+                          propagator_state_t& state, const stepper_t& stepper) {
       // did we hit the layer?
       auto& [init_ix, layer, surface, dir] = *state.navigation.navLayerIter;
-      if(surface == state.navigation.currentSurface) {
+      if (surface == state.navigation.currentSurface) {
         // hm?
-      }
-      else {
+      } else {
         auto navCorr = stepper.corrector(state.stepping);
         NavigationOptions<Surface> navOpts(state.stepping.navDir, true);
 
-        while(state.navigation.navLayerIter != state.navigation.navLayers.end()) {
-          const Surface* layerSurface = state.navigation.navLayerIter->representation;
+        while (state.navigation.navLayerIter !=
+               state.navigation.navLayers.end()) {
+          const Surface* layerSurface =
+              state.navigation.navLayerIter->representation;
           auto ix = layerSurface->surfaceIntersectionEstimate(
-              state.geoContext,
-              stepper.position(state.stepping),
-              stepper.direction(state.stepping),
-              navOpts,
-              navCorr);
+              state.geoContext, stepper.position(state.stepping),
+              stepper.direction(state.stepping), navOpts, navCorr);
 
-          if(!ix) {
-            ACTS_DEBUG("During approach of layer" << layer->geoID().toString() << " intersection");
+          if (!ix) {
+            ACTS_DEBUG("During approach of layer" << layer->geoID().toString()
+                                                  << " intersection");
             ACTS_DEBUG("estimate became invalid => skipping layer candidate");
             ++state.navigation.navLayerIter;
             continue;
-          }
-          else {
+          } else {
             // update straight line estimation
-            ACTS_DEBUG("Proceeding towards layer: " << ix.object->geoID().toString());
-            updateStep(state,
-                       navCorr,
-                       ix.intersection.pathLength);
+            ACTS_DEBUG(
+                "Proceeding towards layer: " << ix.object->geoID().toString());
+            updateStep(state, navCorr, ix.intersection.pathLength);
             break;
           }
         }
       }
-      return std::nullopt; // stay in state
+      return std::nullopt;  // stay in state
     }
 
-
     template <typename propagator_state_t, typename stepper_t>
-    void
-    on_enter(const states::LayerToLayer&,
-             const FSMNavigator& /*navigator*/,
-             propagator_state_t& /*state*/,
-             const stepper_t&    /*stepper*/)
-    {
+    void on_enter(const states::LayerToLayer&,
+                  const FSMNavigator& /*navigator*/,
+                  propagator_state_t& /*state*/, const stepper_t& /*stepper*/) {
       // ACTS_VERBOSE("Entering LayerToLayer loop: resolving layers!");
     }
 
     // terminate enter handler: throw exception
     template <typename... Args>
-    void
-    on_enter(const Terminated&, Args&&...)
-    {
+    void on_enter(const Terminated&, Args&&...) {
       throw std::runtime_error("FSMNavigator FSM entered Terminated state");
     }
 
     // Logging methods
 
     template <typename S, typename E, typename S2>
-    void
-    log(const S&, const E&, const S2&)
-    {
+    void log(const S&, const E&, const S2&) {
       ACTS_VERBOSE("FSM: transition: [" << S::name << "] + <" << E::name
-                                        << "> = "
-                                        << S2::name);
+                                        << "> = " << S2::name);
     }
 
     template <typename S, typename E>
-    void
-    log(const S&, const E&)
-    {
+    void log(const S&, const E&) {
       ACTS_VERBOSE("FSM: internal transition: [" << S::name << "] + <"
-                                                 << E::name
-                                                 << ">");
+                                                 << E::name << ">");
     }
 
     template <typename E>
-    void
-    log(const E&)
-    {
+    void log(const E&) {
       ACTS_VERBOSE("FSM: process_event: <" << E::name << ">");
     }
 
     // catch all handlers
 
     template <typename S, typename E, typename... Args>
-    event_return
-    on_event(const S&, const E&, Args&&...)
-    {
+    event_return on_event(const S&, const E&, Args&&...) {
       return Terminated{};
     }
 
     template <typename S, typename... Args>
-    void
-    on_enter(const S&, Args&&...)
-    {
-    }
+    void on_enter(const S&, Args&&...) {}
 
     template <typename S, typename... Args>
-    void
-    on_exit(const S&, Args&&...)
-    {
-    }
+    void on_exit(const S&, Args&&...) {}
 
-    const Logger&
-    logger() const
-    {
-      return *m_logger;
-    }
+    const Logger& logger() const { return *m_logger; }
 
     const Logger* m_logger;
   };
 
   using state_type = State;
 
-  struct Config
-  {
+  struct Config {
     /// Tracking Geometry for this Navigator
     std::shared_ptr<const TrackingGeometry> trackingGeometry;
 
@@ -445,38 +365,29 @@ public:
     bool resolvePassive = false;
   };
 
-  FSMNavigator(Config                        cfg,
-               std::unique_ptr<const Logger> logger
-               = getDefaultLogger("FSMNavigator", Logging::INFO))
-    : m_cfg(std::move(cfg)), m_logger(std::move(logger)){};
+  FSMNavigator(Config cfg, std::unique_ptr<const Logger> logger =
+                               getDefaultLogger("FSMNavigator", Logging::INFO))
+      : m_cfg(std::move(cfg)), m_logger(std::move(logger)){};
 
   template <typename propagator_state_t, typename stepper_t>
-  void
-  status(propagator_state_t& state, const stepper_t& stepper) const
-  {
+  void status(propagator_state_t& state, const stepper_t& stepper) const {
     // ACTS_VERBOSE("Status call");
     state.navigation.m_logger = m_logger.get();
     state.navigation.dispatch(events::Status{}, *this, state, stepper);
   }
 
   template <typename propagator_state_t, typename stepper_t>
-  void
-  target(propagator_state_t& state, const stepper_t& stepper) const
-  {
+  void target(propagator_state_t& state, const stepper_t& stepper) const {
     // ACTS_VERBOSE("Target call");
     state.navigation.m_logger = m_logger.get();
     state.navigation.dispatch(events::Target{}, *this, state, stepper);
   }
 
-private:
-  Config                        m_cfg;
+ private:
+  Config m_cfg;
   std::unique_ptr<const Logger> m_logger;
 
-  const Logger&
-  logger() const
-  {
-    return *m_logger;
-  }
+  const Logger& logger() const { return *m_logger; }
 };
 
 }  // namespace Acts

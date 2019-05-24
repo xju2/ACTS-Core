@@ -19,7 +19,7 @@ namespace Acts {
 namespace detail {
   struct TunningEnergyEffect 
   {
-    const static int N = 2;
+    const static int N = 3;
     struct ComponentValues
     {
       double weight; 
@@ -32,10 +32,12 @@ namespace detail {
     {
       // make non effect, just means copy the components in material effect
 	  ComponentValues comp1{0.7,-0.01,0.01};
-	  ComponentValues comp2{0.3,-0.02,0.01};
+	  ComponentValues comp2{0.1,-0.02,0.01};
+	  ComponentValues comp3{0.2,-0.005,0.01};
 	  std::vector<ComponentValues> compVec;
 	  compVec.push_back(comp1);
 	  compVec.push_back(comp2);
+	  compVec.push_back(comp3);
 	  return std::move(compVec);
 
     }

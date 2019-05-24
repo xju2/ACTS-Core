@@ -31,7 +31,7 @@ struct ComponentReduction
   using Covariance = ActsSymMatrixD<5>;
 
   /// the number of component constrained in propagate
-  static const int constraintNum = 12;
+  static const int constraintNum = 1;
 
   template <typename propagator_state_t, typename stepper_t>
   void
@@ -39,6 +39,7 @@ struct ComponentReduction
              const stepper_t&    stepper,
              result_type&        result) const
   {
+	std::cout<<"in the reduction "<<std::endl;
 
     // If we are on target, everything should have been done
     if (state.navigation.targetReached) {
@@ -84,28 +85,31 @@ struct ComponentReduction
 	std::cout<<std::endl;
 */
 	
-
-
-	
 	using TrackParMap = typename std::remove_reference<decltype(trackMap)>::type;
+	using WeightedTrackPars = std::pair<double, std::unique_ptr<TrackParametersBase>>;
 	// the aim merging map
 	TrackParMap& unmergedMap = trackMap;
 	// the empty map to merge
 	TrackParMap mergedMap;
 	size_t numberOfComponents = unmergedMap.size();
+	std::cout<<"map size "<<numberOfComponents<<std::endl;
 	while ( numberOfComponents > constraintNum ){
-	  if( !unmergedMap.empty() ) unmergedMap.clear();
+	  if( mergedMap.empty() ) mergedMap.clear();
+		std::cout<<"numberOfComponents: "<<numberOfComponents<<" "<<unmergedMap.empty()<<std::endl;
 	  while ( numberOfComponents > constraintNum && !unmergedMap.empty() ) {
 		if( unmergedMap.size() > 1 ){
 		  auto mergedComponentIter = pairWithMinimumDistance(trackMap);
+		  std::cout<<"output the weight "<<mergedComponentIter->first.first<<std::endl;
 //		  if (mergedComponentIter){
 //			auto combinedComponent = combiner(state.stepping.geoContext, trackMap.begin()->first, mergedComponentIter->first);
 			auto combinedComponent = combiner( state.stepping.geoContext, *state.navigation.currentSurface, trackMap.begin()->first,mergedComponentIter->first);
 			unmergedMap.erase(mergedComponentIter);
+			std::cout<<"after erase "<<unmergedMap.size()<<std::endl;
 			unmergedMap.erase(trackMap.begin());
-			using WeightedTrackPars = std::pair<double, std::unique_ptr<TrackParametersBase>>;
+			std::cout<<"after erase2 "<<unmergedMap.size()<<std::endl;
 			WeightedTrackPars weight_parameter( combinedComponent.first, std::unique_ptr<TrackParametersBase>(combinedComponent.second) );
 			mergedMap.insert(std::make_pair(std::move(weight_parameter),0 ));
+			std::cout<<"after add "<<mergedMap.size()<<std::endl;
 //			mergedMap.insert( std::make_pair(std::move(combinedComponent),unmergedMap.size()) );
 //		  }
 //		  else {
@@ -114,7 +118,13 @@ struct ComponentReduction
 		  --numberOfComponents;
 		}
 		else{
-//		  mergedMap.insert( std::move( *trackMap.begin() ));
+		  auto& lastComponent = *unmergedMap.begin();
+		  auto& lastPar    = lastComponent.second;
+		  auto& lastWeight = lastComponent.first;
+		  mergedMap.insert( std::make_pair(lastWeight, std::move(lastPar)) );
+//		  mergedMap.insert( mergedMap.begin(), std::move(lastComponent) );
+//		  WeightedTrackPars weight_parameter( lastComponent.first, std::move(lastComponent.second) );
+//		  mergedMap.insert( std::make_pair(std::move(weight_parameter),0) );    
 		}
 	  }
 //	  if( unmergedMap.empty() && numberOfComponents > constraintNum ) unmergedMap = mergedMap; //move
@@ -133,6 +143,7 @@ struct ComponentReduction
 	bool minmumDistSet = false;
 	typename TrackParMap::const_iterator it = unmergedMap.begin();
 	typename TrackParMap::const_iterator it_record ;
+	std::cout<<"unmerged map size "<<unmergedMap.size()<<std::endl;
 
 	for( ; it != unmergedMap.end(); it++ ){
 	  if ( it == unmergedMap.begin() ) continue;

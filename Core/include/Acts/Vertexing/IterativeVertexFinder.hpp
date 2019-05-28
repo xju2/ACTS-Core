@@ -101,7 +101,7 @@ class IterativeVertexFinder {
     LinearizedTrackFactory<bfield_t, propagator_t> linFactory;
 
     /// ImpactPoint3dEstimator
-    ImpactPoint3dEstimator ipEst;
+    ImpactPoint3dEstimator<input_track_t> ipEst;
 
     /// Propagator
     propagator_t propagator;

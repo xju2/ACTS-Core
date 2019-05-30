@@ -69,7 +69,8 @@ class IterativeVertexFinder {
  public:
   /// @struct Config Configuration struct
   struct Config {
-    /// @brief Finder configuration
+
+    /// @brief Config constructor
     ///
     /// @param bIn bfield_t
     /// @param fitter Vertex fitter
@@ -84,10 +85,13 @@ class IterativeVertexFinder {
           linFactory(
               typename LinearizedTrackFactory<bfield_t, propagator_t>::Config(
                   bField)),
+
+          ipEst(typename ImpactPoint3dEstimator<
+                bfield_t, input_track_t, propagator_t>::Config(bIn,
+                                                               propagatorIn)),
           propagator(propagatorIn),
-          zScanFinderCfg(
-              typename ZScanVertexFinder<bfield_t, BoundParameters,
-                                         propagator_t>::Config(propagator)),
+          zScanFinderCfg(typename ZScanVertexFinder<bfield_t, BoundParameters,
+                                                    propagator_t>::Config()),
           seedFinder(ZScanVertexFinder<bfield_t, BoundParameters, propagator_t>(
               std::move(zScanFinderCfg))) {}
 

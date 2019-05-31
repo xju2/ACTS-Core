@@ -155,7 +155,7 @@ void Acts::SurfaceMaterialMapper::mapMaterialTrack(
   using DebugOutput = detail::DebugOutputActor;
   using MaterialSurfaceCollector = SurfaceCollector<MaterialSurface>;
   using ActionList = ActionList<MaterialSurfaceCollector, DebugOutput>;
-  using AbortList = AbortList<detail::EndOfWorldReached>;
+  using AbortList = ConditionList<detail::EndOfWorldReached>;
 
   PropagatorOptions<ActionList, AbortList> options(mState.geoContext,
                                                    mState.magFieldContext);

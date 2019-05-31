@@ -139,7 +139,7 @@ BOOST_AUTO_TEST_CASE(PropagatorOptions_) {
   // todo write null options test
 
   using ActionListType = ActionList<PerpendicularMeasure>;
-  using AbortConditionsType = AbortList<>;
+  using AbortConditionsType = ConditionList<>;
 
   using optionsType = PropagatorOptions<ActionListType, AbortConditionsType>;
 
@@ -167,7 +167,7 @@ BOOST_DATA_TEST_CASE(
 
   using CylinderObserver = SurfaceObserver<CylinderSurface>;
   using ActionListType = ActionList<CylinderObserver>;
-  using AbortConditionsType = AbortList<>;
+  using AbortConditionsType = ConditionList<>;
 
   // setup propagation options
   PropagatorOptions<ActionListType, AbortConditionsType> options(tgContext,

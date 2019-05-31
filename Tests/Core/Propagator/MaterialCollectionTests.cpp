@@ -113,10 +113,10 @@ void runTest(const propagator_t& prop, double pT, double phi, double theta,
   using DebugOutput = detail::DebugOutputActor;
 
   // Action list and abort list
-  using ActionListType = ActionList<MaterialInteractor, DebugOutput>;
-  using AbortListType = AbortList<>;
+  using ActionList = ActionList<MaterialInteractor, DebugOutput>;
+  using AbortList = ConditionList<>;
 
-  using Options = PropagatorOptions<ActionListType, AbortListType>;
+  using Options = PropagatorOptions<ActionList, AbortList>;
   Options fwdOptions(tgContext, mfContext);
 
   fwdOptions.maxStepSize = 25. * units::_cm;

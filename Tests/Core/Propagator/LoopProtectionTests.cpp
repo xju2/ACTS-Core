@@ -15,7 +15,7 @@
 // clang-format on
 
 #include "Acts/MagneticField/ConstantBField.hpp"
-#include "Acts/Propagator/AbortList.hpp"
+#include "Acts/Propagator/ConditionList.hpp"
 #include "Acts/Propagator/EigenStepper.hpp"
 #include "Acts/Propagator/Propagator.hpp"
 #include "Acts/Propagator/detail/LoopProtection.hpp"
@@ -87,7 +87,7 @@ struct Options {
   double loopFraction = 0.5;
 
   /// Contains: target aborters
-  AbortList<PathLimitReached> abortList;
+  ConditionList<PathLimitReached> abortList;
 };
 
 /// @brief mockup of propagtor state

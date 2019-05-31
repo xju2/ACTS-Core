@@ -42,7 +42,7 @@ namespace Acts {
 /// @tparam aborter_list_t Propagator aborter list type
 template <typename bfield_t, typename propagator_t,
           typename action_list_t = ActionList<>,
-          typename aborter_list_t = AbortList<>>
+          typename aborter_list_t = ConditionList<>>
 class LinearizedTrackFactory {
  public:
   struct Config {

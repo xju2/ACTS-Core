@@ -227,7 +227,7 @@ BOOST_AUTO_TEST_CASE(kalman_fitter_zero_field) {
 
   // Create action list for the measurement creation
   using MeasurementActions = ActionList<MeasurementCreator, DebugOutput>;
-  using MeasurementAborters = AbortList<detail::EndOfWorldReached>;
+  using MeasurementAborters = ConditionList<detail::EndOfWorldReached>;
 
   auto pixelResX = Resolution(eLOC_0, 25. * units::_um);
   auto pixelResY = Resolution(eLOC_1, 50. * units::_um);

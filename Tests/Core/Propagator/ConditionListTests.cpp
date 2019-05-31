@@ -7,7 +7,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 ///  Boost include(s)
-#define BOOST_TEST_MODULE AbortList Tests
+#define BOOST_TEST_MODULE ConditionList Tests
 
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
@@ -19,7 +19,7 @@
 #include <boost/test/output_test_stream.hpp>
 // leave blank line
 
-#include "Acts/Propagator/AbortList.hpp"
+#include "Acts/Propagator/ConditionList.hpp"
 #include "Acts/Propagator/detail/ConstrainedStep.hpp"
 #include "Acts/Propagator/detail/StandardAborters.hpp"
 #include "Acts/Utilities/Definitions.hpp"
@@ -107,15 +107,15 @@ struct Stepper {};
 /// propagator result
 struct Result {};
 
-// This tests the implementation of the AbortList
+// This tests the implementation of the ConditionList
 // and the standard aborters
-BOOST_AUTO_TEST_CASE(AbortListTest_PathLimit) {
+BOOST_AUTO_TEST_CASE(ConditionListTest_PathLimit) {
   PropagatorState state;
   state.options.pathLimit = 1. * units::_m;
   Stepper stepper;
   Result result;
 
-  AbortList<PathLimit> abortList;
+  ConditionList<PathLimit> abortList;
 
   // It should not abort yet
   BOOST_CHECK(!abortList(result, state, stepper));
@@ -137,9 +137,9 @@ BOOST_AUTO_TEST_CASE(AbortListTest_PathLimit) {
   // now we need to be smaller than the tolerance
   BOOST_CHECK_LT(state.stepping.stepSize, 1. * units::_um);
 
-  // Check if you can expand the AbortList
+  // Check if you can expand the ConditionList
   EndOfWorld eow;
-  AbortList<PathLimit, EndOfWorld> pathWorld = abortList.append(eow);
+  ConditionList<PathLimit, EndOfWorld> pathWorld = abortList.append(eow);
   auto& path = pathWorld.get<PathLimit>();
   BOOST_CHECK(path(result, state, stepper));
 }

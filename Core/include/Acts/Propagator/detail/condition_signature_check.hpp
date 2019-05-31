@@ -75,15 +75,15 @@ struct condition_signature_check_impl<T, propagator_state_t, stepper_t, true>
 };
 
 template <typename T, typename propagator_state_t, typename stepper_t>
-struct abort_condition_signature_check
+struct condition_signature_check
     : condition_signature_check_impl<T, propagator_state_t, stepper_t,
                                      condition_uses_result_type<T>::value> {};
 // clang-format on
 }  // end of anonymous namespace
 
 template <typename T, typename propagator_state_t, typename stepper_t>
-constexpr bool abort_condition_signature_check_v =
-    abort_condition_signature_check<T, propagator_state_t, stepper_t>::value;
+constexpr bool condition_signature_check_v =
+    condition_signature_check<T, propagator_state_t, stepper_t>::value;
 }  // namespace detail
 
 }  // namespace Acts

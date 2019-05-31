@@ -417,7 +417,7 @@ struct DenseEnvironmentExtension {
 };
 
 template <typename action_list_t = ActionList<>,
-          typename aborter_list_t = AbortList<>>
+          typename aborter_list_t = ConditionList<>>
 struct DenseStepperPropagatorOptions
     : public PropagatorOptions<action_list_t, aborter_list_t> {
   /// Copy Constructor

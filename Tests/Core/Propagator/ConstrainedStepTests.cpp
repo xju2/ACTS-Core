@@ -28,7 +28,7 @@ namespace Acts {
 
 namespace Test {
 
-// This tests the implementation of the AbortList
+// This tests the implementation of the ConditionList
 // and the standard aborters
 BOOST_AUTO_TEST_CASE(ConstrainedStepTest) {
   using cstep = detail::ConstrainedStep;

@@ -150,11 +150,11 @@ BOOST_AUTO_TEST_CASE(step_extension_vacuum_test) {
 
   // Create action list for surface collection
   ActionList<StepCollector> aList;
-  AbortList<EndOfWorld> abortList;
+  ConditionList<EndOfWorld> abortList;
 
   // Set options for propagator
   DenseStepperPropagatorOptions<ActionList<StepCollector>,
-                                AbortList<EndOfWorld>>
+                                ConditionList<EndOfWorld>>
       propOpts(tgContext, mfContext);
   propOpts.actionList = aList;
   propOpts.abortList = abortList;
@@ -195,7 +195,7 @@ BOOST_AUTO_TEST_CASE(step_extension_vacuum_test) {
   ActionList<StepCollector> aListDef;
 
   // Set options for propagator
-  PropagatorOptions<ActionList<StepCollector>, AbortList<EndOfWorld>>
+  PropagatorOptions<ActionList<StepCollector>, ConditionList<EndOfWorld>>
       propOptsDef(tgContext, mfContext);
   propOptsDef.actionList = aListDef;
   propOptsDef.abortList = abortList;
@@ -267,11 +267,11 @@ BOOST_AUTO_TEST_CASE(step_extension_material_test) {
 
   // Create action list for surface collection
   ActionList<StepCollector> aList;
-  AbortList<EndOfWorld> abortList;
+  ConditionList<EndOfWorld> abortList;
 
   // Set options for propagator
   DenseStepperPropagatorOptions<ActionList<StepCollector>,
-                                AbortList<EndOfWorld>>
+                                ConditionList<EndOfWorld>>
       propOpts(tgContext, mfContext);
   propOpts.actionList = aList;
   propOpts.abortList = abortList;
@@ -321,7 +321,7 @@ BOOST_AUTO_TEST_CASE(step_extension_material_test) {
   // Rebuild and check the choice of extension
   // Set options for propagator
   DenseStepperPropagatorOptions<ActionList<StepCollector>,
-                                AbortList<EndOfWorld>>
+                                ConditionList<EndOfWorld>>
       propOptsDense(tgContext, mfContext);
   propOptsDense.actionList = aList;
   propOptsDense.abortList = abortList;
@@ -443,12 +443,12 @@ BOOST_AUTO_TEST_CASE(step_extension_vacmatvac_test) {
 
   // Create action list for surface collection
   ActionList<StepCollector> aList;
-  AbortList<EndOfWorld> abortList;
+  ConditionList<EndOfWorld> abortList;
   abortList.get<EndOfWorld>().maxX = 3. * units::_m;
 
   // Set options for propagator
   DenseStepperPropagatorOptions<ActionList<StepCollector>,
-                                AbortList<EndOfWorld>>
+                                ConditionList<EndOfWorld>>
       propOpts(tgContext, mfContext);
   propOpts.actionList = aList;
   propOpts.abortList = abortList;
@@ -509,7 +509,7 @@ BOOST_AUTO_TEST_CASE(step_extension_vacmatvac_test) {
   // Set options for propagator
   ActionList<StepCollector> aListDef;
 
-  PropagatorOptions<ActionList<StepCollector>, AbortList<EndOfWorld>>
+  PropagatorOptions<ActionList<StepCollector>, ConditionList<EndOfWorld>>
       propOptsDef(tgContext, mfContext);
   abortList.get<EndOfWorld>().maxX = 1. * units::_m;
   propOptsDef.actionList = aListDef;
@@ -563,7 +563,7 @@ BOOST_AUTO_TEST_CASE(step_extension_vacmatvac_test) {
 
   // Set options for propagator
   DenseStepperPropagatorOptions<ActionList<StepCollector>,
-                                AbortList<EndOfWorld>>
+                                ConditionList<EndOfWorld>>
       propOptsDense(tgContext, mfContext);
   abortList.get<EndOfWorld>().maxX = 2. * units::_m;
   propOptsDense.actionList = aList;

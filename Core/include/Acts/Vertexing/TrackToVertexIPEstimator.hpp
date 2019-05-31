@@ -32,7 +32,7 @@ struct ImpactParametersAndSigma {
 
 template <typename input_track_t, typename propagator_t,
           typename action_list_t = ActionList<>,
-          typename aborter_list_t = AbortList<>>
+          typename aborter_list_t = ConditionList<>>
 
 /// @class TrackToVertexIPEstimator estimates the impact parameters and their
 /// errors of a given track w.r.t. a vertex

@@ -16,8 +16,8 @@
 #include "Acts/EventData/TrackParameters.hpp"
 #include "Acts/Geometry/GeometryContext.hpp"
 #include "Acts/MagneticField/MagneticFieldContext.hpp"
-#include "Acts/Propagator/AbortList.hpp"
 #include "Acts/Propagator/ActionList.hpp"
+#include "Acts/Propagator/ConditionList.hpp"
 #include "Acts/Propagator/detail/LoopProtection.hpp"
 #include "Acts/Propagator/detail/StandardAborters.hpp"
 #include "Acts/Propagator/detail/VoidPropagatorComponents.hpp"
@@ -62,7 +62,7 @@ struct PropagatorResult : private detail::Extendable<result_list...> {
 ///    propagation step using the current propagation and stepper state
 ///
 template <typename action_list_t = ActionList<>,
-          typename aborter_list_t = AbortList<>>
+          typename aborter_list_t = ConditionList<>>
 struct PropagatorOptions {
   /// Delete default contructor
   PropagatorOptions() = delete;
@@ -318,7 +318,7 @@ class Propagator final {
   ///
   /// @tparam parameters_t Type of initial track parameters to propagate
   /// @tparam action_list_t Type list of actions, type ActionList<>
-  /// @tparam aborter_list_t Type list of abort conditions, type AbortList<>
+  /// @tparam aborter_list_t Type list of abort conditions, type ConditionList<>
   /// @tparam propagator_options_t Type of the propagator options
   ///
   /// @param [in] start initial track parameters to propagate

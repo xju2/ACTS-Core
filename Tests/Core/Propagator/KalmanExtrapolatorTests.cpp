@@ -133,10 +133,10 @@ BOOST_AUTO_TEST_CASE(kalman_extrapolator) {
   SingleCurvilinearTrackParameters<ChargedPolicy> start(std::move(covPtr), pos,
                                                         mom, 1.);
 
-  // Create the ActionList and AbortList
+  // Create the ActionList and ConditionList
   using StepWiseResult = StepWiseActor::result_type;
   using StepWiseActors = ActionList<StepWiseActor>;
-  using Aborters = AbortList<detail::EndOfWorldReached>;
+  using Aborters = ConditionList<detail::EndOfWorldReached>;
 
   // Create some options
   using StepWiseOptions = PropagatorOptions<StepWiseActors, Aborters>;

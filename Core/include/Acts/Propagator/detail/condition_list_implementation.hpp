@@ -46,43 +46,41 @@ struct condition_caller<false> {
 }  // end of anonymous namespace
 
 template <typename... conditions>
-struct abort_list_impl;
+struct condition_list_impl;
 
 /// This is the check call on the a list of conditions
 /// it calls the aparant condition and broadcasts
 /// the call to the remaining ones
 template <typename first, typename... others>
-struct abort_list_impl<first, others...> {
+struct condition_list_impl<first, others...> {
   template <typename T, typename result_t, typename propagator_state_t,
             typename stepper_t>
   static bool check(const T& conditions_tuple, const result_t& result,
                     propagator_state_t& state, const stepper_t& stepper) {
-    // get the right helper for calling the abort condition
+    // get the right helper for calling the condition
     constexpr bool has_result = condition_uses_result_type<first>::value;
     using caller_type = condition_caller<has_result>;
 
-    // get the cache abort condition
+    // get the first condition
     const auto& this_condition = std::get<first>(conditions_tuple);
 
-    // - check abort conditions recursively
+    // - check conditions recursively
     // - make use of short-circuit evaluation
-    // -> skip remaining conditions if this abort condition evaluates to true
-    bool abort = caller_type::check(this_condition, result, state, stepper) ||
-                 abort_list_impl<others...>::check(conditions_tuple, result,
-                                                   state, stepper);
-
-    return abort;
+    // -> skip remaining conditions if this condition evaluates to true
+    return caller_type::check(this_condition, result, state, stepper) ||
+           condition_list_impl<others...>::check(conditions_tuple, result,
+                                                 state, stepper);
   }
 };
 
 /// This is the check call on the a last of all conditions
 template <typename last>
-struct abort_list_impl<last> {
+struct condition_list_impl<last> {
   template <typename T, typename result_t, typename propagator_state_t,
             typename stepper_t>
   static bool check(const T& conditions_tuple, const result_t& result,
                     propagator_state_t& state, const stepper_t& stepper) {
-    // get the right helper for calling the abort condition
+    // get the right helper for calling the condition
     constexpr bool has_result = condition_uses_result_type<last>::value;
     const auto& this_condition = std::get<last>(conditions_tuple);
 
@@ -91,9 +89,9 @@ struct abort_list_impl<last> {
   }
 };
 
-/// This is the empty call list - never abort
+/// This is the empty call list - return false, never trigger
 template <>
-struct abort_list_impl<> {
+struct condition_list_impl<> {
   template <typename T, typename result_t, typename propagator_state_t,
             typename stepper_t>
   static bool check(const T& /*unused*/, const result_t& /*result*/,

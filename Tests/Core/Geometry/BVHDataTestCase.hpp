@@ -141,7 +141,7 @@ BOOST_DATA_TEST_CASE(
 
   using DebugOutput = Acts::detail::DebugOutputActor;
   using ActionList = Acts::ActionList<SteppingLogger, DebugOutput>;
-  using AbortConditions = Acts::AbortList<>;
+  using AbortConditions = Acts::ConditionList<>;
 
   Acts::PropagatorOptions<ActionList, AbortConditions> options(tgContext,
                                                                mfContext);

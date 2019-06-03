@@ -49,27 +49,29 @@ MagneticFieldContext mfContext = MagneticFieldContext();
 
 BOOST_AUTO_TEST_SUITE(Utilities)
 
-const std::unique_ptr<const BoundParameters> func() {
 
-      std::unique_ptr<BoundSymMatrix> covMat 
-        = std::make_unique<BoundSymMatrix>(BoundSymMatrix::Identity());
+Result<const std::unique_ptr<const BoundParameters>> func2() {
+  std::unique_ptr<BoundSymMatrix> covMat =
+      std::make_unique<BoundSymMatrix>(BoundSymMatrix::Identity());
 
-        TrackParametersBase::ParVector_t paramVec;
-      paramVec << 0.5, 0.1, 0.1, 0.2, 0.01, 0.;
+  TrackParametersBase::ParVector_t paramVec;
+  paramVec << 0.5, 0.1, 0.1, 0.2, 0.01, 0.;
 
   std::shared_ptr<PerigeeSurface> perigeeSurface =
-        Surface::makeShared<PerigeeSurface>(Vector3D(0., 0., 0.));
+      Surface::makeShared<PerigeeSurface>(Vector3D(0., 0., 0.));
 
-  std::unique_ptr<const BoundParameters> ptr = std::make_unique<const BoundParameters>
-  (tgContext, std::move(covMat), paramVec,
-                                       perigeeSurface);
+  std::unique_ptr<const BoundParameters> ptr =
+      std::make_unique<const BoundParameters>(tgContext, std::move(covMat),
+                                              paramVec, perigeeSurface);
 
-  return ptr;
-
+  return std::move(ptr);
 }
 
-BOOST_AUTO_TEST_CASE(FailingTest) {
-  
+
+BOOST_AUTO_TEST_CASE(FailingTest2) {
+  auto res = func2();
+
+  auto par = std::move(res.value());
 }
 
 BOOST_AUTO_TEST_CASE(TestConstruction) {

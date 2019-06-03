@@ -14,6 +14,11 @@
 
 #include "Acts/Utilities/Result.hpp"
 
+#include "Acts/EventData/TrackParameters.hpp"
+#include "Acts/Surfaces/PerigeeSurface.hpp"
+#include "Acts/Geometry/GeometryContext.hpp"
+#include "Acts/MagneticField/MagneticFieldContext.hpp"
+
 #include <iostream>
 #include <string>
 #include <system_error>
@@ -38,20 +43,33 @@ namespace Acts {
 
 namespace Test {
 
+// Create a test context
+GeometryContext tgContext = GeometryContext();
+MagneticFieldContext mfContext = MagneticFieldContext();
+
 BOOST_AUTO_TEST_SUITE(Utilities)
 
-Result<std::unique_ptr<int>> func(int a) {
-  std::unique_ptr<const int> ptr = std::make_unique<const int>(a);
-  return std::move(ptr);
+const std::unique_ptr<const BoundParameters> func() {
+
+      std::unique_ptr<BoundSymMatrix> covMat 
+        = std::make_unique<BoundSymMatrix>(BoundSymMatrix::Identity());
+
+        TrackParametersBase::ParVector_t paramVec;
+      paramVec << 0.5, 0.1, 0.1, 0.2, 0.01, 0.;
+
+  std::shared_ptr<PerigeeSurface> perigeeSurface =
+        Surface::makeShared<PerigeeSurface>(Vector3D(0., 0., 0.));
+
+  std::unique_ptr<const BoundParameters> ptr = std::make_unique<const BoundParameters>
+  (tgContext, std::move(covMat), paramVec,
+                                       perigeeSurface);
+
+  return ptr;
+
 }
 
 BOOST_AUTO_TEST_CASE(FailingTest) {
-  int a = 5;
-  auto res = func(a);
-
-  std::unique_ptr<const int> ptr = std::move(*res);
-
-  BOOST_CHECK_EQUAL(a, *ptr);
+  
 }
 
 BOOST_AUTO_TEST_CASE(TestConstruction) {

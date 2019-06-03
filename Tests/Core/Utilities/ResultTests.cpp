@@ -40,6 +40,20 @@ namespace Test {
 
 BOOST_AUTO_TEST_SUITE(Utilities)
 
+Result<std::unique_ptr<int>> func(int a) {
+  std::unique_ptr<const int> ptr = std::make_unique<const int>(a);
+  return std::move(ptr);
+}
+
+BOOST_AUTO_TEST_CASE(FailingTest) {
+  int a = 5;
+  auto res = func(a);
+
+  std::unique_ptr<const int> ptr = std::move(*res);
+
+  BOOST_CHECK_EQUAL(a, *ptr);
+}
+
 BOOST_AUTO_TEST_CASE(TestConstruction) {
   {
     using Result = Result<int, char>;

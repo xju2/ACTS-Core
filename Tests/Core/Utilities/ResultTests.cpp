@@ -50,7 +50,7 @@ MagneticFieldContext mfContext = MagneticFieldContext();
 BOOST_AUTO_TEST_SUITE(Utilities)
 
 
-Result<const std::unique_ptr<const BoundParameters>> func2() {
+Result<std::unique_ptr<const BoundParameters>> func2() {
   std::unique_ptr<BoundSymMatrix> covMat =
       std::make_unique<BoundSymMatrix>(BoundSymMatrix::Identity());
 

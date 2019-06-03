@@ -36,6 +36,7 @@ namespace Test {
     CHECK_CLOSE_REL(pars.momentum(), momentum, 1e-6);
     BOOST_CHECK_EQUAL(pars.charge(), charge);
   }
+  /*
   template <typename Parameter>
   void
   MultiConsistencyCheck(const Parameter& pars,
@@ -58,5 +59,6 @@ namespace Test {
     CHECK_CLOSE_REL(pars.momentum(order), momentum, 1e-6);
     BOOST_CHECK_EQUAL(pars.charge(), charge);
   }
+  */
 }
 }

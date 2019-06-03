@@ -24,21 +24,10 @@ public:
   /// allow to sort the track by weight
   using WeightedTrackPars
       = std::pair<double, std::unique_ptr<TrackParametersBase>>;
-  using TrackParMap = std::map<WeightedTrackPars,
-                               const unsigned int,
-                               std::greater<WeightedTrackPars>>;
+  using TrackParMap = std::multimap<double, std::unique_ptr<TrackParametersBase>,
+                               std::greater<double> >;
   using TrackParMapConstIter = TrackParMap::const_iterator;
   using TrackParMapIter      = TrackParMap::iterator;
-  struct TrackIndexFinder
-  {
-    TrackIndexFinder(const unsigned int id) : m_index(id) {}
-    bool
-    operator()(const TrackParMap::value_type& trackPar)
-    {
-      return trackPar.second == m_index;
-    }
-    const unsigned int m_index;
-  };
 
   template <typename T = ChargePolicy,
             std::enable_if_t<std::is_same<T, ChargedPolicy>::value, int> = 0>
@@ -119,14 +108,14 @@ public:
   //
   /// @param[in] gctx is the Context object that is forwarded to the surface
   ///            for local to global coordinate transformation
-  template <ParID_t par>
-  void
-  set(const GeometryContext& gctx, ParValue_t newValue, unsigned int order)
-  {
-    // set the parameter & update the new global position
-    this->getParameterSet(order).template setParameter<par>(newValue);
-    this->updateGlobalCoordinates(gctx, typename par_type<par>::type(), order);
-  }
+//  template <ParID_t par>
+//  void
+//  set(const GeometryContext& gctx, ParValue_t newValue, unsigned int order)
+//  {
+//    // set the parameter & update the new global position
+//    this->getParameterSet(order).template setParameter<par>(newValue);
+//    this->updateGlobalCoordinates(gctx, typename par_type<par>::type(), order);
+//  }
 
   /// @brief access to the reference surface
   const Surface&
@@ -136,15 +125,15 @@ public:
   }
 
   /// @brief access to the reference surface
-  const Surface&
-  referenceSurface(unsigned int id) const final
-  {
-    TrackParMapConstIter it = std::find_if(this->m_TrackList.begin(),
-                                           this->m_TrackList.end(),
-                                           TrackIndexFinder(id));
-    assert(it != this->m_TrackList.end());
-    return (*it).first.second->referenceSurface();
-  }
+//  const Surface&
+//  referenceSurface(unsigned int id) const final
+//  {
+//    TrackParMapConstIter it = std::find_if(this->m_TrackList.begin(),
+//                                           this->m_TrackList.end(),
+//                                           TrackIndexFinder(id));
+//    assert(it != this->m_TrackList.end());
+//    return (*it).first.second->referenceSurface();
+//  }
 
   /// @brief update the reference surface
   void

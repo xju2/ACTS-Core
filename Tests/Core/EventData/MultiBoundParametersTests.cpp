@@ -91,16 +91,6 @@ namespace Test {
     pars << pars_array[0], pars_array[1], pars_array[2], pars_array[3],
         pars_array[4];
 
-    const double phi   = pars_array[2];
-    const double theta = pars_array[3];
-    double       p     = fabs(1. / pars_array[4]);
-    Vector3D     direction(
-        cos(phi) * sin(theta), sin(phi) * sin(theta), cos(theta));
-    Vector3D mom = p * direction;
-    // the global position
-    Vector3D pos
-        = center + pars_array[0] * rot.col(0) + pars_array[1] * rot.col(1);
-    // constructor from parameter vector
     BoundParameters* ataPlane_from_pars_0
         = new BoundParameters(tgContext, nullptr, pars, pSurface);  //+2
     BoundParameters* ataPlane_from_pars_1
@@ -113,17 +103,13 @@ namespace Test {
     multi_ataPlane_from_pars.append(0.6, ataPlane_from_pars_0);
     multi_ataPlane_from_pars.append(0.7, ataPlane_from_pars_1);
 
-    MultiConsistencyCheck(
-        multi_ataPlane_from_pars, 0, pos, mom, 1., pars_array);
-    MultiConsistencyCheck(
-        multi_ataPlane_from_pars, 1, pos, mom, 1., pars_array);
 
     // test the append method
     MultipleBoundParameters::TrackParMapConstIter it
         = multi_ataPlane_from_pars.getTrackList().begin();
-    BOOST_CHECK_EQUAL((*it).first.first, 0.7);
+    BOOST_CHECK_EQUAL((*it).first, 0.7);
     ++it;
-    BOOST_CHECK_EQUAL((*it).first.first, 0.6);
+    BOOST_CHECK_EQUAL((*it).first, 0.6);
 
     // check shared ownership of same surface
     BOOST_CHECK_EQUAL(&multi_ataPlane_from_pars.referenceSurface(),
@@ -134,30 +120,6 @@ namespace Test {
     CHECK_CLOSE_REL(
         multi_ataPlane_from_pars.referenceFrame(tgContext), rot, 1e-6);
 
-    /// modification test via setter functions
-    double ux = 0.3;
-    double uy = 0.4;
-
-    multi_ataPlane_from_pars.set<Acts::eLOC_X>(tgContext, ux, 0);
-    multi_ataPlane_from_pars.set<Acts::eLOC_Y>(tgContext, uy, 0);
-    // we should have a new updated position
-    Vector3D lPosition3D(ux, uy, 0.);
-    Vector3D uposition = rot * lPosition3D + center;
-    CHECK_CLOSE_REL(uposition, multi_ataPlane_from_pars.position(0), 1e-6);
-
-    double uphi   = 1.2;
-    double utheta = 0.2;
-    double uqop   = 0.025;
-
-    multi_ataPlane_from_pars.set<Acts::ePHI>(tgContext, uphi, 0);
-    multi_ataPlane_from_pars.set<Acts::eTHETA>(tgContext, utheta, 0);
-    multi_ataPlane_from_pars.set<Acts::eQOP>(tgContext, uqop, 0);
-    // we should have a new updated momentum
-    Vector3D umomentum = 40. * Vector3D(cos(uphi) * sin(utheta),
-                                        sin(uphi) * sin(utheta),
-                                        cos(utheta));
-
-    CHECK_CLOSE_REL(umomentum, multi_ataPlane_from_pars.momentum(0), 1e-6);
   }
 }
 }

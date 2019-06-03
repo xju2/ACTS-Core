@@ -99,16 +99,16 @@ struct ComponentReduction
 	  while ( numberOfComponents > constraintNum && !unmergedMap.empty() ) {
 		if( unmergedMap.size() > 1 ){
 		  auto mergedComponentIter = pairWithMinimumDistance(trackMap);
-		  std::cout<<"output the weight "<<mergedComponentIter->first.first<<std::endl;
+		  std::cout<<"output the weight "<<mergedComponentIter->first<<std::endl;
 //		  if (mergedComponentIter){
 //			auto combinedComponent = combiner(state.stepping.geoContext, trackMap.begin()->first, mergedComponentIter->first);
-			auto combinedComponent = combiner( state.stepping.geoContext, *state.navigation.currentSurface, trackMap.begin()->first,mergedComponentIter->first);
+			auto combinedComponent = combiner( state.stepping.geoContext, *state.navigation.currentSurface, *trackMap.begin(),*mergedComponentIter);
 			unmergedMap.erase(mergedComponentIter);
 			std::cout<<"after erase "<<unmergedMap.size()<<std::endl;
 			unmergedMap.erase(trackMap.begin());
 			std::cout<<"after erase2 "<<unmergedMap.size()<<std::endl;
 			WeightedTrackPars weight_parameter( combinedComponent.first, std::unique_ptr<TrackParametersBase>(combinedComponent.second) );
-			mergedMap.insert(std::make_pair(std::move(weight_parameter),0 ));
+			mergedMap.insert(std::make_pair(combinedComponent.first,std::unique_ptr<TrackParametersBase>(combinedComponent.second)));
 			std::cout<<"after add "<<mergedMap.size()<<std::endl;
 //			mergedMap.insert( std::make_pair(std::move(combinedComponent),unmergedMap.size()) );
 //		  }
@@ -147,7 +147,7 @@ struct ComponentReduction
 
 	for( ; it != unmergedMap.end(); it++ ){
 	  if ( it == unmergedMap.begin() ) continue;
-	  double distance = klDist((*it).first,unmergedMap.begin()->first);
+	  double distance = klDist((*it),*unmergedMap.begin());
 	  std::cout<<"dist "<<distance<<std::endl;
 	  if( distance < minmumDist ){
 		minmumDist = distance;

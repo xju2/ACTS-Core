@@ -82,40 +82,59 @@ std::vector<LayerIntersection> TrackingVolume::compatibleLayers(
 }
 
 // Returns the boundary surfaces ordered in probability to hit them based on
-template <typename options_t, typename corrector_t, typename sorter_t>
+template <typename options_t, typename corrector_t>
 std::vector<BoundaryIntersection> TrackingVolume::compatibleBoundaries(
     const GeometryContext& gctx, const Vector3D& position,
     const Vector3D& direction, const options_t& options,
-    const corrector_t& corrfnc, const sorter_t& sorter) const {
+    const corrector_t& corrfnc) const {
   // Loop over boundarySurfaces and calculate the intersection
   auto excludeObject = options.startObject;
   auto& bSurfaces = boundarySurfaces();
-  std::vector<const BoundarySurfaceT<TrackingVolume>*> nonExcludedBoundaries;
+  std::vector<BoundaryIntersection> cIntersections;
+  cIntersections.reserve(bSurfaces.size());
 
-  for (auto& bsIter : bSurfaces) {
-    // get the boundary surface pointer
-    const BoundarySurfaceT<TrackingVolume>* bSurface = bsIter.get();
-    const auto& bSurfaceRep = bSurface->surfaceRepresentation();
-    // exclude the on boundary object
-    if (excludeObject && excludeObject == &bSurfaceRep) {
-      continue;
+  // Not compatible solutions given the options
+  std::vector<BoundaryIntersection> ncIntersections;
+
+  // Collect the boundary surfaces both directions
+  for (const auto& boundary : bSurfaces) {
+    // get the surface representation
+    const Surface& surface = boundary->surfaceRepresentation();
+    // intersect the surface
+    SurfaceIntersection sIntersection = surface.surfaceIntersectionEstimate(
+        gctx, position, direction, options, corrfnc);
+    sIntersection.intersection.pathLength *= int(options.navDir);
+    // if the surface intersection is: reachable || on surface || overstepped
+    if (sIntersection and excludeObject != &surface) {
+      cIntersections.push_back(BoundaryIntersection(sIntersection.intersection,
+                                                    boundary.get(), &surface));
+    } else {
+      ncIntersections.push_back(BoundaryIntersection(sIntersection.intersection,
+                                                     boundary.get(), &surface));
     }
-    nonExcludedBoundaries.push_back(bSurface);
   }
-  return sorter(gctx, nonExcludedBoundaries, position, direction, options,
-                corrfnc);
+  // sort them accordingly to the navigation direction
+  if (options.navDir == forward) {
+    std::sort(cIntersections.begin(), cIntersections.end());
+  } else {
+    std::sort(cIntersections.begin(), cIntersections.end(), std::greater<>());
+  }
+  // simply insert them
+  cIntersections.insert(cIntersections.end(), ncIntersections.begin(),
+                        ncIntersections.end());
+
+  // return the compatible boundary intersections
+  return cIntersections;
 }
 
 // Returns the boundary surfaces ordered in probability to hit them based on
 // straight line intersection @todo change hard-coded default
-template <typename parameters_t, typename options_t, typename corrector_t,
-          typename sorter_t>
+template <typename parameters_t, typename options_t, typename corrector_t>
 std::vector<BoundaryIntersection> TrackingVolume::compatibleBoundaries(
     const GeometryContext& gctx, const parameters_t& parameters,
-    const options_t& options, const corrector_t& corrfnc,
-    const sorter_t& sorter) const {
+    const options_t& options, const corrector_t& corrfnc) const {
   return compatibleBoundaries(gctx, parameters.position(),
-                              parameters.direction(), options, corrfnc, sorter);
+                              parameters.direction(), options, corrfnc);
 }
 
 template <typename options_t, typename corrector_t>

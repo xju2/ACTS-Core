@@ -208,8 +208,9 @@ class LineSurface : public Surface {
   /// @param gpos The global position as a starting point
   /// @param gdir The global direction at the starting point
   ///        @note exptected to be normalized
-  /// @param navDir The navigation direction
   /// @param bcheck The boundary check directive for the estimate
+  /// @param bwdTolerance a tolerance within which overstepping (neg. path)
+  ///        is accepted
   /// @param correct is a corrector function (e.g. for curvature correction)
   ///
   ///   <b>mathematical motivation:</b>
@@ -242,9 +243,9 @@ class LineSurface : public Surface {
   /// @return is the intersection object
   Intersection intersectionEstimate(const GeometryContext& gctx,
                                     const Vector3D& gpos, const Vector3D& gdir,
-                                    NavigationDirection navDir = forward,
                                     const BoundaryCheck& bcheck = false,
-                                    CorrFnc correct = nullptr) const final;
+                                    double bwdTolerance = s_onSurfaceTolerance,
+                                    CorrFnc corr = nullptr) const final;
 
   /// the pathCorrection for derived classes with thickness
   /// is by definition 1 for LineSurfaces

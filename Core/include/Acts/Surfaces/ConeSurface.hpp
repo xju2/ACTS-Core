@@ -172,8 +172,8 @@ class ConeSurface : public Surface {
   /// @param gctx The current geometry context object, e.g. alignment
   /// @param gpos The start position for the intersection
   /// @param gmom The start momentum for the intersection (will be normalized)
-  /// @param navDir The navigation direction with respect to the momentum
   /// @param bcheck The boundary check to be used in this directive
+  /// @param bwdTolerance the allowed tolerance for backward solution
   /// @param correct is an (optional) correction function pointer
   ///
   /// <b>mathematical motivation:</b>
@@ -211,8 +211,8 @@ class ConeSurface : public Surface {
   /// @return is the Intersection object
   Intersection intersectionEstimate(const GeometryContext& gctx,
                                     const Vector3D& gpos, const Vector3D& gmom,
-                                    NavigationDirection navDir,
                                     const BoundaryCheck& bcheck = false,
+                                    double bwdTolerance = s_onSurfaceTolerance,
                                     CorrFnc correct = nullptr) const final;
 
   /// the pathCorrection for derived classes with thickness

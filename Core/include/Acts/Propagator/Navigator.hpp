@@ -55,7 +55,11 @@ struct NavigationOptions {
   /// Target surface to exclude
   const Surface* targetSurface = nullptr;
 
+  /// Maximum limit for this navigaiton check
   double pathLimit = std::numeric_limits<double>::max();
+
+  /// Overstepping limit for navigation actions
+  double overstepLimit = s_onSurfaceTolerance;
 
   /// Constructor
   ///
@@ -589,7 +593,7 @@ class Navigator {
 
     // Create the navigaton options, the surfaces have initially be ordered
     // so, to catch overstepping anyDirection is allowed here
-    NavigationOptions<Surface> navOpts(anyDirection, true);
+    NavigationOptions<Surface> navOpts(state.stepping.navDir, true);
     navOpts.pathLimit = state.stepping.stepSize.value(Cstep::aborter);
 
     // Loop over the navigation surfaces
@@ -895,8 +899,7 @@ class Navigator {
       state.navigation.navBoundaries =
           state.navigation.currentVolume->compatibleBoundaries(
               state.geoContext, stepper.position(state.stepping),
-              stepper.direction(state.stepping), navOpts, navCorr,
-              BoundaryIntersectionSorter());
+              stepper.direction(state.stepping), navOpts, navCorr);
       // The number of boundary candidates
       debugLog(state, [&] {
         std::stringstream dstream;

@@ -187,8 +187,9 @@ BOOST_AUTO_TEST_CASE(DiscSurface_properties_test, *utf::expected_failures(2)) {
   // (bool) valid
   auto intersect = discSurfaceObject->intersectionEstimate(
       tgContext, globalPosition, direction);
-  Intersection expectedIntersect{Vector3D{1.2, 0., 0.}, 10., true, 0.0};
-  BOOST_CHECK(intersect.valid);
+  Intersection expectedIntersect{Vector3D{1.2, 0., 0.}, 10.,
+                                 IntersectionStatus::reachable};
+  BOOST_CHECK(intersect);
   CHECK_CLOSE_ABS(intersect.position, expectedIntersect.position, 1e-9);
   CHECK_CLOSE_ABS(intersect.pathLength, expectedIntersect.pathLength, 1e-9);
   CHECK_CLOSE_ABS(intersect.distance, expectedIntersect.distance, 1e-9);

@@ -22,7 +22,7 @@ namespace Acts {
 
 // Full intersection with surface
 using BoundaryIntersection =
-    FullIntersection<BoundarySurfaceT<TrackingVolume>, Surface>;
+    ObjectIntersection<BoundarySurfaceT<TrackingVolume>, Surface>;
 
 // Typedef of the surface intersection
 using SurfaceIntersection = ObjectIntersection<Surface>;
@@ -137,17 +137,6 @@ struct BoundaryIntersectionSorter {
       case backward: {
         optionsOtherNavDir.navDir = forward;
         break;
-      }
-      // anyDirection does not have any opposite direction so it will directly
-      // collected
-      case anyDirection: {
-        // Collect intersections
-        for (const auto& boundary : boundaries) {
-          bIntersections.push_back(
-              intersect(gctx, boundary, position, direction, options, corrfnc));
-        }
-        // Fast exit for that case
-        return bIntersections;
       }
     }
 

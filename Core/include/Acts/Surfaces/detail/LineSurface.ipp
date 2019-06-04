@@ -92,8 +92,7 @@ inline const SurfaceBounds& LineSurface::bounds() const {
 
 inline Intersection LineSurface::intersectionEstimate(
     const GeometryContext& gctx, const Vector3D& gpos, const Vector3D& gdir,
-    NavigationDirection navDir, const BoundaryCheck& bcheck,
-    CorrFnc correct) const {
+    const BoundaryCheck& bcheck, double bwdTolerance, CorrFnc correct) const {
   // following nominclature found in header file and doxygen documentation
   // line one is the straight track
   Vector3D ma = gpos;
@@ -106,14 +105,32 @@ inline Intersection LineSurface::intersectionEstimate(
   Vector3D mab(mb - ma);
   double eaTeb = ea.dot(eb);
   double denom = 1 - eaTeb * eaTeb;
+
+  //  lemma not to evaluate the intersection status
+  auto status = [&bwdTolerance](double path) -> IntersectionStatus {
+    if (path > 0.) {
+      return IntersectionStatus::reachable;
+    }
+    if (path * path < bwdTolerance * bwdTolerance) {
+      return IntersectionStatus::overstepped;
+    }
+    if (path * path < s_onSurfaceTolerance * s_onSurfaceTolerance) {
+      return IntersectionStatus::onSurface;
+    }
+    return IntersectionStatus::unreachable;
+  };
+
   // validity parameter
-  bool valid = false;
+  auto istatus = IntersectionStatus::unreachable;
+
+  // evaluate validaty in terms of bounds
+  Vector3D result{0., 0., 0.};
+
   if (denom * denom > s_onSurfaceTolerance * s_onSurfaceTolerance) {
     double u = (mab.dot(ea) - mab.dot(eb) * eaTeb) / denom;
-    // evaluate in terms of direction
-    valid = (navDir * u >= 0);
+    istatus = status(u);
     // evaluate validaty in terms of bounds
-    Vector3D result = (ma + u * ea);
+    result = (ma + u * ea);
     // update if you have a correction
     if (correct && correct(ma, ea, u)) {
       // update everything that is in relation to ea
@@ -123,19 +140,21 @@ inline Intersection LineSurface::intersectionEstimate(
         u = (mab.dot(ea) - mab.dot(eb) * eaTeb) / denom;
         result = (ma + u * ea);
         // if you have specified a navigation direction, valid mean path > 0.
-        valid = (navDir * u >= 0);
-      } else {
-        valid = false;
+        istatus = status(u);
       }
     }
-    // it just needs to be a insideBounds() check
-    // @todo there should be a faster check possible
-    valid = bcheck ? (valid && isOnSurface(gctx, result, gdir, bcheck)) : valid;
+    // Evaluate boundaries if necessary, since the solution was done in global
+    // frame a global to local is necessary for the boundary check
+    if (bcheck && istatus != IntersectionStatus::unreachable) {
+      istatus = isOnSurface(gctx, result, gdir, bcheck)
+                    ? istatus
+                    : IntersectionStatus::missed;
+    }
     // return the result with validity
-    return Intersection(result, u, valid);
+    return Intersection(result, u, istatus);
   }
   // return a false intersection
-  return Intersection(gpos, std::numeric_limits<double>::max(), false);
+  return Intersection(gpos, std::numeric_limits<double>::infinity(), istatus);
 }
 
 inline void LineSurface::initJacobianToGlobal(const GeometryContext& gctx,

@@ -87,6 +87,10 @@ add_executable (DiscTrapezoidalBoundsTests DiscTrapezoidalBoundsTests.cpp)
 target_link_libraries (DiscTrapezoidalBoundsTests PRIVATE ActsCore ActsTestsCommonHelpers ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 add_test (NAME DiscTrapezoidalBoundsUnitTest COMMAND DiscTrapezoidalBoundsTests)
 
+add_executable (SurfaceIntersectionTests SurfaceIntersectionTests.cpp)
+target_link_libraries (SurfaceIntersectionTests PRIVATE ActsCore ActsTestsCommonHelpers ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+add_test (NAME SurfaceIntersectionUnitTest COMMAND SurfaceIntersectionTests)
+
 add_executable (SurfaceArrayTests SurfaceArrayTests.cpp)
 target_link_libraries (SurfaceArrayTests PRIVATE ActsCore ActsTestsCommonHelpers ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 add_test (NAME SurfaceArrayUnitTest COMMAND SurfaceArrayTests)

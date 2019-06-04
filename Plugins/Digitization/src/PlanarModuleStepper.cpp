@@ -41,7 +41,7 @@ std::vector<Acts::DigitizationStep> Acts::PlanarModuleStepper::cellSteps(
     // try it out by intersecting, but do not force the direction
     Acts::Intersection sIntersection = sSurface->intersectionEstimate(
         gctx, startPoint, trackDirection, forward, true);
-    if (sIntersection.valid) {
+    if (sIntersection) {
       // now record
       stepIntersections.push_back(sIntersection);
       ACTS_VERBOSE("Boundary Surface intersected with = "
@@ -87,7 +87,7 @@ std::vector<Acts::DigitizationStep> Acts::PlanarModuleStepper::cellSteps(
     // try it out by intersecting, but do not force the direction
     Acts::Intersection bIntersection = bSurface->intersectionEstimate(
         gctx, intersection3D, trackDirection, anyDirection, true);
-    if (bIntersection.valid) {
+    if (bIntersection) {
       // now record
       boundaryIntersections.push_back(bIntersection);
       ACTS_VERBOSE("Boundary Surface intersected with = "

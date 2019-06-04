@@ -18,6 +18,7 @@
 #include "Acts/Surfaces/InfiniteBounds.hpp"
 #include "Acts/Surfaces/PlanarBounds.hpp"
 #include "Acts/Surfaces/Surface.hpp"
+#include "Acts/Surfaces/detail/PlanarHelper.hpp"
 #include "Acts/Utilities/Definitions.hpp"
 
 namespace Acts {
@@ -164,8 +165,9 @@ class PlaneSurface : public Surface {
   /// @param gpos The start position of the intersection attempt
   /// @param gdir The direction of the interesection attempt,
   ///       @note expected to be normalized
-  /// @param navDir The navigation direction with respect to the momentum
   /// @param bcheck The boundary check directive
+  /// @param bwdTolerance a tolerance within which overstepping (neg. path)
+  ///        is accepted
   /// @param correct is a corrector function (e.g. for curvature correction)
   ///
   /// <b>mathematical motivation:</b>
@@ -188,9 +190,9 @@ class PlaneSurface : public Surface {
   /// @return the Intersection object
   Intersection intersectionEstimate(const GeometryContext& gctx,
                                     const Vector3D& gpos, const Vector3D& gdir,
-                                    NavigationDirection navDir = forward,
                                     const BoundaryCheck& bcheck = false,
-                                    CorrFnc correct = nullptr) const final;
+                                    double bwdTolerance = s_onSurfaceTolerance,
+                                    CorrFnc corr = nullptr) const final;
 
   /// Return properly formatted class name for screen output
   std::string name() const override;

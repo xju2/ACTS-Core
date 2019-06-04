@@ -49,11 +49,11 @@ using LayerArray = BinnedArray<LayerPtr>;
 using LayerVector = std::vector<LayerPtr>;
 
 // full intersection with Layer
-using LayerIntersection = FullIntersection<Layer, Surface>;
+using LayerIntersection = ObjectIntersection<Layer, Surface>;
 
 // full intersection with surface
 using BoundaryIntersection =
-    FullIntersection<BoundarySurfaceT<TrackingVolume>, Surface>;
+    ObjectIntersection<BoundarySurfaceT<TrackingVolume>, Surface>;
 
 /// @class TrackingVolume
 ///
@@ -200,7 +200,6 @@ class TrackingVolume : public Volume {
   ///
   /// @tparam options_t Type of navigation options object for decomposition
   /// @tparam corrector_t Type of (optional) corrector for surface intersection
-  /// @tparam sorter_t Type of the boundary surface sorter
   ///
   /// @param gctx The current geometry context object, e.g. alignment
   /// @param position The position for searching
@@ -211,20 +210,17 @@ class TrackingVolume : public Volume {
   ///
   /// @return is the templated boundary intersection
   template <typename options_t,
-            typename corrector_t = VoidIntersectionCorrector,
-            typename sorter_t = DefaultBoundaryIntersectionSorter>
+            typename corrector_t = VoidIntersectionCorrector>
   std::vector<BoundaryIntersection> compatibleBoundaries(
       const GeometryContext& gctx, const Vector3D& position,
       const Vector3D& direction, const options_t& options,
-      const corrector_t& corrfnc = corrector_t(),
-      const sorter_t& sorter = sorter_t()) const;
+      const corrector_t& corrfnc = corrector_t()) const;
 
   /// @brief Returns all boundary surfaces sorted by the user.
   ///
   /// @tparam parameters_t Type of parameters used for the decomposition
   /// @tparam options_t Type of navigation options object for decomposition
   /// @tparam corrector_t Type of (optional) corrector for surface intersection
-  /// @tparam sorter_t Type of the boundary surface sorter
   ///
   /// @param gctx The current geometry context object, e.g. alignment
   /// @param parameters The templated parameters for searching
@@ -234,12 +230,11 @@ class TrackingVolume : public Volume {
   ///
   /// @return is the templated boundary intersection
   template <typename parameters_t, typename options_t,
-            typename corrector_t = VoidIntersectionCorrector,
-            typename sorter_t = DefaultBoundaryIntersectionSorter>
+            typename corrector_t = VoidIntersectionCorrector>
   std::vector<BoundaryIntersection> compatibleBoundaries(
       const GeometryContext& gctx, const parameters_t& parameters,
-      const options_t& options, const corrector_t& corrfnc = corrector_t(),
-      const sorter_t& sorter = sorter_t()) const;
+      const options_t& options,
+      const corrector_t& corrfnc = corrector_t()) const;
 
   /// @brief Return surfaces in given direction from bounding volume hierarchy
   /// @tparam options_t Type of navigation options object for decomposition

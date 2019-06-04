@@ -77,14 +77,14 @@ class SurfaceStub : public Surface {
   }
 
   /// Straight line intersection schema from parameters
-  Intersection intersectionEstimate(const GeometryContext& /*cxt*/,
-                                    const Vector3D& /*gpos*/,
-                                    const Vector3D& /*gdir*/,
-                                    NavigationDirection /*navDir*/,
-                                    const BoundaryCheck& /*bcheck*/,
-                                    CorrFnc corrfnc = nullptr) const final {
+  Intersection intersectionEstimate(
+      const GeometryContext& /*cxt*/, const Vector3D& /*gpos*/,
+      const Vector3D& /*gdir*/, const BoundaryCheck& /*bcheck*/,
+      double /*bwdTolerance = s_onSurfaceTolerance*/,
+      CorrFnc corrfnc = nullptr) const final {
     (void)corrfnc;
-    const Intersection is{Vector3D{1, 1, 1}, 20., true};
+    const Intersection is{Vector3D{1, 1, 1}, 20.,
+                          IntersectionStatus::reachable};
     return is;
   }
 

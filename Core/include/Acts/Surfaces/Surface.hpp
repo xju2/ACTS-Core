@@ -434,9 +434,9 @@ class Surface : public virtual GeometryObject,
 
   {
     // get the intersection with the surface
-    auto sIntersection =
-        intersectionEstimate(gctx, position, direction, options.navDir,
-                             options.boundaryCheck, correct);
+    auto sIntersection = intersectionEstimate(
+        gctx, position, options.navDir * direction, options.boundaryCheck,
+        options.overstepLimit, correct);
     // return a surface intersection with result direction
     return SurfaceIntersection(sIntersection, this);
   }
@@ -469,20 +469,20 @@ class Surface : public virtual GeometryObject,
   /// @param gctx The current geometry context object, e.g. alignment
   /// @param gpos global 3D position - considered to be on surface but not
   ///        inside bounds (check is done)
-  /// @param 3D direction representation - expected to be normalized
+  /// @param gdir 3D direction representation - expected to be normalized
   ///        (no check done)
-  /// @param navDir The navigation direction : if you want to find the closest,
-  ///        chose anyDirection and the closest will be chosen
   /// @param bcheck boundary check directive for this operation
+  /// @param bwdTolerance a tolerance for which an intersection is accepted
+  ///        in opposite direction
   /// @param corr is a correction function on position and momentum to do
   ///        a more appropriate intersection
   ///
   /// @return Intersection object
   virtual Intersection intersectionEstimate(
-      const GeometryContext& gctx, const Vector3D& gpos, const Vector3D& gidr,
-      NavigationDirection navDir = forward, const BoundaryCheck& bcheck = false,
+      const GeometryContext& gctx, const Vector3D& gpos, const Vector3D& gdir,
+      const BoundaryCheck& bcheck = false,
+      double bwdTolerance = s_onSurfaceTolerance,
       CorrFnc corr = nullptr) const = 0;
-  /// clang-format on
 
   /// Output Method for std::ostream, to be overloaded by child classes
   ///

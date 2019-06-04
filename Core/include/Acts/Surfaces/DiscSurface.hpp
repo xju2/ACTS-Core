@@ -18,6 +18,7 @@
 #include "Acts/Surfaces/InfiniteBounds.hpp"
 #include "Acts/Surfaces/PolyhedronRepresentation.hpp"
 #include "Acts/Surfaces/Surface.hpp"
+#include "Acts/Surfaces/detail/PlanarHelper.hpp"
 #include "Acts/Utilities/Definitions.hpp"
 
 namespace Acts {
@@ -274,8 +275,9 @@ class DiscSurface : public Surface {
   /// @param gpos The global position as a starting point
   /// @param gdir The global direction at the starting point
   ///        @note expected to be normalized (no checking)
-  /// @param navDir is a navigation direction
   /// @param bcheck The boundary check prescription
+  /// @param bwdTolerance is a tolerance within overstepping
+  ///       (i.e. negative path) is accepted
   /// @param correct is a corrector function (e.g. for curvature correction)
   ///
   ///  <b>mathematical motivation:</b>
@@ -297,9 +299,9 @@ class DiscSurface : public Surface {
   /// @return is the surface intersection object
   Intersection intersectionEstimate(const GeometryContext& gctx,
                                     const Vector3D& gpos, const Vector3D& gdir,
-                                    NavigationDirection navDir = forward,
                                     const BoundaryCheck& bcheck = false,
-                                    CorrFnc correct = nullptr) const final;
+                                    double bwdTolerance = s_onSurfaceTolerance,
+                                    CorrFnc corr = nullptr) const final;
 
   /// Return properly formatted class name for screen output
   std::string name() const override;

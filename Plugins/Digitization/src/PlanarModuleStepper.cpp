@@ -11,6 +11,7 @@
 ///////////////////////////////////////////////////////////////////
 
 #include "Acts/Plugins/Digitization/PlanarModuleStepper.hpp"
+#include <limits>
 #include "Acts/Plugins/Digitization/DigitizationModule.hpp"
 #include "Acts/Surfaces/Surface.hpp"
 #include "Acts/Utilities/Definitions.hpp"
@@ -39,8 +40,9 @@ std::vector<Acts::DigitizationStep> Acts::PlanarModuleStepper::cellSteps(
   // run them - and check for the fast exit
   for (auto& sSurface : stepSurfaces) {
     // try it out by intersecting, but do not force the direction
-    Acts::Intersection sIntersection = sSurface->intersectionEstimate(
-        gctx, startPoint, trackDirection, forward, true);
+    Acts::Intersection sIntersection =
+        sSurface->intersectionEstimate(gctx, startPoint, trackDirection, true,
+                                       std::numeric_limits<double>::max());
     if (sIntersection) {
       // now record
       stepIntersections.push_back(sIntersection);
@@ -51,8 +53,8 @@ std::vector<Acts::DigitizationStep> Acts::PlanarModuleStepper::cellSteps(
     }
   }
   // last one is also valid - now sort
-  stepIntersections.push_back(
-      Intersection(endPoint, (startPoint - endPoint).norm(), true));
+  stepIntersections.push_back(Intersection(
+      endPoint, (startPoint - endPoint).norm(), IntersectionStatus::reachable));
   std::sort(stepIntersections.begin(), stepIntersections.end());
 
   Vector3D lastPosition = startPoint;
@@ -86,7 +88,8 @@ std::vector<Acts::DigitizationStep> Acts::PlanarModuleStepper::cellSteps(
     ++attempts;
     // try it out by intersecting, but do not force the direction
     Acts::Intersection bIntersection = bSurface->intersectionEstimate(
-        gctx, intersection3D, trackDirection, anyDirection, true);
+        gctx, intersection3D, trackDirection, true,
+        std::numeric_limits<double>::max());
     if (bIntersection) {
       // now record
       boundaryIntersections.push_back(bIntersection);

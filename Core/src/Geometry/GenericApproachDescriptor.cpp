@@ -31,7 +31,7 @@ Acts::GenericApproachDescriptor::approachSurface(
                                                  bwdTolerance, corrfnc);
     sIntersections.push_back(ObjectIntersection<Surface>(intersection, sf));
   }
-  // sort the solution : @TODO respect tolerance in search
+  // sort the solution , bwdTolerance should be respected
   std::sort(sIntersections.begin(), sIntersections.end());
   // return what you have
   return (*sIntersections.begin());

@@ -26,62 +26,6 @@ namespace Acts {
 
 using Cstep = detail::ConstrainedStep;
 
-/// @brief struct for the Navigation options that are forwarded to
-///        the geometry
-///
-/// @tparam propagator_state_t Type of the object for navigation state
-/// @tparam object_t Type of the object for navigation to check against
-template <typename object_t>
-struct NavigationOptions {
-  /// The navigation direction
-  NavigationDirection navDir = forward;
-
-  /// The boundary check directive
-  BoundaryCheck boundaryCheck = true;
-
-  // How to resolve the geometry
-  /// Always look for sensitive
-  bool resolveSensitive = true;
-  /// Always look for material
-  bool resolveMaterial = true;
-  /// always look for passive
-  bool resolvePassive = false;
-
-  /// object to check against: at start
-  const object_t* startObject = nullptr;
-  /// object to check against: at end
-  const object_t* endObject = nullptr;
-
-  /// Target surface to exclude
-  const Surface* targetSurface = nullptr;
-
-  /// Maximum limit for this navigaiton check
-  double pathLimit = std::numeric_limits<double>::max();
-
-  /// Overstepping limit for navigation actions
-  double overstepLimit = s_onSurfaceTolerance;
-
-  /// Constructor
-  ///
-  /// @param nDir Navigation direction prescription
-  /// @param bcheck Boundary check for the navigation action
-  /// @param sobject Start object to check against
-  /// @param eobject End object to check against
-  /// @param maxStepLength Maximal step length to check against
-  NavigationOptions(NavigationDirection ndir, BoundaryCheck bcheck,
-                    bool resolves = true, bool resolvem = true,
-                    bool resolvep = false, const object_t* sobject = nullptr,
-                    const object_t* eobject = nullptr)
-      : navDir(ndir),
-        boundaryCheck(std::move(bcheck)),
-        resolveSensitive(resolves),
-        resolveMaterial(resolvem),
-        resolvePassive(resolvep),
-        startObject(sobject),
-        endObject(eobject),
-        pathLimit(ndir * std::numeric_limits<double>::max()) {}
-};
-
 /// Navigator class
 ///
 /// This is an Actor to be added to the ActorList in order to navigate
@@ -107,6 +51,85 @@ struct NavigationOptions {
 ///
 class Navigator {
  public:
+  /// Parameter wrapper struct for the state
+  ///
+  /// @tparam the state of the stepper (can that be a deduced type)?
+  /// @tparam the stepper for it's functionality
+  template <typename stepper_state_t, typename stepper_t>
+  struct Parameters {
+    const stepper_state_t& state;
+    const stepper_t& stepper;
+
+    /// There is no default parameters
+    Parameters() = delete;
+
+    /// Constructor with references
+    Parameters(const stepper_state_t& istate, const stepper_t& istepper)
+        : state(istate), stepper(istepper) {}
+
+    /// Forward the position calculation to the stepper
+    const Vector3D position() const { return stepper.position(state); }
+
+    /// Forward the direction calculation to the stepper
+    const Vector3D direction() const { return stepper.direction(state); }
+  };
+
+  /// @brief struct for the Navigation options that are forwarded to
+  ///        the geometry
+  ///
+  /// @tparam propagator_state_t Type of the object for navigation state
+  /// @tparam object_t Type of the object for navigation to check against
+  template <typename object_t>
+  struct Options {
+    /// The navigation direction
+    NavigationDirection navDir = forward;
+
+    /// The boundary check directive
+    BoundaryCheck boundaryCheck = true;
+
+    // How to resolve the geometry
+    /// Always look for sensitive
+    bool resolveSensitive = true;
+    /// Always look for material
+    bool resolveMaterial = true;
+    /// always look for passive
+    bool resolvePassive = false;
+
+    /// object to check against: at start
+    const object_t* startObject = nullptr;
+    /// object to check against: at end
+    const object_t* endObject = nullptr;
+
+    /// Target surface to exclude
+    const Surface* targetSurface = nullptr;
+
+    /// Maximum limit for this navigaiton check
+    double pathLimit = std::numeric_limits<double>::max();
+
+    /// Overstepping limit for navigation actions
+    double overstepLimit = s_onSurfaceTolerance;
+
+    /// Constructor
+    ///
+    /// @param nDir Navigation direction prescription
+    /// @param bcheck Boundary check for the navigation action
+    /// @param sobject Start object to check against
+    /// @param eobject End object to check against
+    /// @param maxStepLength Maximal step length to check against
+    Options(NavigationDirection ndir, BoundaryCheck bcheck,
+            bool resolves = true, bool resolvem = true, bool resolvep = false,
+            const object_t* sobject = nullptr,
+            const object_t* eobject = nullptr)
+        : navDir(ndir),
+          boundaryCheck(std::move(bcheck)),
+          resolveSensitive(resolves),
+          resolveMaterial(resolvem),
+          resolvePassive(resolvep),
+          startObject(sobject),
+          endObject(eobject),
+          pathLimit(ndir * std::numeric_limits<double>::max()) {}
+  };
+
   using Surfaces = std::vector<const Surface*>;
   using SurfaceIter = std::vector<const Surface*>::iterator;
 
@@ -592,8 +615,8 @@ class Navigator {
     }
 
     // Create the navigaton options, the surfaces have initially be ordered
-    // so, to catch overstepping anyDirection is allowed here
-    NavigationOptions<Surface> navOpts(state.stepping.navDir, true);
+    auto navPars = Parameters(state.stepping, stepper);
+    auto navOpts = Options<Surface>(state.stepping.navDir, true);
     navOpts.pathLimit = state.stepping.stepSize.value(Cstep::aborter);
 
     // Loop over the navigation surfaces
@@ -619,8 +642,7 @@ class Navigator {
       });
       // Now intersect (should exclude punch-through)
       auto surfaceIntersect = surface->surfaceIntersectionEstimate(
-          state.geoContext, stepper.position(state.stepping),
-          stepper.direction(state.stepping), navOpts, navCorr);
+          state.geoContext, navPars, navOpts, navCorr);
       double surfaceDistance = surfaceIntersect.intersection.pathLength;
       if (!surfaceIntersect) {
         debugLog(state, [&] {
@@ -691,7 +713,8 @@ class Navigator {
       // check if current volume has BVH, or layers
       if (state.navigation.currentVolume->hasBoundingVolumeHierarchy()) {
         // has hierarchy, use that, skip layer resolution
-        NavigationOptions<Surface> navOpts(
+        auto navPars = Parameters(state.stepping, stepper);
+        auto navOpts = Options<Surface>(
             state.stepping.navDir, true, resolveSensitive, resolveMaterial,
             resolvePassive, nullptr, state.navigation.targetSurface);
         double opening_angle = 0;
@@ -732,9 +755,7 @@ class Navigator {
 
         auto protoNavSurfaces =
             state.navigation.currentVolume->compatibleSurfacesFromHierarchy(
-                state.geoContext, stepper.position(state.stepping),
-                stepper.direction(state.stepping), opening_angle, navOpts,
-                navCorr);
+                state.geoContext, navPars, opening_angle, navOpts, navCorr);
         if (!protoNavSurfaces.empty()) {
           // did we find any surfaces?
 
@@ -781,10 +802,10 @@ class Navigator {
         }
       }
       // Otherwise try to step towards it
-      NavigationOptions<Surface> navOpts(state.stepping.navDir, true);
+      auto navPars = Parameters(state.stepping, stepper);
+      auto navOpts = Options<Surface>(state.stepping.navDir, true);
       auto layerIntersect = layerSurface->surfaceIntersectionEstimate(
-          state.geoContext, stepper.position(state.stepping),
-          stepper.direction(state.stepping), navOpts, navCorr);
+          state.geoContext, navPars, navOpts, navCorr);
       // check if the intersect is invalid
       if (!layerIntersect) {
         debugLog(state, [&] {
@@ -879,8 +900,9 @@ class Navigator {
     // Re-initialize target at volume boundary
     initializeTarget(state, stepper, navCorr);
 
-    // The navigation options
-    NavigationOptions<Surface> navOpts(state.stepping.navDir, true);
+    // The navigation parameter and options
+    auto navPars = Parameters(state.stepping, stepper);
+    auto navOpts = Options<Surface>(state.stepping.navDir, true);
     navOpts.pathLimit = state.stepping.stepSize.value(Cstep::aborter);
 
     // If you came until here, and you might not have boundaries
@@ -898,8 +920,7 @@ class Navigator {
       // Evaluate the boundary surfaces
       state.navigation.navBoundaries =
           state.navigation.currentVolume->compatibleBoundaries(
-              state.geoContext, stepper.position(state.stepping),
-              stepper.direction(state.stepping), navOpts, navCorr);
+              state.geoContext, navPars, navOpts, navCorr);
       // The number of boundary candidates
       debugLog(state, [&] {
         std::stringstream dstream;
@@ -914,6 +935,16 @@ class Navigator {
       state.navigation.navBoundaryIter = state.navigation.navBoundaries.begin();
     }
 
+    if (state.navigation.navBoundaryIter->intersection) {
+      debugLog(state,
+               [&] { return std::string("Boundary intersection valid."); });
+      // This is a new navigation stream, release the former first
+      auto distance = state.navigation.navBoundaryIter->intersection.pathLength;
+      updateStep(state, navCorr, distance, true);
+      return true;
+    }
+
+    /*
     // Loop over the boundary surface
     while (state.navigation.navBoundaryIter !=
            state.navigation.navBoundaries.end()) {
@@ -921,13 +952,12 @@ class Navigator {
       auto boundarySurface = state.navigation.navBoundaryIter->representation;
       // Step towards the boundary surface
       auto boundaryIntersect = boundarySurface->surfaceIntersectionEstimate(
-          state.geoContext, stepper.position(state.stepping),
-          stepper.direction(state.stepping), navOpts, navCorr);
+          state.geoContext, navPars, navOpts, navCorr);
       // Distance
       auto distance = boundaryIntersect.intersection.pathLength;
       // Check the boundary is properly intersected: we are in target mode
-      if (!boundaryIntersect or
-          distance * distance < s_onSurfaceTolerance * s_onSurfaceTolerance) {
+      if (!boundaryIntersect or boundaryIntersect.intersection.status ==
+                                    IntersectionStatus::onSurface) {
         debugLog(state, [&] {
           std::stringstream ss;
           ss << "Boundary intersection with:\n";
@@ -952,6 +982,7 @@ class Navigator {
         return true;
       }
     }
+    */
     // Could not do anything
     return false;
   }
@@ -1015,14 +1046,15 @@ class Navigator {
       }
       // Slow navigation initialization for target:
       // target volume and layer search through global search
-      NavigationOptions<Surface> navOpts(state.stepping.navDir, false,
-                                         resolveSensitive, resolveMaterial,
-                                         resolvePassive);
+
+      auto navPars = Parameters(state.stepping, stepper);
+      auto navOpts =
+          Options<Surface>(state.stepping.navDir, false, resolveSensitive,
+                           resolveMaterial, resolvePassive);
       // take the target intersection
       auto targetIntersection =
           state.navigation.targetSurface->surfaceIntersectionEstimate(
-              state.geoContext, stepper.position(state.stepping),
-              stepper.direction(state.stepping), navOpts, navCorr);
+              state.geoContext, navPars, navOpts, navCorr);
       debugLog(state, [&] {
         std::stringstream dstream;
         dstream << "Target estimate position (";
@@ -1073,17 +1105,17 @@ class Navigator {
                                : state.navigation.navLayerIter->representation;
     auto navLayer = cLayer ? cLayer : state.navigation.navLayerIter->object;
     // are we on the start layer
+    auto navPars = Parameters(state.stepping, stepper);
     bool onStart = (navLayer == state.navigation.startLayer);
     auto startSurface = onStart ? state.navigation.startSurface : layerSurface;
-    NavigationOptions<Surface> navOpts(
+    auto navOpts = Options<Surface>(
         state.stepping.navDir, true, resolveSensitive, resolveMaterial,
         resolvePassive, startSurface, state.navigation.targetSurface);
     // Check the limit
     navOpts.pathLimit = state.stepping.stepSize.value(Cstep::aborter);
     // get the surfaces
     state.navigation.navSurfaces = navLayer->compatibleSurfaces(
-        state.geoContext, stepper.position(state.stepping),
-        stepper.direction(state.stepping), navOpts, navCorr);
+        state.geoContext, navPars, navOpts, navCorr);
     // the number of layer candidates
     if (!state.navigation.navSurfaces.empty()) {
       debugLog(state, [&] {
@@ -1139,19 +1171,19 @@ class Navigator {
         (state.navigation.currentVolume == state.navigation.startVolume)
             ? state.navigation.startLayer
             : nullptr;
-    // Create the navigation options
+    // Create the navigation parameter & options
     // - and get the compatible layers, start layer will be excluded
-    NavigationOptions<Layer> navOpts(state.stepping.navDir, true,
-                                     resolveSensitive, resolveMaterial,
-                                     resolvePassive, startLayer, nullptr);
+    auto navPars = Parameters(state.stepping, stepper);
+    auto navOpts =
+        Options<Layer>(state.stepping.navDir, true, resolveSensitive,
+                       resolveMaterial, resolvePassive, startLayer, nullptr);
     // Set also the target surface
     navOpts.targetSurface = state.navigation.targetSurface;
     navOpts.pathLimit = state.stepping.stepSize.value(Cstep::aborter);
     // Request the compatible layers
     state.navigation.navLayers =
         state.navigation.currentVolume->compatibleLayers(
-            state.geoContext, stepper.position(state.stepping),
-            stepper.direction(state.stepping), navOpts, navCorr);
+            state.geoContext, navPars, navOpts, navCorr);
 
     // Layer candidates have been found
     if (!state.navigation.navLayers.empty()) {

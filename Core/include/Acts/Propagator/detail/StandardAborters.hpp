@@ -173,7 +173,7 @@ struct SurfaceReached {
     const auto intersection = targetSurface.intersectionEstimate(
         state.geoContext, stepper.position(state.stepping),
         state.stepping.navDir * stepper.direction(state.stepping), false);
-    const double distance = intersection.pathLength;
+    const double distance = state.stepping.navDir * intersection.pathLength;
     // Adjust the step size so that we cannot cross the target surface
     state.stepping.stepSize.update(distance, ConstrainedStep::aborter);
     // return true if you fall below tolerance

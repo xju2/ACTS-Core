@@ -412,35 +412,6 @@ class Surface : public virtual GeometryObject,
                                 const Vector3D& gpos,
                                 const Vector3D& gmom) const = 0;
 
-  /// Straight line intersection schema from position/direction
-  ///
-  /// Templated for :
-  /// @tparam options_t Type of the navigation options
-  /// @tparam corrector_t is the type of the corrector struct foer the direction
-  ///
-  /// @param gctx The current geometry context object, e.g. alignment
-  /// @param position The position to start from
-  /// @param position The direction to start from
-  /// @param options Options object that holds additional navigation info
-  /// @param correct Corrector struct that can be used to refine the solution
-  ///
-  /// @return SurfaceIntersection object (contains intersection & surface)
-  template <typename options_t,
-            typename corrector_t = VoidIntersectionCorrector>
-  SurfaceIntersection surfaceIntersectionEstimate(
-      const GeometryContext& gctx, const Vector3D& position,
-      const Vector3D& direction, const options_t& options,
-      const corrector_t& correct = corrector_t()) const
-
-  {
-    // get the intersection with the surface
-    auto sIntersection = intersectionEstimate(
-        gctx, position, options.navDir * direction, options.boundaryCheck,
-        options.overstepLimit, correct);
-    // return a surface intersection with result direction
-    return SurfaceIntersection(sIntersection, this);
-  }
-
   /// Straight line intersection schema from parameters
   ///
   /// Templated for :
@@ -460,11 +431,23 @@ class Surface : public virtual GeometryObject,
       const GeometryContext& gctx, const parameters_t& parameters,
       const options_t& options,
       const corrector_t& correct = corrector_t()) const {
-    return surfaceIntersectionEstimate(
-        gctx, parameters.position(), parameters.direction(), options, correct);
+    // Get the intersection with the surface
+    auto sIntersection = intersectionEstimate(
+        gctx, parameters.position(), options.navDir * parameters.direction(),
+        options.boundaryCheck, options.overstepLimit, correct);
+    // Sign the path length correctly
+    sIntersection.pathLength *= options.navDir;
+    // Check if you are within limit
+    if (sIntersection.pathLength * sIntersection.pathLength >
+        options.pathLimit * options.pathLimit) {
+      sIntersection.status = IntersectionStatus::unreachable;
+    }
+    // Return a surface intersection with result direction
+    return SurfaceIntersection(sIntersection, this);
   }
 
-  /// Straight line intersection from position and momentum
+  /// Straight line intersection from position and momentum,
+  /// at the end all intersection at the end boil down to this
   ///
   /// @param gctx The current geometry context object, e.g. alignment
   /// @param gpos global 3D position - considered to be on surface but not

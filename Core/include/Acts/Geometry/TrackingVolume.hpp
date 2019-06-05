@@ -159,26 +159,6 @@ class TrackingVolume : public Volume {
   /// @brief Resolves the volume into (compatible) Layers
   ///
   /// This is the method for the propagator/extrapolator
-  /// @tparam options_t Type of navigation options object for decomposition
-  /// @tparam corrector_t Type of (optional) corrector for surface intersection
-  ///
-  /// @param gctx The current geometry context object, e.g. alignment
-  /// @param position Position for the search
-  /// @param direction Direction for the search
-  /// @param options The templated navigation options
-  /// @param corrfnc is the corrector struct / function
-  ///
-  /// @return vector of compatible intersections with layers
-  template <typename options_t,
-            typename corrector_t = VoidIntersectionCorrector>
-  std::vector<LayerIntersection> compatibleLayers(
-      const GeometryContext& gctx, const Vector3D& position,
-      const Vector3D& direction, const options_t& options,
-      const corrector_t& corrfnc = corrector_t()) const;
-
-  /// @brief Resolves the volume into (compatible) Layers
-  ///
-  /// This is the method for the propagator/extrapolator
   /// @tparam parameters_t Type of parameters used for the decomposition
   /// @tparam options_t Type of navigation options object for decomposition
   /// @tparam corrector_t Type of (optional) corrector for surface intersection
@@ -194,26 +174,6 @@ class TrackingVolume : public Volume {
   std::vector<LayerIntersection> compatibleLayers(
       const GeometryContext& gctx, const parameters_t& parameters,
       const options_t& options,
-      const corrector_t& corrfnc = corrector_t()) const;
-
-  /// @brief Returns all boundary surfaces sorted by the user.
-  ///
-  /// @tparam options_t Type of navigation options object for decomposition
-  /// @tparam corrector_t Type of (optional) corrector for surface intersection
-  ///
-  /// @param gctx The current geometry context object, e.g. alignment
-  /// @param position The position for searching
-  /// @param direction The direction for searching
-  /// @param options The templated navigation options
-  /// @param corrfnc is the corrector struct / function
-  /// @param sorter Sorter of the boundary surfaces
-  ///
-  /// @return is the templated boundary intersection
-  template <typename options_t,
-            typename corrector_t = VoidIntersectionCorrector>
-  std::vector<BoundaryIntersection> compatibleBoundaries(
-      const GeometryContext& gctx, const Vector3D& position,
-      const Vector3D& direction, const options_t& options,
       const corrector_t& corrfnc = corrector_t()) const;
 
   /// @brief Returns all boundary surfaces sorted by the user.
@@ -248,11 +208,11 @@ class TrackingVolume : public Volume {
   /// @param corrfnc is the corrector struct / function
   ///
   /// @return Vector of surface candidates
-  template <typename options_t,
+  template <typename parameters_t, typename options_t,
             typename corrector_t = VoidIntersectionCorrector>
   std::vector<SurfaceIntersection> compatibleSurfacesFromHierarchy(
-      const GeometryContext& gctx, const Vector3D& position,
-      const Vector3D& direction, double angle, const options_t& options,
+      const GeometryContext& gctx, const parameters_t& parameters, double angle,
+      const options_t& options,
       const corrector_t& corrfnc = corrector_t()) const;
 
   /// Return the associated sub Volume, returns THIS if no subVolume exists

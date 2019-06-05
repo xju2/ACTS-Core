@@ -96,7 +96,18 @@ BOOST_AUTO_TEST_CASE(LayerProperties, *utf::expected_failures(1)) {
   const Vector3D gpos{0., 0., 1.0};
   const Vector3D direction{0., 0., -1.};
   /// nextLayer()
-  BOOST_CHECK(!(layerStub.nextLayer(tgContext, gpos, direction)));
+  struct Parameters {
+    Vector3D pos;
+    Vector3D dir;
+    const Vector3D position() const { return pos; }
+    const Vector3D direction() const { return dir; }
+  };
+  ///
+  struct Options {
+    NavigationDirection navDir = forward;
+  };
+  BOOST_CHECK(!(layerStub.nextLayer(tgContext, Parameters{gpos, direction},
+                                    Options{forward})));
   /// trackingVolume()
   BOOST_CHECK(!layerStub.trackingVolume());
   // BOOST_TEST_CHECKPOINT("Before ending test");

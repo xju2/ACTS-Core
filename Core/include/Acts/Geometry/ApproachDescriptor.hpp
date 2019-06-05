@@ -91,8 +91,17 @@ ObjectIntersection<Surface> ApproachDescriptor::approachSurface(
     const GeometryContext& gctx, const parameters_t& parameters,
     const options_t& options, const corrector_t& corrfnc) const {
   // calculate the actual intersection
-  return approachSurface(gctx, parameters.position(), parameters.direction(),
-                         options.navDir, options.boundaryCheck, corrfnc);
+  auto approach = approachSurface(
+      gctx, parameters.position(), options.navDir * parameters.direction(),
+      options.boundaryCheck, options.overstepLimit, corrfnc);
+  // correct for the navigation direction
+  approach.intersection.pathLength *= options.navDir;
+  // set to unreachable if it exceeds the pathlength
+  if (approach.intersection.pathLength * approach.intersection.pathLength >
+      options.pathLimit * options.pathLimit) {
+    approach.intersection.status = IntersectionStatus::unreachable;
+  }
+  return approach;
 }
 
 }  // namespace Acts

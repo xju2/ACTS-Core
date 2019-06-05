@@ -38,15 +38,20 @@ inline const AbstractVolume* Layer::representingVolume() const {
   return m_representingVolume.get();
 }
 
-inline const Layer* Layer::nextLayer(const GeometryContext& /*gctx*/,
-                                     const Vector3D& gp,
-                                     const Vector3D& mom) const {
-  // no binutility -> no chance to find out the direction
+template <typename parameters_t, typename options_t>
+const Layer* Layer::nextLayer(const GeometryContext& /*gctx*/,
+                              const parameters_t& parameters,
+                              const options_t& options) const {
+  // No binutility -> no chance to find out the direction
   if (m_nextLayerUtility == nullptr) {
     return nullptr;
   }
-  return (m_nextLayerUtility->nextDirection(gp, mom) < 0) ? m_nextLayers.first
-                                                          : m_nextLayers.second;
+  // Return your best guess
+  return (m_nextLayerUtility->nextDirection(
+              parameters.position(), options.navDir * parameters.direction()) <
+          0)
+             ? m_nextLayers.first
+             : m_nextLayers.second;
 }
 
 inline bool Layer::resolve(bool resolveSensitive, bool resolveMaterial,
@@ -54,11 +59,11 @@ inline bool Layer::resolve(bool resolveSensitive, bool resolveMaterial,
   if (resolvePassive) {
     return true;
   }
-  if (resolveSensitive && m_surfaceArray) {
+  if (resolveSensitive and m_surfaceArray) {
     return true;
   }
-  if (resolveMaterial &&
-      (m_ssSensitiveSurfaces > 1 || m_ssApproachSurfaces > 1 ||
+  if (resolveMaterial and
+      (m_ssSensitiveSurfaces > 1 or m_ssApproachSurfaces > 1 or
        (surfaceRepresentation().surfaceMaterial() != nullptr))) {
     return true;
   }
@@ -71,11 +76,10 @@ bool Layer::onLayer(const GeometryContext& gctx, const parameters_t& pars,
   return isOnLayer(gctx, pars.position(), bcheck);
 }
 
-template <typename options_t, typename corrector_t>
+template <typename parameters_t, typename options_t, typename corrector_t>
 std::vector<SurfaceIntersection> Layer::compatibleSurfaces(
-    const GeometryContext& gctx, const Vector3D& position,
-    const Vector3D& momentum, const options_t& options,
-    const corrector_t& corrfnc) const {
+    const GeometryContext& gctx, const parameters_t& parameters,
+    const options_t& options, const corrector_t& corrfnc) const {
   // the list of valid intersection
   std::vector<SurfaceIntersection> sIntersections;
   // remember the surfaces for duplicate removal
@@ -96,15 +100,15 @@ std::vector<SurfaceIntersection> Layer::compatibleSurfaces(
   if (options.endObject) {
     // intersect the end surface
     // - it is the final one don't use the bounday check at all
-    SurfaceIntersection endInter =
+    SurfaceIntersection lastIntersecxtion =
         options.endObject->template surfaceIntersectionEstimate(
-            gctx, position, momentum, options, corrfnc);
+            gctx, parameters, options, corrfnc);
     // non-valid intersection with the end surface provided at this layer
     // indicates wrong direction or faulty setup
     // -> do not return compatible surfaces since they may lead you on a wrong
     // navigation path
-    if (endInter) {
-      maxPath = endInter.intersection.pathLength;
+    if (lastIntersecxtion) {
+      maxPath = lastIntersecxtion.intersection.pathLength;
     } else {
       return sIntersections;
     }
@@ -114,8 +118,8 @@ std::vector<SurfaceIntersection> Layer::compatibleSurfaces(
     // i.e. the maximum path limit is given by the layer thickness times
     // path correction, we take a safety factor of 1.5
     // -> this avoids punch through for cylinders
-    double pCorrection =
-        surfaceRepresentation().pathCorrection(gctx, position, momentum);
+    double pCorrection = surfaceRepresentation().pathCorrection(
+        gctx, parameters.position(), parameters.direction());
     maxPath = 1.5 * thickness() * pCorrection * options.navDir;
   }
 
@@ -131,7 +135,7 @@ std::vector<SurfaceIntersection> Layer::compatibleSurfaces(
       return true;
     }
     // next option: it's a material surface and you want to have it
-    if (options.resolveMaterial && sf.surfaceMaterial()) {
+    if (options.resolveMaterial and sf.surfaceMaterial()) {
       return true;
     }
     // last option: resovle all
@@ -142,7 +146,7 @@ std::vector<SurfaceIntersection> Layer::compatibleSurfaces(
   // [&sIntersections, &options, &parameters,&corrfnc
   auto processSurface = [&](const Surface& sf, bool sensitive = false) {
     // veto if it's start or end surface
-    if (options.startObject == &sf || options.endObject == &sf) {
+    if (options.startObject == &sf or options.endObject == &sf) {
       return;
     }
     // veto if it doesn't fit the prescription
@@ -150,8 +154,8 @@ std::vector<SurfaceIntersection> Layer::compatibleSurfaces(
       return;
     }
     // the surface intersection
-    SurfaceIntersection sfi = sf.surfaceIntersectionEstimate(
-        gctx, position, momentum, options, corrfnc);
+    SurfaceIntersection sfi =
+        sf.surfaceIntersectionEstimate(gctx, parameters, options, corrfnc);
     // check if intersection is valid and pathLimit has not been exceeded
     double sifPath = sfi.intersection.pathLength;
     // check the maximum path length
@@ -187,7 +191,7 @@ std::vector<SurfaceIntersection> Layer::compatibleSurfaces(
                          options.resolveSensitive)) {
     // get the canditates
     const std::vector<const Surface*>& sensitiveSurfaces =
-        m_surfaceArray->neighbors(position);
+        m_surfaceArray->neighbors(parameters.position());
     // loop through and veto
     // - if the approach surface is the parameter surface
     // - if the surface is not compatible with the type(s) that are collected
@@ -208,73 +212,48 @@ std::vector<SurfaceIntersection> Layer::compatibleSurfaces(
   } else {
     std::sort(sIntersections.begin(), sIntersections.end(), std::greater<>());
   }
-
   return sIntersections;
 }
 
 template <typename parameters_t, typename options_t, typename corrector_t>
-std::vector<SurfaceIntersection> Layer::compatibleSurfaces(
+const SurfaceIntersection Layer::surfaceOnApproach(
     const GeometryContext& gctx, const parameters_t& parameters,
     const options_t& options, const corrector_t& corrfnc) const {
-  return compatibleSurfaces(gctx, parameters.position(), parameters.momentum(),
-                            options, corrfnc);
-}
-
-template <typename options_t, typename corrector_t>
-const SurfaceIntersection Layer::surfaceOnApproach(
-    const GeometryContext& gctx, const Vector3D& position,
-    const Vector3D& direction, const options_t& options,
-    const corrector_t& corrfnc) const {
   // resolve directive based by options
   // - options.resolvePassive is on -> always
   // - options.resolveSensitive is on -> always
   // - options.resolveMaterial is on
   //   && either sensitive or approach surfaces have material
-  bool resolvePS = options.resolveSensitive || options.resolvePassive;
-  bool resolveMS = options.resolveMaterial &&
-                   (m_ssSensitiveSurfaces > 1 || m_ssApproachSurfaces > 1 ||
+  bool resolvePS = options.resolveSensitive or options.resolvePassive;
+  bool resolveMS = options.resolveMaterial and
+                   (m_ssSensitiveSurfaces > 1 or m_ssApproachSurfaces > 1 or
                     surfaceRepresentation().surfaceMaterial());
 
   // now of course this only counts when you have an approach descriptor
-  if (m_approachDescriptor && (resolvePS || resolveMS)) {
+  if (m_approachDescriptor and (resolvePS or resolveMS)) {
     // test if you are on an approach surface already, if so - provide it
     for (auto& asf : m_approachDescriptor->containedSurfaces()) {
       // in a connected geometry this is only a pointer comparison
       if (options.startObject &&
           asf == &(options.startObject->surfaceRepresentation())) {
-        Intersection nIntersection(position, 0., IntersectionStatus::onSurface);
+        Intersection nIntersection(parameters.position(), 0.,
+                                   IntersectionStatus::onSurface);
         return SurfaceIntersection(nIntersection, asf);
       }
     }
     // that's the collect trigger for always collecting
     // let's find the most suitable approach surface
     SurfaceIntersection aSurface = m_approachDescriptor->approachSurface(
-        gctx, position, direction, options.navDir, options.boundaryCheck,
-        corrfnc);
+        gctx, parameters, options, corrfnc);
     if (aSurface.intersection) {
       return (aSurface);
     }
   }
 
-  const Surface& rSurface = surfaceRepresentation();
-
-  // if we have no approach descriptor - we have no sensitive surfaces
-  if (rSurface.isOnSurface(gctx, position, direction, options.boundaryCheck)) {
-    Intersection nIntersection(position, 0., IntersectionStatus::onSurface);
-    return SurfaceIntersection(nIntersection, &rSurface);
-  }
-
   // create the intersection with the surface representation
-  return rSurface.surfaceIntersectionEstimate(gctx, position, direction,
-                                              options, corrfnc);
-}
-
-template <typename parameters_t, typename options_t, typename corrector_t>
-const SurfaceIntersection Layer::surfaceOnApproach(
-    const GeometryContext& gctx, const parameters_t& parameters,
-    const options_t& options, const corrector_t& corrfnc) const {
-  return surfaceOnApproach(gctx, parameters.position(), parameters.direction(),
-                           options, corrfnc);
+  const Surface& rSurface = surfaceRepresentation();
+  return rSurface.surfaceIntersectionEstimate(gctx, parameters, options,
+                                              corrfnc);
 }
 
 inline bool Layer::isOnLayer(const GeometryContext& gctx, const Vector3D& gp,

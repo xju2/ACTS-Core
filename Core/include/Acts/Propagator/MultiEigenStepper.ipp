@@ -303,10 +303,10 @@ Acts::MultiEigenStepper<B, C, E, A>::update(State& state,
 	auto& singlestate = std::get<0>(tuple_state);
 	// Get the BoundParameters
 	if( it!= trackMap.end() ){
-	const double weight = it->first.first;
+	const double weight = it->first;
 //	const auto& boundPar = *it->first.second;
 	// update track state with new bound parameter
-	EigenStepper<B>::update(singlestate, *it->first.second);
+	EigenStepper<B>::update(singlestate, *it->second);
 	// update track state weight 
 	std::get<1>(tuple_state) = weight;
 	++it;

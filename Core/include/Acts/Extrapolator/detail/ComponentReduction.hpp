@@ -39,7 +39,6 @@ struct ComponentReduction
              const stepper_t&    stepper,
              result_type&        result) const
   {
-	std::cout<<"in the reduction "<<std::endl;
 
     // If we are on target, everything should have been done
     if (state.navigation.targetReached) {
@@ -47,8 +46,9 @@ struct ComponentReduction
 	}
 
     // A current surface has been already assigned by the navigator
-    if (state.navigation.currentSurface
-        && state.navigation.currentSurface->surfaceMaterial()) {
+    if (state.navigation.currentSurface){
+    
+	std::cout<<"in the reduction "<<std::endl;
 		  
 	//stepper.outPut(state.stepping);
 	
@@ -102,12 +102,13 @@ struct ComponentReduction
 		  std::cout<<"output the weight "<<mergedComponentIter->first<<std::endl;
 //		  if (mergedComponentIter){
 //			auto combinedComponent = combiner(state.stepping.geoContext, trackMap.begin()->first, mergedComponentIter->first);
+		  //combined component: std::pair<double,TrackParameterBase*>
 			auto combinedComponent = combiner( state.stepping.geoContext, *state.navigation.currentSurface, *trackMap.begin(),*mergedComponentIter);
 			unmergedMap.erase(mergedComponentIter);
 			std::cout<<"after erase "<<unmergedMap.size()<<std::endl;
 			unmergedMap.erase(trackMap.begin());
 			std::cout<<"after erase2 "<<unmergedMap.size()<<std::endl;
-			WeightedTrackPars weight_parameter( combinedComponent.first, std::unique_ptr<TrackParametersBase>(combinedComponent.second) );
+//			WeightedTrackPars weight_parameter( combinedComponent.first, std::unique_ptr<TrackParametersBase>(combinedComponent.second) );
 			mergedMap.insert(std::make_pair(combinedComponent.first,std::unique_ptr<TrackParametersBase>(combinedComponent.second)));
 			std::cout<<"after add "<<mergedMap.size()<<std::endl;
 //			mergedMap.insert( std::make_pair(std::move(combinedComponent),unmergedMap.size()) );
@@ -116,18 +117,22 @@ struct ComponentReduction
 //			unmergedMap.erase( trackMap.begin() );
 //		  }
 		  --numberOfComponents;
+		  std::cout<<"numberOfComponents "<<numberOfComponents<<" "<<unmergedMap.size()<<std::endl;
 		}
 		else{
 		  auto& lastComponent = *unmergedMap.begin();
 		  auto& lastPar    = lastComponent.second;
 		  auto& lastWeight = lastComponent.first;
 		  mergedMap.insert( std::make_pair(lastWeight, std::move(lastPar)) );
+		  unmergedMap.erase( unmergedMap.begin());
+		  std::cout<<" merged "<<mergedMap.size()<<" unmerged "<<unmergedMap.size()<<std::endl;
 //		  mergedMap.insert( mergedMap.begin(), std::move(lastComponent) );
 //		  WeightedTrackPars weight_parameter( lastComponent.first, std::move(lastComponent.second) );
 //		  mergedMap.insert( std::make_pair(std::move(weight_parameter),0) );    
 		}
 	  }
-//	  if( unmergedMap.empty() && numberOfComponents > constraintNum ) unmergedMap = mergedMap; //move
+	  if( unmergedMap.empty() && numberOfComponents > constraintNum ) unmergedMap = std::move(mergedMap); //move
+	  std::cout<<"at end "<<unmergedMap.size()<<std::endl;
 	}
 	
 

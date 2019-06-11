@@ -50,9 +50,11 @@
 namespace Acts {
 namespace Test {
 
+  using DebugOutput = detail::DebugOutputActor;
 
   std::normal_distribution<double> gauss(0., 1.);
   std::default_random_engine       generator(42);
+
 
   bool debugMode = true;
 
@@ -102,11 +104,21 @@ namespace Test {
 	using ComponentReduction = detail::ComponentReduction;
 	using MultiMaterialEffect= MultiMaterialInteractor<detail::TunningEnergyEffect>;
 
-    PropagatorOptions<ActionList<MultiMaterialEffect,ComponentReduction>, AbortList<detail::EndOfWorldReached> >
+    PropagatorOptions<ActionList<DebugOutput,MultiMaterialEffect,ComponentReduction>, AbortList<detail::EndOfWorldReached> >
         rOptions(tgContext, mfContext);
     rOptions.debug = debugMode;
 
     auto result = multiPropagator.propagate(rStart, rOptions).value();
+    auto numOfComponents
+        = result.template get<MultiMaterialEffect::result_type>()
+              .numComponents;
+    if (debugMode) {
+      const auto debugString
+          = result.template get<DebugOutput::result_type>().debugString;
+      std::cout << ">>>> Measurement creation: " << std::endl;
+      std::cout << debugString;
+      std::cout << " There collects " << numOfComponents << " components.";
+    }
 
 	//std::vector<double> distance = result.get<ComponentReduction::result_type>().distance;
 	//for( auto dis : distance ) std::cout<<"distance result "<<dis<<std::endl;

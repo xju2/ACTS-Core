@@ -63,10 +63,10 @@ namespace Acts {
 
 			double distance = covarianceDifference * G_difference + parametersDifference * G_sum * parametersDifference;
 
-			//std::cout<<"in 1D kl distance "<<std::endl;
-			//std::cout<<"par1 par2 "<<firstPars<<" "<<std::endl<<secondPars<<std::endl;
-			//std::cout<<"cov1 cov2 "<<*firstCovTrk<<" "<<std::endl<<*secondCovTrk<<std::endl;
-			//std::cout<<"distance "<<distance<<std::endl;
+			std::cout<<"in 1D kl distance "<<std::endl;
+			std::cout<<"par1 par2 "<<firstPars<<" "<<std::endl<<secondPars<<std::endl;
+			std::cout<<"cov1 cov2 "<<*firstCovTrk<<" "<<std::endl<<*secondCovTrk<<std::endl;
+			std::cout<<"distance "<<distance<<std::endl;
 			return distance;    
 		  }
 		  else{

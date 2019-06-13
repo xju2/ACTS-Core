@@ -72,11 +72,11 @@ EigenPropagator epropagator(std::move(estepper), std::move(navigatorES));
 StraightLineStepper slstepper;
 StraightLinePropagator slpropagator(std::move(slstepper),
                                     std::move(navigatorSL));
-const int ntests = 51;
-const int skip = 50;
-bool debugModeFwd = true;
-bool debugModeBwd = true;
-bool debugModeFwdStep = true;
+const int ntests = 1000;
+const int skip = 0;
+bool debugModeFwd = false;
+bool debugModeBwd = false;
+bool debugModeFwdStep = false;
 bool debugModeBwdStep = false;
 
 /// the actual test nethod that runs the test
@@ -413,7 +413,7 @@ BOOST_DATA_TEST_CASE(
     test_material_collector,
     bdata::random((bdata::seed = 20,
                    bdata::distribution = std::uniform_real_distribution<>(
-                       0.15 * units::_GeV, 10. * units::_GeV))) ^
+                       0.35 * units::_GeV, 10. * units::_GeV))) ^
         bdata::random((bdata::seed = 21,
                        bdata::distribution =
                            std::uniform_real_distribution<>(-M_PI, M_PI))) ^

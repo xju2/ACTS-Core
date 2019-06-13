@@ -292,8 +292,19 @@ class Navigator {
         if (++state.navigation.navSurfaceIter ==
             state.navigation.navSurfaces.end()) {
           // this was the last surface, check if we have layers
-          if (!state.navigation.navLayers.empty()) {
-            ++state.navigation.navLayerIter;
+          // if (!state.navigation.navLayers.empty()) {
+          //  ++state.navigation.navLayerIter;
+          //}
+          debugLog(state, [&] {
+            return std::string("Last surface processed, re-evaluate layers.");
+          });
+          // Get a  navigation corrector associated to the stepper
+          auto navCorr = stepper.corrector(state.stepping);
+          if (resolveLayers(state, stepper, navCorr)) {
+            debugLog(state, [&] {
+              return std::string("Layer information updated, target at layer.");
+            });
+            state.navigation.nextTargetType = TargetType::layer;
           } else {
             // no layers, go to boundary
             state.navigation.nextTargetType = TargetType::boundary;
@@ -1222,12 +1233,11 @@ class Navigator {
     debugLog(state,
              [&] { return std::string("Searching for compatible layers."); });
 
-    // Check if we are in the start volume
+    // Check if we are in the start volume, then set the start layer
     auto startLayer =
         (state.navigation.currentVolume == state.navigation.startVolume)
             ? state.navigation.startLayer
             : nullptr;
-    // Create the navigation parameter & options
     // - and get the compatible layers, start layer will be excluded
     Parameters<stepper_t> navPars(stepper, state.stepping);
     Options<Layer> navOpts(state.stepping.navDir, true, resolveSensitive,

@@ -235,11 +235,13 @@ class IterativeVertexFinder {
   /// @param seedVertex Seed vertex
   /// @param perigeesToFitOut Perigees to fit
   /// @param perigeesToFitSplitVertexOut Perigees to fit split vertex
+  /// @param vFinderOptions Vertex finder options
   Result<void> fillPerigeesToFit(
       const std::vector<input_track_t>& perigeeList,
       const Vertex<input_track_t>& seedVertex,
       std::vector<input_track_t>& perigeesToFitOut,
-      std::vector<input_track_t>& perigeesToFitSplitVertexOut) const;
+      std::vector<input_track_t>& perigeesToFitSplitVertexOut,
+      const VertexFinderOptions<input_track_t>& vFinderOptions) const;
 
   /// @brief Function that reassigns tracks from other vertices
   ///        to the current vertex if they are more compatible

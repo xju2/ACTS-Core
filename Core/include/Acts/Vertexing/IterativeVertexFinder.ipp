@@ -50,12 +50,14 @@ Acts::IterativeVertexFinder<bfield_t, input_track_t, propagator_t, vfitter_t>::
     std::vector<input_track_t> perigeesToFit;
     std::vector<input_track_t> perigeesToFitSplitVertex;
 
-    // Fill vector with tracks to fit, only compatible with seed
-    auto fillRes = fillPerigeesToFit(seedTracks, seedVertex, perigeesToFit,
-                                     perigeesToFitSplitVertex);
-    if (!fillRes.ok()) {
-      return fillRes.error();
+    // Fill vector with tracks to fit, only compatible with seed:
+    auto res = fillPerigeesToFit(seedTracks, seedVertex, perigeesToFit,
+                                 perigeesToFitSplitVertex, vFinderOptions);
+
+    if (!res.ok()) {
+      return res.error();
     }
+
     ACTS_DEBUG("Perigees used for fit: " << perigeesToFit.size());
 
     /// Begin vertex fit
@@ -371,15 +373,16 @@ Acts::IterativeVertexFinder<bfield_t, input_track_t, propagator_t, vfitter_t>::
   return {};
 }
 
-template <typename bfield_t, typename input_track_t, typename propagator_t,
-          typename vfitter_t>
-Acts::Result<void> Acts::IterativeVertexFinder<
-    bfield_t, input_track_t, propagator_t,
-    vfitter_t>::fillPerigeesToFit(const std::vector<input_track_t>& perigeeList,
-                                  const Vertex<input_track_t>& seedVertex,
-                                  std::vector<input_track_t>& perigeesToFitOut,
-                                  std::vector<input_track_t>&
-                                      perigeesToFitSplitVertexOut) const {
+template <typename bfield_t, typename input_track_t, typename propagator_t>
+Acts::Result<void>
+Acts::IterativeVertexFinder<bfield_t, input_track_t, propagator_t>::
+    fillPerigeesToFit(
+        const std::vector<input_track_t>& perigeeList,
+        const Vertex<input_track_t>& seedVertex,
+        std::vector<input_track_t>& perigeesToFitOut,
+        std::vector<input_track_t>& perigeesToFitSplitVertexOut,
+        const VertexFinderOptions<input_track_t>& vFinderOptions) const {
+      
   int numberOfTracks = perigeeList.size();
 
   // Count how many tracks are used for fit
@@ -407,8 +410,11 @@ Acts::Result<void> Acts::IterativeVertexFinder<
     else {
       // check first that distance is not too large
       const BoundParameters& sTrackParams = m_extractParameters(sTrack);
-      double distance =
-          m_cfg.ipEst.calculateDistance(sTrackParams, seedVertex.position());
+      auto distanceRes = m_cfg.ipEst.calculateDistance(
+          vFinderOptions.geoContext, sTrackParams, seedVertex.position());
+      if (!distanceRes.ok()) {
+        return distanceRes.error();
+      }
 
       if (sTrackParams.covariance() == nullptr) {
         return VertexingError::NoCovariance;
@@ -422,7 +428,7 @@ Acts::Result<void> Acts::IterativeVertexFinder<
         error = 1.;
       }
 
-      if (distance / error < m_cfg.significanceCutSeeding) {
+      if (*distanceRes / error < m_cfg.significanceCutSeeding) {
         if (count % m_cfg.splitVerticesTrkInvFraction == 0 ||
             !m_cfg.createSplitVertices) {
           perigeesToFitOut.push_back(sTrack);

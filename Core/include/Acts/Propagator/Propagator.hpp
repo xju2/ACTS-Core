@@ -104,6 +104,9 @@ struct PropagatorOptions {
     // Stepper options
     eoptions.tolerance = tolerance;
     eoptions.stepSizeCutOff = stepSizeCutOff;
+    // Boundary chekcs
+    eoptions.targetBoundaryCheck = targetBoundaryCheck;
+    eoptions.externalBoundaryCheck = externalBoundaryCheck;
     // Action / abort list
     eoptions.actionList = std::move(actionList);
     eoptions.abortList = std::move(aborters);
@@ -131,6 +134,12 @@ struct PropagatorOptions {
 
   /// Required tolerance to reach target (surface, pathlength)
   double targetTolerance = s_onSurfaceTolerance;
+
+  /// The boundary checks - boundaries
+  BoundaryCheck targetBoundaryCheck = true;
+
+  /// The bouncary checks - external
+  BoundaryCheck externalBoundaryCheck = false;
 
   /// Loop protection step, it adapts the pathLimit
   bool loopProtection = true;

@@ -105,9 +105,12 @@ struct PropagatorState {
       return VoidIntersectionCorrector();
     }
 
-    bool surfaceReached(const State& state, const Surface* surface) const {
-      return surface->isOnSurface(tgContext, position(state), direction(state),
-                                  true);
+    SurfaceIntersection intersectSurface(State& state, const Surface& surface,
+                                         const BoundaryCheck& bcheck) const {
+      auto intersection = surface.intersectionEstimate(
+          tgContext, position(state), state.navDir * direction(state), bcheck,
+          s_onSurfaceTolerance);
+      return SurfaceIntersection(intersection, &surface);
     }
 
     BoundState boundState(State& state, const Surface& surface,
@@ -163,6 +166,9 @@ struct PropagatorState {
     /// buffer & formatting for consistent output
     size_t debugPfxWidth = 30;
     size_t debugMsgWidth = 50;
+
+    /// The boundary checks - boundaries
+    BoundaryCheck targetBoundaryCheck = true;
   };
 
   /// Navigation cache: the start surface

@@ -43,6 +43,7 @@ struct ConstrainedStep {
   ///
   /// @param value is the new value to be updated
   /// @param type is the constraint type
+  /// @param releaseStep forces a release before updating
   void update(const double& value, Type type, bool releaseStep = false) {
     if (releaseStep) {
       release(type);

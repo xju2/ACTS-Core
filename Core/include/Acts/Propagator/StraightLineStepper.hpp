@@ -41,13 +41,15 @@ class StraightLineStepper {
   };
 
  public:
-  using cstep = detail::ConstrainedStep;
+  using Cstep = detail::ConstrainedStep;
 
   using Corrector = VoidIntersectionCorrector;
   using Jacobian = BoundMatrix;
   using Covariance = BoundSymMatrix;
   using BoundState = std::tuple<BoundParameters, Jacobian, double>;
   using CurvilinearState = std::tuple<CurvilinearParameters, Jacobian, double>;
+
+  using SurfaceIntersection = ObjectIntersection<Surface>;
 
   /// State for track parameter propagation
   ///
@@ -108,7 +110,7 @@ class StraightLineStepper {
     double pathAccumulated = 0.;
 
     /// adaptive step size of the runge-kutta integration
-    cstep stepSize = std::numeric_limits<double>::max();
+    Cstep stepSize = std::numeric_limits<double>::max();
 
     // Cache the geometry context of this propagation
     std::reference_wrapper<const GeometryContext> geoContext;
@@ -156,15 +158,20 @@ class StraightLineStepper {
   /// Time access
   double time(const State& state) const { return state.t0 + state.dt; }
 
-  /// Tests if the state reached a surface
+  /// Tests if the state reached a surface, or update progress towards it
   ///
-  /// @param [in] state State that is tests
+  /// @param [in,out] state State that is tests, step size will be updated if
+  /// needed
   /// @param [in] surface Surface that is tested
+  /// @param [in] bcheck is the boundary check directive here
   ///
   /// @return Boolean statement if surface is reached by state
-  bool surfaceReached(const State& state, const Surface* surface) const {
-    return surface->isOnSurface(state.geoContext, position(state),
-                                direction(state), true);
+  SurfaceIntersection intersectSurface(State& state, const Surface& surface,
+                                       const BoundaryCheck& bcheck) const {
+    auto intersection = surface.intersectionEstimate(
+        state.geoContext, position(state), state.navDir * direction(state),
+        bcheck, s_onSurfaceTolerance);
+    return SurfaceIntersection(intersection, &surface);
   }
 
   /// Create and return the bound state at the current position

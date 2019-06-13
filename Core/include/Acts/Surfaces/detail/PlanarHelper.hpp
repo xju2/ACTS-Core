@@ -56,11 +56,11 @@ static Intersection planarIntersectionEstimate(
       path = (pnormal.dot((pcenter - lpos))) / (denom);
       solution = (lpos + path * ldir);
     }
-    if (path > 0.) {
-      return IntersectionStatus::reachable;
-    }
     if (path * path < s_onSurfaceTolerance * s_onSurfaceTolerance) {
       return IntersectionStatus::onSurface;
+    }
+    if (path > 0.) {
+      return IntersectionStatus::reachable;
     }
     // is valid if it goes into the right direction, or is within
     return (path * path < bwdTolerance * bwdTolerance

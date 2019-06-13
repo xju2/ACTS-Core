@@ -89,10 +89,8 @@ std::vector<SurfaceIntersection> Layer::compatibleSurfaces(
   if (!m_surfaceArray || !m_approachDescriptor || !options.navDir) {
     return sIntersections;
   }
-
   // reserve a few bins
   sIntersections.reserve(20);
-
   // (0) End surface check
   // @todo: - we might be able to skip this by use of options.pathLimit
   // check if you have to stop at the endSurface
@@ -103,15 +101,7 @@ std::vector<SurfaceIntersection> Layer::compatibleSurfaces(
     SurfaceIntersection lastIntersecxtion =
         options.endObject->template surfaceIntersectionEstimate(
             gctx, parameters, options, corrfnc);
-    // non-valid intersection with the end surface provided at this layer
-    // indicates wrong direction or faulty setup
-    // -> do not return compatible surfaces since they may lead you on a wrong
-    // navigation path
-    if (lastIntersecxtion) {
-      maxPath = lastIntersecxtion.intersection.pathLength;
-    } else {
-      return sIntersections;
-    }
+    maxPath = lastIntersecxtion.intersection.pathLength;
 
   } else {
     // compatibleSurfaces() should only be called when on the layer,

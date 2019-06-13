@@ -25,6 +25,7 @@ namespace Acts {
 
 /// @brief the AtlasStepper implementation for the
 template <typename bfield_t>
+
 class AtlasStepper {
   // This struct is a meta-function which normally maps to BoundParameters...
   template <typename T, typename S>
@@ -39,7 +40,7 @@ class AtlasStepper {
   };
 
  public:
-  using cstep = detail::ConstrainedStep;
+  using Cstep = detail::ConstrainedStep;
 
   using Jacobian = BoundMatrix;
   using Covariance = BoundSymMatrix;
@@ -47,6 +48,8 @@ class AtlasStepper {
   using CurvilinearState = std::tuple<CurvilinearParameters, Jacobian, double>;
 
   using Corrector = VoidIntersectionCorrector;
+
+  using SurfaceIntersection = ObjectIntersection<Surface>;
 
   /// @brief Nested State struct for the local caching
   struct State {
@@ -282,7 +285,7 @@ class AtlasStepper {
     const double t0;
 
     // adaptive step size of the runge-kutta integration
-    cstep stepSize = std::numeric_limits<double>::max();
+    Cstep stepSize = std::numeric_limits<double>::max();
 
     /// It caches the current magnetic field cell and stays (and interpolates)
     ///  within as long as this is valid. See step() code for details.
@@ -338,15 +341,20 @@ class AtlasStepper {
   /// Time access
   double time(const State& state) const { return state.t0 + state.pVector[3]; }
 
-  /// Tests if the state reached a surface
+  /// Tests if the state reached a surface, or update progress towards it
   ///
-  /// @param [in] state State that is tests
+  /// @param [in,out] state State that is tests, step size will be updated if
+  /// needed
   /// @param [in] surface Surface that is tested
+  /// @param [in] bcheck is the boundary check directive here
   ///
   /// @return Boolean statement if surface is reached by state
-  bool surfaceReached(const State& state, const Surface* surface) const {
-    return surface->isOnSurface(state.geoContext, position(state),
-                                direction(state), true);
+  SurfaceIntersection intersectSurface(State& state, const Surface& surface,
+                                       const BoundaryCheck& bcheck) const {
+    auto intersection = surface.intersectionEstimate(
+        state.geoContext, position(state), state.navDir * direction(state),
+        bcheck, s_onSurfaceTolerance);
+    return SurfaceIntersection(intersection, &surface);
   }
 
   /// Create and return the bound state at the current position

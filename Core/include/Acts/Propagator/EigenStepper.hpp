@@ -54,7 +54,7 @@ class EigenStepper {
   };
 
  public:
-  using cstep = detail::ConstrainedStep;
+  using Cstep = detail::ConstrainedStep;
   using Corrector = corrector_t;
 
   /// Jacobian, Covariance and State defintions
@@ -62,6 +62,8 @@ class EigenStepper {
   using Covariance = BoundSymMatrix;
   using BoundState = std::tuple<BoundParameters, Jacobian, double>;
   using CurvilinearState = std::tuple<CurvilinearParameters, Jacobian, double>;
+
+  using SurfaceIntersection = ObjectIntersection<Surface>;
 
   /// @brief State for track parameter propagation
   ///
@@ -157,7 +159,7 @@ class EigenStepper {
     double pathAccumulated = 0.;
 
     /// adaptive step size of the runge-kutta integration
-    cstep stepSize{std::numeric_limits<double>::max()};
+    Cstep stepSize{std::numeric_limits<double>::max()};
 
     /// This caches the current magnetic field cell and stays
     /// (and interpolates) within it as long as this is valid.
@@ -217,15 +219,28 @@ class EigenStepper {
   /// Time access
   double time(const State& state) const { return state.t0 + state.dt; }
 
-  /// Tests if the state reached a surface
+  /// Tests if the state reached a surface, or update progress towards it
   ///
-  /// @param [in] state State that is tests
+  /// @param [in,out] state State that is tests, step size will be updated if
+  /// needed
   /// @param [in] surface Surface that is tested
+  /// @param [in] bcheck is the boundary check directive here
   ///
   /// @return Boolean statement if surface is reached by state
-  bool surfaceReached(const State& state, const Surface* surface) const {
-    return surface->isOnSurface(state.geoContext, position(state),
-                                direction(state), true);
+  SurfaceIntersection intersectSurface(State& state, const Surface& surface,
+                                       const BoundaryCheck& bcheck) const {
+    // @TODO overstep tolerance to be included
+    auto intersection = surface.intersectionEstimate(
+        state.geoContext, position(state), state.navDir * direction(state),
+        bcheck, 10.);
+    // update by the navigation direction
+    intersection.pathLength *= state.navDir;
+    // update the step size if the intersection is reachable or overstepped
+    if (intersection.status == IntersectionStatus::reachable or
+        intersection.status == IntersectionStatus::overstepped) {
+      state.stepSize.update(intersection.pathLength, Cstep::actor);
+    }
+    return SurfaceIntersection(intersection, &surface);
   }
 
   /// Create and return the bound state at the current position

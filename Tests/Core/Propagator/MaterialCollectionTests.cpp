@@ -60,7 +60,7 @@ Navigator navigatorSL(tGeometry);
 
 using BField = ConstantBField;
 using StepCorrector = detail::RelativePathCorrector;
-using EigenStepper = EigenStepper<BField, StepCorrector>;
+using EigenStepper = EigenStepper<BField>;
 using EigenPropagator = Propagator<EigenStepper, Navigator>;
 using StraightLinePropagator = Propagator<StraightLineStepper, Navigator>;
 
@@ -72,11 +72,11 @@ EigenPropagator epropagator(std::move(estepper), std::move(navigatorES));
 StraightLineStepper slstepper;
 StraightLinePropagator slpropagator(std::move(slstepper),
                                     std::move(navigatorSL));
-const int ntests = 1000;
-const int skip = 0;
-bool debugModeFwd = false;
-bool debugModeBwd = false;
-bool debugModeFwdStep = false;
+const int ntests = 51;
+const int skip = 50;
+bool debugModeFwd = true;
+bool debugModeBwd = true;
+bool debugModeFwdStep = true;
 bool debugModeBwdStep = false;
 
 /// the actual test nethod that runs the test
@@ -413,7 +413,7 @@ BOOST_DATA_TEST_CASE(
     test_material_collector,
     bdata::random((bdata::seed = 20,
                    bdata::distribution = std::uniform_real_distribution<>(
-                       0.5 * units::_GeV, 10. * units::_GeV))) ^
+                       0.15 * units::_GeV, 10. * units::_GeV))) ^
         bdata::random((bdata::seed = 21,
                        bdata::distribution =
                            std::uniform_real_distribution<>(-M_PI, M_PI))) ^
@@ -428,7 +428,7 @@ BOOST_DATA_TEST_CASE(
              bdata::distribution = std::uniform_int_distribution<>(0, 100))) ^
         bdata::xrange(ntests),
     pT, phi, theta, charge, time, index) {
-  // runTest(epropagator, pT, phi, theta, charge, time, index);
+  runTest(epropagator, pT, phi, theta, charge, time, index);
   runTest(slpropagator, pT, phi, theta, charge, time, index);
 }
 

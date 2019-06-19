@@ -295,8 +295,6 @@ Acts::MultiEigenStepper<B, C, E, A>::update(State& state,
                                             const MultipleBoundParameters& pars) const
 {
   auto& trackMap = pars.getTrackList();
-  size_t trackMapSize = trackMap.size();
-//  typename (decltype(trackMap)::const_iterator it = trackMap.begin();
 	auto it = trackMap.begin();
 
   for (auto& tuple_state : state.stateCol) {
@@ -304,7 +302,6 @@ Acts::MultiEigenStepper<B, C, E, A>::update(State& state,
 	// Get the BoundParameters
 	if( it!= trackMap.end() ){
 	const double weight = it->first;
-//	const auto& boundPar = *it->first.second;
 	// update track state with new bound parameter
 	EigenStepper<B>::update(singlestate, *it->second);
 	// update track state weight 

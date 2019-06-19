@@ -18,14 +18,14 @@ namespace Acts {
   /// performs to reduct the number component
 struct ComponentReduction
 {
-  struct this_result
-  {
-	std::vector<double> distance;
-  };
+//  struct this_result
+//  {
+//	std::vector<double> distance;
+//  };
   detail::KullbackLeiblerComponentDistance klDist;
   detail::ComponentCombiner combiner;
 
-  using result_type = this_result;
+  //using result_type = this_result;
   /// Jacobian, Covariance and State defintions
   using Jacobian   = ActsMatrixD<5, 5>;
   using Covariance = ActsSymMatrixD<5>;
@@ -36,8 +36,7 @@ struct ComponentReduction
   template <typename propagator_state_t, typename stepper_t>
   void
   operator()(propagator_state_t& state,
-             const stepper_t&    stepper,
-             result_type&        result) const
+             const stepper_t&    stepper) const
   {
 
     // If we are on target, everything should have been done
@@ -70,7 +69,6 @@ struct ComponentReduction
 
 	
 	using TrackParMap = typename std::remove_reference<decltype(trackMap)>::type;
-	using WeightedTrackPars = std::pair<double, std::unique_ptr<TrackParametersBase>>;
 	// the aim merging map
 	TrackParMap& unmergedMap = trackMap;
 	// the empty map to merge
@@ -127,9 +125,8 @@ struct ComponentReduction
 		  minmumDist = distance;
 		  it_record = it;
 		}
-		return it_record;
-
 	  }
+	  return it_record;
 	} 
 
   template<typename TrackParMap>

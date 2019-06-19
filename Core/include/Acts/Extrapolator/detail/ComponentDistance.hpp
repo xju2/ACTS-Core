@@ -37,13 +37,13 @@ namespace Acts {
 
 		  const auto& firstComponentCov  = firstComponent.second->covariance();
 		  const auto& secondComponentCov = secondComponent.second->covariance();
+		 
 
 		  const auto& firstComponentParameters  = firstComponent.second->parameters();
 		  const auto& secondComponentParameters = secondComponent.second->parameters();
-		  std::cout<<"cov1 cov2 "<<*firstComponentCov<<" "<<std::endl<<*secondComponentCov<<std::endl;
-
-		  //std::cout<<"1st "<<firstComponentParameters<<std::endl;
-		  //std::cout<<"2nd "<<secondComponentParameters<<std::endl;
+//		  std::cout<<"cov1 cov2 "<<*firstComponentCov<<" "<<std::endl<<*secondComponentCov<<std::endl;
+//		  std::cout<<"1st "<<firstComponentParameters<<std::endl;
+//		  std::cout<<"2nd "<<secondComponentParameters<<std::endl;
 
 		  if ( do1D ){
 			//only 1 dimension
@@ -63,10 +63,11 @@ namespace Acts {
 
 			double distance = covarianceDifference * G_difference + parametersDifference * G_sum * parametersDifference;
 
-			std::cout<<"in 1D kl distance "<<std::endl;
-			std::cout<<"par1 par2 "<<firstPars<<" "<<std::endl<<secondPars<<std::endl;
-			std::cout<<"cov1 cov2 "<<*firstCovTrk<<" "<<std::endl<<*secondCovTrk<<std::endl;
-			std::cout<<"distance "<<distance<<std::endl;
+//			std::cout<<"in 1D kl distance "<<std::endl;
+//			std::cout<<"par1 par2 "<<firstPars<<" "<<std::endl<<secondPars<<std::endl;
+//			std::cout<<"distance "<<distance<<std::endl;
+//			std::cout<<"part1 "<<covarianceDifference * G_difference<<" "<<parametersDifference * G_sum * parametersDifference<<std::endl;
+//			std::cout<<"parametersDifference "<<parametersDifference<<" G_sum "<<G_sum<<std::endl;
 			return distance;    
 		  }
 		  else{
@@ -77,13 +78,13 @@ namespace Acts {
 			const auto& G_difference = G2 - G1;
 			const auto& G_sum        = G1 + G2;
 			double distance = (covarianceDifference * G_difference).trace() + (parametersDifference.transpose() * G_sum * parametersDifference);
-			//std::cout<<"in ND kl distance "<<std::endl;
-			//std::cout<<"par1 par2 "<<firstComponentParameters<<" "<<std::endl<<secondComponentParameters<<std::endl;
-			//std::cout<<"cov1 cov2 "<<firstComponentCov<<" "<<std::endl<<secondComponentCov<<std::endl;
-			//std::cout<<"distance "<<distance<<std::endl;
+//			std::cout<<"in ND kl distance "<<std::endl;
+//			std::cout<<"par1 par2 "<<firstComponentParameters<<" "<<std::endl<<secondComponentParameters<<std::endl;
+//			std::cout<<"distance "<<distance<<std::endl;
+//			std::cout<<"part2 "<<(covarianceDifference * G_difference).trace()<<" "<<(parametersDifference.transpose() * G_sum * parametersDifference)<<std::endl;
 			return distance;
 		  }
-		} //end of operator()
+		} 
 
 	};
 

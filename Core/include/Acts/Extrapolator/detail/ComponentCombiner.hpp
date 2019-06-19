@@ -35,21 +35,16 @@ namespace Acts {
 		  double weightCombined  = weight1 + weight2;
 		  auto parameterCombined = uncombined1.second->parameters() * weight1 + uncombined2.second->parameters() * weight2;
 
-		  // a temporary version
+		  // a simple combination
 		  auto covPart1 = *uncombined1.second->covariance() * weight1 + *uncombined2.second->covariance() * weight2;
 		  std::unique_ptr<const Covariance> covPtr = nullptr;
 		  covPtr = std::make_unique<const Covariance>(covPart1);
 
-		  //std::unique_ptr<BoundParameters> combinedPar( new BoundParameters(gctx, covPtr, parameterCombined, surface.getSharedPtr()) );
 		  TrackParametersBase* ptr = new BoundParameters(gctx, std::move(covPtr), parameterCombined, surface.getSharedPtr()) ;
 
-//		  std::pair<double,std::unique_ptr<TrackParametersBase> > parPair( weightCombined, std::move(uptr) );
-//		  return std::move(parPair);
 		  return  std::make_pair( weightCombined, ptr ) ;
 
-//		  auto trackPair = std::make_pair<double,std::unique_ptr<TrackParametersBase> >( weightCombined, std::move(uptr) );
-		  //return   std::move(trackPair);
-		} //end of operator()
+		} 
 	};
 
   }  //detail

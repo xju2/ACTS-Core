@@ -109,17 +109,12 @@ namespace Test {
     rOptions.debug = debugMode;
 
     auto result = multiPropagator.propagate(rStart, rOptions).value();
-    auto numOfComponents
-        = result.template get<MultiMaterialEffect::result_type>()
-              .numComponents;
     if (debugMode) {
       const auto debugString
           = result.template get<DebugOutput::result_type>().debugString;
-      std::cout << ">>>> Measurement creation: " << std::endl;
+      std::cout << ">>>> MultiComponent Reduction: " << std::endl;
       std::cout << debugString;
-      std::cout << " There collects " << numOfComponents << " components.";
     }
-
 	//std::vector<double> distance = result.get<ComponentReduction::result_type>().distance;
 	//for( auto dis : distance ) std::cout<<"distance result "<<dis<<std::endl;
   }

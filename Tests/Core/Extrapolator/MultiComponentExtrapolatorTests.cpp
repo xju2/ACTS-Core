@@ -181,7 +181,7 @@ namespace Test {
       const auto& par = result.endParameters;
       std::cout << "curvi par " << std::endl;
       std::cout << par->size() << std::endl;
-      std::cout << par->parameters(0) << std::endl;
+      std::cout << par->parameters() << std::endl;
     }
   }
 
@@ -366,7 +366,7 @@ namespace Test {
       std::cout << output.debugString << std::endl;
       std::cout << par->size() << std::endl;
       std::cout << "End: multi curvileaner parameter " << std::endl;
-      std::cout << par->parameters(0) << std::endl;
+      std::cout << par->parameters() << std::endl;
     }
 
     // singlepar
@@ -379,18 +379,18 @@ namespace Test {
       std::cout << "End: single curvileaner parameter " << std::endl;
       std::cout << single_par->parameters() << std::endl;
     }
-    CHECK_CLOSE_ABS(par->parameters(0)[eLOC_0],
+    CHECK_CLOSE_ABS(par->parameters()[eLOC_0],
                     single_par->parameters()[eLOC_0],
                     s_onSurfaceTolerance);
-    CHECK_CLOSE_ABS(par->parameters(0)[eLOC_1],
+    CHECK_CLOSE_ABS(par->parameters()[eLOC_1],
                     single_par->parameters()[eLOC_1],
                     s_onSurfaceTolerance);
     CHECK_CLOSE_REL(
-        par->parameters(0)[ePHI], single_par->parameters()[ePHI], 1e-6);
+        par->parameters()[ePHI], single_par->parameters()[ePHI], 1e-6);
     CHECK_CLOSE_REL(
-        par->parameters(0)[eTHETA], single_par->parameters()[eTHETA], 1e-6);
+        par->parameters()[eTHETA], single_par->parameters()[eTHETA], 1e-6);
     CHECK_CLOSE_REL(
-        par->parameters(0)[eQOP], single_par->parameters()[eQOP], 1e-6);
+        par->parameters()[eQOP], single_par->parameters()[eQOP], 1e-6);
   }
   
 }  // namespace Test

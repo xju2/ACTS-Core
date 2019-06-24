@@ -1,6 +1,6 @@
 // This file is part of the Acts project.
 //
-// Copyright (C) 2018 Acts project team
+// Copyright (C) 2019 Acts project team
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -12,7 +12,7 @@
 #include <sstream>
 #include <utility>
 #include "Acts/Extrapolator/MaterialInteractor.hpp"
-#include "Acts/Extrapolator/detail/EmptyEffect.hpp"
+#include "Acts/Extrapolator/detail/EmptyEffects.hpp"
 #include "Acts/Extrapolator/detail/InteractionFormulas.hpp"
 #include "Acts/Material/ISurfaceMaterial.hpp"
 #include "Acts/Material/Material.hpp"
@@ -22,55 +22,32 @@
 
 namespace Acts {
 
-struct InteractionPoint
-{
-  /// The material surface
-  const Surface* surface = nullptr;
-  /// The position information of the material hit
-  Vector3D position = Vector3D(0., 0., 0);
-  /// The direction information of the material hit
-  Vector3D direction = Vector3D(0., 0., 0);
-  /// The calculated path & applied path correction factor
-
-  bool
-  operator==(const InteractionPoint& others) const
-  {
-    if (fabs((this->direction - others.direction).norm()) > 1e-10) {
-      return false;
-    }
-    if (fabs((this->position - others.position).norm()) > 1e-10) {
-      return false;
-    }
-    if (this->surface != others.surface) {
-      return false;
-    }
-    return true;
-  }
-};
-
-using InteractionPointVec = std::vector<Acts::InteractionPoint>;
+using InteractionPointVec = std::vector<Acts::MaterialInteraction>;
 
 /// The Material interactor struct
 ///
 /// This is a plugin to the Propagator that
 /// performs material interaction on the currentSurface
 /// of the Propagagor state
-template<typename extensioneffect_t= detail::EmptyEffect>
 struct MultiMaterialInteractor
 {
-  // Configuration for this MultiMaterialInteractor
+  /// Configuration for this MultiMaterialInteractor
 
   /// multiple scattering switch on/off
   bool multipleScattering = true;
   /// The scattering formula struct
-  detail::HighlandScattering scattering;
+  detail::HighlandScattering process_scattering;
+  /// apply delta theta/phi on the covariance matrix
+  detail::MultipleScattering multiplescattering;
 
-  /// Bethe-Hitler struct
-  /// currently empty
-  extensioneffect_t extensionEffect;
+  /// Empty Bethe-Heitler struct
+  /// currently copy one component into multi equal components
+  detail::EmptyEffect emptyEffect;
+  /// apply dE and delta covariance on the matrix
+  detail::EnergyLoss energyloss;
 
   /// Record material in detail
-  bool recordInteractions = true;
+  bool recordInteractions = false;
 
   /// Simple result struct to be returned
   /// It mainly acts as an internal state which is
@@ -78,6 +55,7 @@ struct MultiMaterialInteractor
   struct this_result
   {
     /// This one is only filled when recordInteractions is switched on
+    /// record all the interactionPoints on surface
     std::map<const Surface*, InteractionPointVec> multiMaterialInteractions;
     /// the number of components
     int numComponents = 0;
@@ -92,8 +70,13 @@ struct MultiMaterialInteractor
   ///
   /// It checks if the state has a current surface, in which case
   /// the action is performed: the covariance is transported to the position,
-  /// multiple scattering and energy loss is applied  according to the
-  /// configuration.
+  /// the energy loss part are assumed to be Bethe-Heitler function, which
+  /// allows to split
+  /// one component into several components with (weight,deltaE,variance),
+  /// currently the Bethe-Heitler does nothing but split into several same
+  /// components,
+  /// to test if they collect same results in the multi-stepper. Then the
+  /// multiple scattering part is considered.
   ///
   /// @tparam propagator_state_t is the type of Propagagor state
   /// @tparam stepper_t Type of the stepper of the propagation
@@ -101,7 +84,9 @@ struct MultiMaterialInteractor
   /// @param state is the mutable propagator state object
   /// @param stepper The stepper in use
   /// @param result is the mutable result state object
-  //
+  ///
+  /// @to do Add Bethe-Heitler effect.
+  ///
   template <typename propagator_state_t, typename stepper_t>
   void
   operator()(propagator_state_t& state,
@@ -153,17 +138,23 @@ struct MultiMaterialInteractor
       const double        m = state.options.mass;
       InteractionPointVec materialInteractionVec;
 
-      /// typename of std::list<tuple<state,weight,status>>
+      /// typename of state column in the multi-state :
+      /// std::list<tuple<state,weight,status>>
       using stateColType = decltype(state.stepping.stateCol);
 
       /// loop the single components in the list
       typename stateColType::iterator it = state.stepping.stateCol.begin();
       while (it != state.stepping.stateCol.end()) {
-        ///  apply energy-lose component split & gaussian multiple scattering
-        auto& singlestate = std::get<0>((*it));
+        // get the current single component state
+        auto&        singlestate = std::get<0>(*it);
+        double       weight      = std::get<1>(*it);
+        const auto   status      = std::get<2>(*it);
+        const double p           = singlestate.p;
+        const double E           = std::sqrt(p * p + m * m);
+        const double lbeta       = p / E;
 
         MaterialProperties mProperties = sMaterial->materialProperties(
-            singlestate.pos, singlestate.navDir, mStage);
+            stepper.position(singlestate), singlestate.navDir, mStage);
         // Material properties (non-zero) have been found for this configuration
         if (mProperties) {
           /// more debugging output to the screen
@@ -178,16 +169,11 @@ struct MultiMaterialInteractor
 
           // Scale the material properties
           mProperties *= pCorrection;
+          const double tInX0 = mProperties.thicknessInX0();
 
           // Create the material interaction class, in case we record afterwards
           // Record the material interaction if configured to do so
-          Acts::InteractionPoint mInteraction;
-          if (recordInteractions) {
-            mInteraction.surface   = state.navigation.currentSurface;
-            mInteraction.position  = stepper.position(singlestate);
-            mInteraction.direction = stepper.direction(singlestate);
-            materialInteractionVec.push_back(std::move(mInteraction));
-          }  // end of record
+          Acts::MaterialInteraction mInteraction;
 
           // To integrate process noise, we need to transport
           // the covariance to the current position in space
@@ -197,21 +183,57 @@ struct MultiMaterialInteractor
           }
 
           // @brief if meets material surface , split the current single state
-          // to get newlist
-          // this should be according to the Bethe-Hitler pdf
+          // to get a new list of components.
+          //
+          // This should be according to the Bethe-Heitler pdf
           // in the function, return the list of multicomponents, each component
-          // carries (weight,mean,variance)
-          // @note current not use the Bethe-Hitler pdf, just make a list of
+          // carries (weight,dmean,dvariance)
+          // weight represents the weight of each newly created component
+          // dmean and dvariance represents the delta Energyloss and the delta
+          // variance
+          // from the newly created component.
+          //
+          // @note current not use the Bethe-Heitler pdf, just make a list of
           // copied component, to see if they act equally in the multi-stepper,
-          // the split is 2
-          debugLog(state, [&] { return std::string("in Split method."); });
-          stateColType newList = makeNewComponetList((*it), mProperties, m);
+          // the number of split is set to 2
 
-          // insert the newlist to the multi-component colume
-          state.stepping.stateCol.insert(it, newList.begin(), newList.end());
+          // the mixture represents the vector of (weight,dmean,dvariance)
+          // struct
+          auto mixture = emptyEffect.getMixture(tInX0, p);
+          for (const auto& mix : mixture) {
+            // energy loss for each created component
+            const double dE        = mix.mean;
+            const double sigmaE    = mix.variance;
+            const double pdfWeight = mix.weight;
+            energyloss(
+                state, stepper, singlestate, p, m, E, dE, sigmaE, mInteraction);
+
+            // multiple scattering
+            // currently multiple scattering is not considered a Bethe-Heitler
+            // process
+            if (multipleScattering && singlestate.covTransport) {
+              double sigmaScat = process_scattering(p, lbeta, tInX0);
+              multiplescattering(
+                  state, stepper, singlestate, sigmaScat, mInteraction);
+            }
+
+            // get the weight of the new component
+            double newWeight = pdfWeight * weight;
+            state.stepping.stateCol.push_front(
+                std::make_tuple(std::move(singlestate), newWeight, status));
+          }
 
           // delete the current component
           it = state.stepping.stateCol.erase(it);
+
+          if (recordInteractions) {
+            mInteraction.surface            = state.navigation.currentSurface;
+            mInteraction.position           = stepper.position(singlestate);
+            mInteraction.direction          = stepper.direction(singlestate);
+            mInteraction.materialProperties = mProperties;
+            mInteraction.pathCorrection     = pCorrection;
+            materialInteractionVec.push_back(std::move(mInteraction));
+          }  // end of record
         }
       }
       // record the material interaction
@@ -224,102 +246,6 @@ struct MultiMaterialInteractor
       // record the number of components at the last step
       result.numComponents = state.stepping.stateCol.size();
     }
-  }
-
-  /// Pure observer interface
-  /// This does not apply to the surface collector
-  template <typename propagator_state_t>
-  void
-  operator()(propagator_state_t& /*state*/) const
-  {
-  }
-
-  /// @brief  simple spliting method, copy 1 component to N components with
-  /// (dMean,dVariance = 0) and  equal weight
-  /// @param [in] single component state
-  /// @param [in] properties - the property of mater, determine the Bethe-Hitler
-  /// distribution
-  /// @param [in] m - mass
-  /// @param [out] the list of split components
-  template <typename tuplestate_t>
-  std::list<tuplestate_t>
-  makeNewComponetList(const tuplestate_t&       tuple_state,
-                      const MaterialProperties& properties,
-                      const double              m) const
-  {
-    auto&                   singleState = std::get<0>(tuple_state);
-    double                  weight      = std::get<1>(tuple_state);
-    const auto              status      = std::get<2>(tuple_state);
-    const double            p           = singleState.p;
-    const double            E           = std::sqrt(p * p + m * m);
-    const double            lbeta       = p / E;
-    const double            tInX0       = properties.thicknessInX0();
-    auto                    mixture     = extensionEffect(tInX0, p);
-    std::list<tuplestate_t> splitList;
-    unsigned int            iComponent = 0;
-    while (iComponent < mixture.size()) {
-      // energy loss
-      const double dE = mixture[iComponent].mean;
-//	  std::cout<<"E+dE / m "<<E<<","<<dE<<" "<<m<<std::endl;
-	  // when kinematically allowed
-      if (E + dE > m) {
-        // p
-        const double newP = std::sqrt((E + dE) * (E + dE) - m * m);
-        // copy
-        auto state = singleState;
-        state.p    = std::copysign(newP, singleState.p);
-        // cov for each new component
-        if (state.covTransport) {
-          // current variance varity : 0
-          const double sigmaQoverP
-              = mixture[iComponent].variance / (lbeta * newP * newP);
-          // good in any case for positive direction
-          if (state.navDir == forward) {
-            state.cov(eQOP, eQOP) += state.navDir * sigmaQoverP * sigmaQoverP;
-          } else {
-            // check that covariance entry doesn't become negtive
-            double sEqop = state.cov(eQOP, eQOP);
-            if (sEqop > sigmaQoverP * sigmaQoverP) {
-              state.cov(eQOP, eQOP) += state.navDir * sigmaQoverP * sigmaQoverP;
-            }
-          }
-        }
-
-        // multiple scattering
-        if (multipleScattering && state.covTransport) {
-          double sigmaScat = scattering(p, lbeta, tInX0);
-          double sinTheta  = std::sin(VectorHelpers::theta(state.dir));
-          double sigmaDeltaPhiSq
-              = sigmaScat * sigmaScat / (sinTheta * sinTheta);
-          double sigmaDeltaThetaSq = sigmaScat * sigmaScat;
-          // Good in any case for positive direction
-          if (state.navDir == forward) {
-            // Just add the multiple scattering component
-            state.cov(ePHI, ePHI) += state.navDir * sigmaDeltaPhiSq;
-            state.cov(eTHETA, eTHETA) += state.navDir * sigmaDeltaThetaSq;
-          } else {
-            // We check if the covariance stays positive
-            double sEphi   = state.cov(ePHI, ePHI);
-            double sEtheta = state.cov(eTHETA, eTHETA);
-            if (sEphi > sigmaDeltaPhiSq && sEtheta > sigmaDeltaThetaSq) {
-              // Noise removal is not applied if covariance would fall below 0
-              state.cov(ePHI, ePHI) -= sigmaDeltaPhiSq;
-              state.cov(eTHETA, eTHETA) -= sigmaDeltaThetaSq;
-            }
-          }
-        }
-
-        // get the weight of the new component
-        double pdfWeight = mixture[iComponent].weight;
-        double newWeight = pdfWeight * weight;
-        splitList.push_back(
-            std::make_tuple(std::move(state), newWeight, status));
-		++iComponent;
-      }
-	  // do nothing 
-	 else ++iComponent;
-    }
-    return std::move(splitList);
   }
 
 private:

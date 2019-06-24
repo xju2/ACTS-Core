@@ -136,38 +136,44 @@ namespace Test {
 
 	// get trackmap
 	auto& trackMap = multi_ataPlane_from_pars.getTrackList();
-	/*
 	using TrackParMap = typename std::remove_reference<decltype(trackMap)>::type;
+	typename TrackParMap::const_iterator element_1 = ++trackMap.begin();
+	
 	// component distance 
 	detail::KullbackLeiblerComponentDistance klDist;
 	detail::KullbackLeiblerComponentDistance klDist_1D;
 	klDist.do1D = false;
 	klDist_1D.do1D = true;
-	typename TrackParMap::const_iterator element_1 = ++trackMap.begin();
 	double distance = klDist( *trackMap.begin(), *element_1);
 	double distance_1D = klDist_1D( *trackMap.begin(), *element_1);
 	std::cout<<"dist1 "<<distance<<std::endl;
 	std::cout<<"dist2 "<<distance_1D<<std::endl;
-	*/
+	
 
-	// component combine 
-	/*
+	/// test component combination 
 	detail::ComponentCombiner combiner;
 	auto combinedComponent = combiner( tgContext, *pSurface, *trackMap.begin(),*element_1);
 	auto combinedParameters = 0.4 * ataPlane_from_pars_1->parameters() + 0.3 * ataPlane_from_pars_2->parameters();
 	auto combinedCov =  *ataPlane_from_pars_1->covariance() * 0.4 + *ataPlane_from_pars_2->covariance() * 0.3;
-	std::cout<<"combine component "<<combinedComponent.first<<","<<*combinedComponent.second<<std::endl;
-	std::cout<<"par cov  "<<combinedParameters<<" "<<combinedCov<<std::endl;
+	std::cout<<"in combine component "<<combinedComponent.first<<","<<*combinedComponent.second<<std::endl;
+	std::cout<<"in simple calculation par cov  "<<combinedParameters<<" "<<combinedCov<<std::endl;
+	std::cout<<"component 1: "<<*ataPlane_from_pars_1<<std::endl;
+	std::cout<<"component 2: "<<*ataPlane_from_pars_2<<std::endl;
+	std::cout<<std::endl;
 
+	// check weight, parameters, covariance
 	CHECK_CLOSE_REL(combinedComponent.first, 0.7, 1e-6);
 	CHECK_CLOSE_REL(combinedComponent.second->parameters(), combinedParameters, 1e-6);
-	*/
+	CHECK_CLOSE_REL((*combinedComponent.second->covariance())(eLOC_0,eLOC_0), combinedCov(eLOC_0,eLOC_0), 1e-6);
+	CHECK_CLOSE_REL((*combinedComponent.second->covariance())(eLOC_1,eLOC_1), combinedCov(eLOC_1,eLOC_1), 1e-6);
+	CHECK_CLOSE_REL((*combinedComponent.second->covariance())(ePHI,ePHI), combinedCov(ePHI,ePHI), 1e-6);
+	CHECK_CLOSE_REL((*combinedComponent.second->covariance())(eTHETA,eTHETA), combinedCov(eTHETA,eTHETA), 1e-6);
+	CHECK_CLOSE_REL((*combinedComponent.second->covariance())(eQOP,eQOP), combinedCov(eQOP,eQOP), 1e-6);
+	
 
 
-	// component reduction
-	std::cout<<"bef size "<<trackMap.size()<<std::endl;
-	reductComponent(trackMap, 2, tgContext, *pSurface);
-	std::cout<<"size "<<trackMap.size()<<std::endl;
+	/// component reduction
+	//reductComponent(trackMap, 2, tgContext, *pSurface);
   }
 
 	template<typename T>

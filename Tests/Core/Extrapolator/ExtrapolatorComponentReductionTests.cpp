@@ -56,7 +56,7 @@ namespace Test {
   std::default_random_engine       generator(42);
 
 
-  bool debugMode = true;
+  bool debugMode = false;
 
   // Create a test context
   GeometryContext      tgContext  = GeometryContext();
@@ -115,8 +115,6 @@ namespace Test {
       std::cout << ">>>> MultiComponent Reduction: " << std::endl;
       std::cout << debugString;
     }
-	//std::vector<double> distance = result.get<ComponentReduction::result_type>().distance;
-	//for( auto dis : distance ) std::cout<<"distance result "<<dis<<std::endl;
   }
 }
 }

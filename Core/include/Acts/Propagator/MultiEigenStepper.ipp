@@ -304,8 +304,9 @@ Acts::MultiEigenStepper<B, C, E, A>::update(State& state,
 	const double weight = it->first;
 	// update track state with new bound parameter
 	EigenStepper<B>::update(singlestate, *it->second);
-	// update track state weight 
+	// update track state weight and status
 	std::get<1>(tuple_state) = weight;
+	std::get<2>(tuple_state) = StateStatus::FREE;
 	++it;
 	}
 	else {

@@ -8,44 +8,30 @@
 
 #pragma once
 
-#include <map>
-#include <utility>
-#include <list>
-#include <memory>
 #include "Acts/EventData/TrackParameters.hpp"
-#include "Acts/Utilities/GeometryContext.hpp"
 
 namespace Acts {
-
   namespace detail {
-
 	struct ComponentCombiner{
-
-	  template< typename weight_parameter_t>
+	  template<typename weight_parameter_t>
 		std::pair<double, TrackParametersBase* >	
 		operator()(const GeometryContext& gctx,
 			const Surface& surface,
-			const weight_parameter_t& uncombined1, 
-			const weight_parameter_t& uncombined2) const
+			const weight_parameter_t& weight_parameters_1, 
+			const weight_parameter_t& weight_parameters_2) const
 		{
-		  using Covariance       = ActsSymMatrixD<5>;
-		  double weight1 = uncombined1.first;
-		  double weight2 = uncombined2.first;
+		  double weight_1 = weight_parameters_1.first;
+		  double weight_2 = weight_parameters_2.first;
 
-		  double weightCombined  = weight1 + weight2;
-		  auto parameterCombined = uncombined1.second->parameters() * weight1 + uncombined2.second->parameters() * weight2;
-
-		  // a simple combination
-		  auto covPart1 = *uncombined1.second->covariance() * weight1 + *uncombined2.second->covariance() * weight2;
-		  std::unique_ptr<const Covariance> covPtr = nullptr;
-		  covPtr = std::make_unique<const Covariance>(covPart1);
-
-		  TrackParametersBase* ptr = new BoundParameters(gctx, std::move(covPtr), parameterCombined, surface.getSharedPtr()) ;
-
-		  return  std::make_pair( weightCombined, ptr ) ;
-
+		  /// the simplist combination
+		  double weightCombined  = weight_1 + weight_2;
+		  auto parametersCombined = weight_parameters_1.second->parameters() * weight_1 + weight_parameters_2.second->parameters() * weight_2;
+		  auto covCombined = *weight_parameters_1.second->covariance() * weight_1 + *weight_parameters_2.second->covariance() * weight_2;
+		  std::unique_ptr<const TrackParametersBase::CovMatrix_t> covPtr = nullptr;
+		  covPtr = std::make_unique<const TrackParametersBase::CovMatrix_t>(covCombined);
+		  TrackParametersBase* ptr = new BoundParameters(gctx, std::move(covPtr), parametersCombined, surface.getSharedPtr()) ;
+		  return  std::make_pair(weightCombined, ptr);
 		} 
 	};
-
   }  //detail
 }  //Acts

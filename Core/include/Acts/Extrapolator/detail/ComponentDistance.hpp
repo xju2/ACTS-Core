@@ -1,17 +1,12 @@
 // This file is part of the Acts project.
 //
-// Copyright (C) 2018 Acts project team
+// Copyright (C) 2019 Acts project team
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #pragma once
-
-#include <map>
-#include <utility>
-#include <list>
-#include <memory>
 
 namespace Acts {
 
@@ -28,61 +23,41 @@ namespace Acts {
 	/// weight_parameter_t : std::pair<weight, unique_ptr<boundpar> >
 	struct KullbackLeiblerComponentDistance{
 
-	  bool do1D = false;
+	  bool do1D = true;
 
 	  template< typename weight_parameter_t>
 		double	
-		operator()(const weight_parameter_t& firstComponent, const weight_parameter_t& secondComponent) const
+		operator()(const weight_parameter_t& weight_parameters_1, const weight_parameter_t& weight_parameters_2) const
 		{
+		  const auto& parameters_1 = weight_parameters_1.second->parameters();
+		  const auto& parameters_2 = weight_parameters_2.second->parameters();
 
-		  const auto& firstComponentCov  = firstComponent.second->covariance();
-		  const auto& secondComponentCov = secondComponent.second->covariance();
+		  const auto& cov_1 = weight_parameters_1.second->covariance();
+		  const auto& cov_2 = weight_parameters_2.second->covariance();
 		 
-
-		  const auto& firstComponentParameters  = firstComponent.second->parameters();
-		  const auto& secondComponentParameters = secondComponent.second->parameters();
-//		  std::cout<<"cov1 cov2 "<<*firstComponentCov<<" "<<std::endl<<*secondComponentCov<<std::endl;
-//		  std::cout<<"1st "<<firstComponentParameters<<std::endl;
-//		  std::cout<<"2nd "<<secondComponentParameters<<std::endl;
-
 		  if ( do1D ){
 			//only 1 dimension
-			double firstPars  = firstComponentParameters[eQOP];
-			double secondPars = secondComponentParameters[eQOP];
-
-			double firstCovTrk  = (*firstComponentCov)(eQOP,eQOP);
-			double secondCovTrk = (*secondComponentCov)(eQOP,eQOP);
-
+			double firstCovTrk  = (*cov_1)(eQOP,eQOP);
+			double secondCovTrk = (*cov_2)(eQOP,eQOP);
 			double G1 =  firstCovTrk > 0  ? 1./firstCovTrk : 1e10;
 			double G2 =  secondCovTrk > 0 ? 1./secondCovTrk : 1e10;
-
-			double parametersDifference = firstPars - secondPars;
+			double parametersDifference = parameters_1[eQOP] - parameters_2[eQOP];
 			double covarianceDifference = firstCovTrk - secondCovTrk;
 			double G_difference = G2 - G1;
 			double G_sum        = G1 + G2;      
 
 			double distance = covarianceDifference * G_difference + parametersDifference * G_sum * parametersDifference;
-
-//			std::cout<<"in 1D kl distance "<<std::endl;
-//			std::cout<<"par1 par2 "<<firstPars<<" "<<std::endl<<secondPars<<std::endl;
-//			std::cout<<"distance "<<distance<<std::endl;
-//			std::cout<<"part1 "<<covarianceDifference * G_difference<<" "<<parametersDifference * G_sum * parametersDifference<<std::endl;
-//			std::cout<<"parametersDifference "<<parametersDifference<<" G_sum "<<G_sum<<std::endl;
 			return distance;    
 		  }
 		  else{
-			const auto& G1 =  firstComponentCov->inverse();
-			const auto& G2 =  secondComponentCov->inverse();
-			const auto& parametersDifference = firstComponentParameters - secondComponentParameters;
-			const auto& covarianceDifference = *firstComponentCov - *secondComponentCov;
+			const auto& G1 =  cov_1->inverse();
+			const auto& G2 =  cov_2->inverse();
+			const auto& parametersDifference = parameters_1 - parameters_2;
+			const auto& covarianceDifference = *cov_1 - *cov_2;
 			const auto& G_difference = G2 - G1;
 			const auto& G_sum        = G1 + G2;
 			double distance = (covarianceDifference * G_difference).trace() + (parametersDifference.transpose() * G_sum * parametersDifference);
-//			std::cout<<"in ND kl distance "<<std::endl;
-//			std::cout<<"par1 par2 "<<firstComponentParameters<<" "<<std::endl<<secondComponentParameters<<std::endl;
-//			std::cout<<"distance "<<distance<<std::endl;
-//			std::cout<<"part2 "<<(covarianceDifference * G_difference).trace()<<" "<<(parametersDifference.transpose() * G_sum * parametersDifference)<<std::endl;
-			return distance;
+			return distance;    
 		  }
 		} 
 

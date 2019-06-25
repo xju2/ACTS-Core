@@ -28,6 +28,7 @@
 
 #include "Acts/Extrapolator/detail/ComponentDistance.hpp"
 #include "Acts/Extrapolator/detail/ComponentCombiner.hpp"
+#include "Acts/Extrapolator/detail/component_reduction_impl.hpp"
 
 namespace bdata = boost::unit_test::data;
 namespace tt    = boost::test_tools;
@@ -36,11 +37,6 @@ namespace Acts {
 
 namespace Test {
 
-	template<typename T>
-	void reductComponent( T& trackMap, size_t constraintNum, const GeometryContext& geoContext, const Surface& surface);
-	template<typename T>
-	  typename T::const_iterator
-	  pairWithMinimumDistance(const T& unmergedMap) ;
 
   // Create a test context
   GeometryContext tgContext = GeometryContext();
@@ -153,8 +149,8 @@ namespace Test {
 	/// test component combination 
 	detail::ComponentCombiner combiner;
 	auto combinedComponent = combiner( tgContext, *pSurface, *trackMap.begin(),*element_1);
-	auto combinedParameters = 0.4 * ataPlane_from_pars_1->parameters() + 0.3 * ataPlane_from_pars_2->parameters();
-	auto combinedCov =  *ataPlane_from_pars_1->covariance() * 0.4 + *ataPlane_from_pars_2->covariance() * 0.3;
+	auto combinedParameters = 0.4/0.7 * ataPlane_from_pars_1->parameters() + 0.3/0.7 * ataPlane_from_pars_2->parameters();
+	auto combinedCov =  *ataPlane_from_pars_1->covariance() * 0.4/0.7 + *ataPlane_from_pars_2->covariance() * 0.3/0.7;
 	std::cout<<"in combine component "<<combinedComponent.first<<","<<*combinedComponent.second<<std::endl;
 	std::cout<<"in simple calculation par cov  "<<combinedParameters<<" "<<combinedCov<<std::endl;
 	std::cout<<"component 1: "<<*ataPlane_from_pars_1<<std::endl;
@@ -171,70 +167,8 @@ namespace Test {
 	CHECK_CLOSE_REL((*combinedComponent.second->covariance())(eQOP,eQOP), combinedCov(eQOP,eQOP), 1e-6);
 	
 	/// component reduction
-	reductComponent(trackMap, 2, tgContext, *pSurface);
+	impl::reductComponent(trackMap, 2, tgContext, *pSurface);
   }
 
-	template<typename T>
-	void reductComponent( T& trackMap, size_t constraintNum, const GeometryContext& geoContext, const Surface& surface)
-	{
-	  detail::ComponentCombiner combiner;
-	  using TrackParMap = typename std::remove_reference<decltype(trackMap)>::type;
-	  // the aim merging map
-	  TrackParMap& unmergedMap = trackMap;
-	  // the empty map to merge
-	  TrackParMap mergedMap;
-	  size_t numberOfComponents = unmergedMap.size();
-	  while ( numberOfComponents > constraintNum ){
-		if( !mergedMap.empty() ) mergedMap.clear();
-		while ( numberOfComponents > constraintNum && !unmergedMap.empty() ) {
-		  if( unmergedMap.size() > 1 ){
-			auto mergedComponentIter = pairWithMinimumDistance(trackMap);
-			auto combinedComponent = combiner( geoContext, surface, *trackMap.begin(),*mergedComponentIter);
-			unmergedMap.erase(mergedComponentIter);
-			unmergedMap.erase(trackMap.begin());
-			mergedMap.insert(std::make_pair(combinedComponent.first,std::unique_ptr<TrackParametersBase>(combinedComponent.second)));
-			--numberOfComponents;
-		  }
-		  else{
-			auto& lastComponent = *unmergedMap.begin();
-			auto& lastPar    = lastComponent.second;
-			auto& lastWeight = lastComponent.first;
-			mergedMap.insert( std::make_pair(lastWeight, std::move(lastPar)) );
-			unmergedMap.erase( unmergedMap.begin());
-		  }
-		}
-		if( unmergedMap.empty() && numberOfComponents > constraintNum ) {
-		  unmergedMap = std::move(mergedMap); //move
-		}
-	  }
-	  // merge two maps
-		auto it = mergedMap.begin();
-		for( ; it != mergedMap.end(); it++ ){
-			auto& par    = (*it).second;
-			auto& weight = (*it).first;
-			unmergedMap.insert( std::make_pair(weight, std::move(par)) );
-		}
-	}
-
-	template<typename T>
-	  auto 
-	  pairWithMinimumDistance(const T& unmergedMap) 
-	  ->typename T::const_iterator
-	  {
-		detail::KullbackLeiblerComponentDistance klDist;
-		double minmumDist = 10e10;
-		typename T::const_iterator it = unmergedMap.begin();
-		typename T::const_iterator it_record ;
-
-		for( ; it != unmergedMap.end(); it++ ){
-		  if ( it == unmergedMap.begin() ) continue;
-		  double distance = klDist((*it),*unmergedMap.begin());
-		  if( distance < minmumDist ){
-			minmumDist = distance;
-			it_record = it;
-		  }
-		}
-		  return it_record;
-		}
 }
 }

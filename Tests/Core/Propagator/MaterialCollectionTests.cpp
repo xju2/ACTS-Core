@@ -72,12 +72,12 @@ EigenPropagator epropagator(std::move(estepper), std::move(navigatorES));
 StraightLineStepper slstepper;
 StraightLinePropagator slpropagator(std::move(slstepper),
                                     std::move(navigatorSL));
-const int ntests = 1000;
+const int ntests = 1;
 const int skip = 0;
-bool debugModeFwd = false;
-bool debugModeBwd = false;
-bool debugModeFwdStep = false;
-bool debugModeBwdStep = false;
+bool debugModeFwd = true;
+bool debugModeBwd = true;
+bool debugModeFwdStep = true;
+bool debugModeBwdStep = true;
 
 /// the actual test nethod that runs the test
 /// can be used with several propagator types
@@ -428,7 +428,8 @@ BOOST_DATA_TEST_CASE(
              bdata::distribution = std::uniform_int_distribution<>(0, 100))) ^
         bdata::xrange(ntests),
     pT, phi, theta, charge, time, index) {
-  runTest(epropagator, pT, phi, theta, charge, time, index);
+      
+  //runTest(epropagator, pT, phi, theta, charge, time, index);
   runTest(slpropagator, pT, phi, theta, charge, time, index);
 }
 

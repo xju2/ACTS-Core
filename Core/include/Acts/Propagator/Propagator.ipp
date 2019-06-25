@@ -19,9 +19,8 @@ auto Acts::Propagator<S, N>::propagate_impl(propagator_state_t& state) const
   m_navigator.status(state, m_stepper);
   // Pre-Stepping call to the action list
   state.options.actionList(state, m_stepper, result);
-  // assume negative outcome, only set to true later if we actually have
-  // a positive outcome.
-  // This is needed for correct error logging
+  // Assume negative outcome, only set to true later if we actually have
+  // a positive outcome, this is needed for correct error logging
   bool terminatedNormally = false;
   // Pre-Stepping: abort condition check
   if (!state.options.abortList(result, state, m_stepper)) {
@@ -60,6 +59,7 @@ auto Acts::Propagator<S, N>::propagate_impl(propagator_state_t& state) const
       state.options.actionList(state, m_stepper, result);
       if (state.options.abortList(result, state, m_stepper)) {
         terminatedNormally = true;
+        debugLog(state, [&] { return std::string("Abort condition met."); });
         break;
       }
       m_navigator.target(state, m_stepper);
@@ -166,18 +166,19 @@ auto Acts::Propagator<S, N>::propagate(
   target_aborter_t targetAborter;
   path_aborter_t pathAborter;
   auto abortList = options.abortList.append(targetAborter, pathAborter);
-
+  
   // Create the extended options and declare their type
   auto eOptions = options.extend(abortList);
   using OptionsType = decltype(eOptions);
-
+  
   // Type of the full propagation result, including output from actions
   using ResultType =
       action_list_t_result_t<return_parameter_type, action_list_t>;
 
   // Initialize the internal propagator state
   using StateType = State<OptionsType>;
-  StateType state(start, eOptions);
+  
+  StateType state(start, eOptions);  
   state.navigation.targetSurface = &target;
 
   static_assert(
@@ -227,7 +228,7 @@ void Acts::Propagator<S, N>::debugLog(
       dstream << "|->" << std::setw(state.options.debugPfxWidth);
       dstream << "Propagator"
               << " | ";
-      dstream << std::setw(state.options.debugMsgWidth) << line << '\n';
+      dstream << line << '\n';
       state.options.debugString += dstream.str();
     }
   }

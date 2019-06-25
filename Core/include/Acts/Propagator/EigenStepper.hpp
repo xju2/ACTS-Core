@@ -205,19 +205,48 @@ class EigenStepper {
   }
 
   /// Global particle position accessor
+  /// @param [in] is the stepper state from which the prosition is calculated
   Vector3D position(const State& state) const { return state.pos; }
 
   /// Momentum direction accessor
+  /// @param [in] is the stepper state from which the direction is calculated
   Vector3D direction(const State& state) const { return state.dir; }
 
-  /// Actual momentum accessor
+  /// Momentum accessor
+  /// @param [in] is the stepper state from which the momentum value is
+  /// calculated
   double momentum(const State& state) const { return state.p; }
 
   /// Charge access
+  /// @param [in] is the stepper state from which the charge is drawn
   double charge(const State& state) const { return state.q; }
 
   /// Time access
+  /// @param [in] is the stepper state from which the time is extracted
   double time(const State& state) const { return state.t0 + state.dt; }
+
+  /// Release the step size
+  ///
+  /// @param [in,out] state is the stepper state on which the release is
+  /// performed
+  void releaseStepSize(State& state, Cstep::Type sType) const {
+    state.stepSize.release(sType);
+  }
+
+  /// Retrieve the step size
+  ///
+  /// @param [in,out] state is the stepper state which is updated
+  double stepSize(State& state, Cstep::Type sType) const {
+    return state.stepSize.value(sType);
+  }
+
+  /// Release the step size
+  ///
+  /// @param [in,out] state is the stepper state which is updated
+  void updateStepSize(State& state, double value, Cstep::Type sType,
+                      bool release = false) const {
+    state.stepSize.update(value, sType, release);
+  }
 
   /// Tests if the state reached a surface, or update progress towards it
   ///
@@ -228,8 +257,9 @@ class EigenStepper {
   ///
   /// @return Boolean statement if surface is reached by state
   SurfaceIntersection intersectSurface(State& state, const Surface& surface,
-                                       const BoundaryCheck& bcheck) const {
-    // @TODO overstep tolerance to be included
+                                       const BoundaryCheck& bcheck,
+                                       Cstep::Type stepType = Cstep::actor) const {
+    // @TODO overstep tolerance to be included dynamically
     auto intersection = surface.intersectionEstimate(
         state.geoContext, position(state), state.navDir * direction(state),
         bcheck, 10.);
@@ -238,7 +268,7 @@ class EigenStepper {
     // update the step size if the intersection is reachable or overstepped
     if (intersection.status == IntersectionStatus::reachable or
         intersection.status == IntersectionStatus::overstepped) {
-      state.stepSize.update(intersection.pathLength, Cstep::actor);
+      state.stepSize.update(intersection.pathLength, stepType);
     }
     return SurfaceIntersection(intersection, &surface);
   }

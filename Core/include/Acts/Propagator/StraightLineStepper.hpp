@@ -135,7 +135,7 @@ class StraightLineStepper {
 
   /// Get the field for the stepping, this gives back a zero field
   ///
-  /// @param [in,out] state is the propagation state associated with the track
+  /// @param [in,out] state is the stepper state associated with the track
   ///                 the magnetic field cell is used (and potentially updated)
   /// @param [in] pos is the field position
   Vector3D getField(State& /*state*/, const Vector3D& /*pos*/) const {
@@ -144,19 +144,48 @@ class StraightLineStepper {
   }
 
   /// Global particle position accessor
+  /// @param [in] is the stepper state from which the prosition is calculated
   Vector3D position(const State& state) const { return state.pos; }
 
   /// Momentum direction accessor
+  /// @param [in] is the stepper state from which the direction is calculated
   Vector3D direction(const State& state) const { return state.dir; }
 
   /// Momentum accessor
+  /// @param [in] is the stepper state from which the momentum value is
+  /// calculated
   double momentum(const State& state) const { return state.p; }
 
   /// Charge access
+  /// @param [in] is the stepper state from which the charge is drawn
   double charge(const State& state) const { return state.q; }
 
   /// Time access
+  /// @param [in] is the stepper state from which the time is extracted
   double time(const State& state) const { return state.t0 + state.dt; }
+
+  /// Release the step size
+  ///
+  /// @param [in,out] state is the stepper state on which the release is
+  /// performed
+  void releaseStepSize(State& state, Cstep::Type sType) const {
+    state.stepSize.release(sType);
+  }
+
+  /// Release the step size
+  ///
+  /// @param [in,out] state is the stepper state which is updated
+  void updateStepSize(State& state, double value, Cstep::Type sType,
+                      bool release = false) const {
+    state.stepSize.update(value, sType, release);
+  }
+
+  /// Retrieve the step size
+  ///
+  /// @param [in,out] state is the stepper state which is updated
+  double stepSize(State& state, Cstep::Type sType) const {
+    return state.stepSize.value(sType);
+  }
 
   /// Tests if the state reached a surface, or update progress towards it
   ///
@@ -167,10 +196,18 @@ class StraightLineStepper {
   ///
   /// @return Boolean statement if surface is reached by state
   SurfaceIntersection intersectSurface(State& state, const Surface& surface,
-                                       const BoundaryCheck& bcheck) const {
+                                       const BoundaryCheck& bcheck,
+                                       Cstep::Type stepType = Cstep::actor) const {
     auto intersection = surface.intersectionEstimate(
         state.geoContext, position(state), state.navDir * direction(state),
         bcheck, s_onSurfaceTolerance);
+    // update by the navigation direction
+    intersection.pathLength *= state.navDir;
+    // update the step size if the intersection is reachable or overstepped
+    if (intersection.status == IntersectionStatus::reachable or
+        intersection.status == IntersectionStatus::overstepped) {
+      state.stepSize.update(intersection.pathLength, stepType);
+    }
     return SurfaceIntersection(intersection, &surface);
   }
 

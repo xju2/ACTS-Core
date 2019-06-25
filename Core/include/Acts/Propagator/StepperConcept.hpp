@@ -9,6 +9,7 @@
 #pragma once
 
 #include "Acts/EventData/TrackParameters.hpp"
+#include "Acts/Propagator/detail/ConstrainedStep.hpp"
 #include "Acts/Surfaces/BoundaryCheck.hpp"
 #include "Acts/Utilities/Definitions.hpp"
 #include "Acts/Utilities/Intersection.hpp"
@@ -16,6 +17,8 @@
 
 namespace Acts {
 class Surface;
+
+using Cstep = detail::ConstrainedStep;
 
 namespace concept {
   namespace Stepper {
@@ -47,6 +50,9 @@ namespace concept {
   METHOD_TRAIT(update_t, update);
   METHOD_TRAIT(covariance_transport_t, covarianceTransport);
   METHOD_TRAIT(step_t, step);
+  METHOD_TRAIT(release_step_t, releaseStepSize);
+  METHOD_TRAIT(update_step_t, updateStepSize);
+  METHOD_TRAIT(get_step_t, stepSize);
   METHOD_TRAIT(corrector_t, corrector);
 
   template <typename T>
@@ -100,7 +106,13 @@ namespace concept {
         static_assert(charge_exists, "charge method not found");
         constexpr static bool time_exists = has_method<const S, double, time_t, const state&>;
         static_assert(time_exists, "time method not found");
-        constexpr static bool intersect_surface_exists = has_method<const S, SurfaceIntersection, intersect_surface_t, state&, const Surface&, const BoundaryCheck&>;
+        constexpr static bool release_step_exists = has_method<const S, void, release_step_t, state&, Cstep::Type>;
+        static_assert(release_step_exists, "releaseStepSize method not found");
+        constexpr static bool update_step_exists = has_method<const S, void, update_step_t, state&, double, Cstep::Type, bool>;
+        static_assert(update_step_exists, "updateStepSize method not found");
+        constexpr static bool get_step_exists = has_method<const S, double, get_step_t, state&, Cstep::Type>;
+        static_assert(get_step_exists, "stepSize method not found");
+        constexpr static bool intersect_surface_exists = has_method<const S, SurfaceIntersection, intersect_surface_t, state&, const Surface&, const BoundaryCheck&, Cstep::Type>;
         static_assert(intersect_surface_exists, "intersectSurface method not found");
         constexpr static bool bound_state_method_exists= has_method<const S, typename S::BoundState, bound_state_method_t, state&, const Surface&, bool>;
         static_assert(bound_state_method_exists, "boundState method not found");

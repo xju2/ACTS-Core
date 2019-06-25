@@ -301,7 +301,7 @@ struct MaterialInteractor {
       dstream << "   " << std::setw(state.options.debugPfxWidth);
       dstream << "material interaction"
               << " | ";
-      dstream << std::setw(state.options.debugMsgWidth) << logAction() << '\n';
+      dstream << logAction() << '\n';
       state.options.debugString += dstream.str();
     }
   }

@@ -115,9 +115,52 @@ struct PathLimitReached {
   }
 };
 
+/// This is the condition that the target surface is reached
+struct TargetSurfaceReached {
+  
+// Default Constructor
+  TargetSurfaceReached() = default;
+
+  /// boolean operator for abort condition using the result (ignored)
+  template <typename propagator_state_t, typename stepper_t, typename result_t>
+  bool operator()(const result_t& /*result*/, propagator_state_t& state,
+                  const stepper_t& stepper) const {
+    return operator()(state, stepper);
+  }
+
+  /// boolean operator for abort condition without using the result
+  ///
+  /// @tparam propagator_state_t Type of the propagator state
+  /// @tparam stepper_t Type of the stepper
+  ///
+  /// @param [in,out] state The propagation state object
+  /// @param [in] stepper Stepper used for propagation
+  template <typename propagator_state_t, typename stepper_t>
+  bool operator()(propagator_state_t& state, const stepper_t& /*stepper*/) const 
+  {
+    // If the target reached flag is already set
+    if (state.navigation.targetReached){
+      return true;
+    }
+    // Simple watcher function 
+    if (state.navigation.currentSurface and
+        state.navigation.currentSurface == state.navigation.targetSurface) {
+      targetDebugLog(state, "x", [&] {
+        std::string ds("Target surface reached.");
+        return ds;
+      });
+      // Reaching the target calls a navigation break
+      state.navigation.targetReached = true;
+      return true;
+    }
+    return false;
+  }
+};
+
 /// This is the condition that the Surface has been reached
 /// it then triggers an propagation abort of the propagation
 struct SurfaceReached {
+  
   /// Default Constructor
   SurfaceReached() = default;
 
@@ -168,6 +211,7 @@ struct SurfaceReached {
       state.navigation.targetReached = true;
       return true;
     }
+    
     // Calculate the distance to the surface
     const double tolerance = state.options.targetTolerance;
     const auto intersection = targetSurface.intersectionEstimate(

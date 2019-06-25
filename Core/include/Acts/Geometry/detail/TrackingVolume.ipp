@@ -88,8 +88,10 @@ std::vector<BoundaryIntersection> TrackingVolume::compatibleBoundaries(
       SurfaceIntersection sIntersection = surface.surfaceIntersectionEstimate(
           gctx, parameters, options, corrfnc);
       // surface intersection can be: reachable || on surface || overstepped
-      cIntersections.push_back(BoundaryIntersection(sIntersection.intersection,
-                                                    boundary.get(), &surface));
+      if (sIntersection){
+        cIntersections.push_back(BoundaryIntersection(sIntersection.intersection,
+                                                      boundary.get(), &surface));
+      }
     }
   }
   // sort them accordingly to the navigation direction

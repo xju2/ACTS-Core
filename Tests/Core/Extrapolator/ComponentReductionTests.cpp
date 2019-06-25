@@ -93,9 +93,9 @@ namespace Test {
     // now create parameters on this surface
     // l_x, l_y, phi, theta, q/p (1/p)
     std::array<double, 5> pars_array_1 = {{-0.1234, 9.8765, 0.45, 0.888, 0.001}};
-    std::array<double, 5> pars_array_2 = {{-0.1234, 9.8765, 0.45, 0.888, 0.005}};
-    std::array<double, 5> pars_array_3 = {{-0.1234, 9.8765, 0.45, 0.888, 0.005}};
-    std::array<double, 5> pars_array_4 = {{-0.1234, 9.8765, 0.45, 0.888, 0.005}};
+    std::array<double, 5> pars_array_2 = {{-0.1234, 9.8765, 0.45, 0.888, 0.002}};
+    std::array<double, 5> pars_array_3 = {{-0.1234, 9.8765, 0.45, 0.888, 0.004}};
+    std::array<double, 5> pars_array_4 = {{-0.1234, 9.8765, 0.45, 0.888, 0.007}};
     TrackParametersBase::ParVector_t pars1,pars2,pars3,pars4;
     pars1 << pars_array_1[0], pars_array_1[1], pars_array_1[2], pars_array_1[3], pars_array_1[4];
     pars2 << pars_array_2[0], pars_array_2[1], pars_array_2[2], pars_array_2[3], pars_array_2[4];
@@ -170,10 +170,8 @@ namespace Test {
 	CHECK_CLOSE_REL((*combinedComponent.second->covariance())(eTHETA,eTHETA), combinedCov(eTHETA,eTHETA), 1e-6);
 	CHECK_CLOSE_REL((*combinedComponent.second->covariance())(eQOP,eQOP), combinedCov(eQOP,eQOP), 1e-6);
 	
-
-
 	/// component reduction
-	//reductComponent(trackMap, 2, tgContext, *pSurface);
+	reductComponent(trackMap, 2, tgContext, *pSurface);
   }
 
 	template<typename T>
@@ -187,12 +185,9 @@ namespace Test {
 	  TrackParMap mergedMap;
 	  size_t numberOfComponents = unmergedMap.size();
 	  while ( numberOfComponents > constraintNum ){
-		std::cout<<"component number "<<numberOfComponents<<std::endl;
-		std::cout<<"unmap/map size "<<unmergedMap.size()<<" "<<mergedMap.size()<<std::endl;
 		if( !mergedMap.empty() ) mergedMap.clear();
 		while ( numberOfComponents > constraintNum && !unmergedMap.empty() ) {
 		  if( unmergedMap.size() > 1 ){
-			std::cout<<"int the real reduction "<<std::endl;
 			auto mergedComponentIter = pairWithMinimumDistance(trackMap);
 			auto combinedComponent = combiner( geoContext, surface, *trackMap.begin(),*mergedComponentIter);
 			unmergedMap.erase(mergedComponentIter);
@@ -209,10 +204,7 @@ namespace Test {
 		  }
 		}
 		if( unmergedMap.empty() && numberOfComponents > constraintNum ) {
-		  std::cout<<"unmerged map empty, but still exceed "<<std::endl;
-		  std::cout<<"bef size "<<unmergedMap.size()<<" "<<mergedMap.size()<<std::endl;
 		  unmergedMap = std::move(mergedMap); //move
-		  std::cout<<"after size "<<unmergedMap.size()<<" "<<mergedMap.size()<<std::endl;
 		}
 	  }
 	  // merge two maps
@@ -222,7 +214,6 @@ namespace Test {
 			auto& weight = (*it).first;
 			unmergedMap.insert( std::make_pair(weight, std::move(par)) );
 		}
-	  std::cout<<"in reductComponent "<<trackMap.size()<<std::endl;
 	}
 
 	template<typename T>

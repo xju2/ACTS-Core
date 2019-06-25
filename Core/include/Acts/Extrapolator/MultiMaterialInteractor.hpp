@@ -29,6 +29,7 @@ using InteractionPointVec = std::vector<Acts::MaterialInteraction>;
 /// This is a plugin to the Propagator that
 /// performs material interaction on the currentSurface
 /// of the Propagagor state
+template<typename extensioneffect_t= detail::EmptyEffect>
 struct MultiMaterialInteractor
 {
   /// Configuration for this MultiMaterialInteractor
@@ -42,7 +43,7 @@ struct MultiMaterialInteractor
 
   /// Empty Bethe-Heitler struct
   /// currently copy one component into multi equal components
-  detail::EmptyEffect emptyEffect;
+  extensioneffect_t extensionEffect;
   /// apply dE and delta covariance on the matrix
   detail::EnergyLoss energyloss;
 
@@ -107,6 +108,7 @@ struct MultiMaterialInteractor
 
     // A current surface has been already assigned by the navigator
     // check for material
+	std::cout<<"surface material "<<state.navigation.currentSurface<<","<< state.navigation.currentSurface->surfaceMaterial()<<std::endl;
     if (state.navigation.currentSurface
         && state.navigation.currentSurface->surfaceMaterial()) {
       // Let's set the pre/full/post update stage
@@ -199,7 +201,7 @@ struct MultiMaterialInteractor
 
           // the mixture represents the vector of (weight,dmean,dvariance)
           // struct
-          auto mixture = emptyEffect.getMixture(tInX0, p);
+          auto mixture = extensionEffect(tInX0, p);
           for (const auto& mix : mixture) {
             // energy loss for each created component
             const double dE        = mix.mean;
@@ -245,6 +247,13 @@ struct MultiMaterialInteractor
       }
       // record the number of components at the last step
       result.numComponents = state.stepping.stateCol.size();
+        debugLog(state, [&] {
+          std::stringstream dstream;
+          dstream << "In multi-material effect, split into ";
+          dstream << result.numComponents;
+          dstream << " components.";
+          return dstream.str();
+        });
     }
   }
 

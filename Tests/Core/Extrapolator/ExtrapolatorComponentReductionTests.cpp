@@ -31,7 +31,7 @@
 #include "Acts/Propagator/MultiEigenStepper.hpp"
 #include "Acts/Extrapolator/MultiMaterialInteractor.hpp"
 #include "Acts/Extrapolator/detail/ComponentReduction.hpp"
-#include "Acts/Extrapolator/detail/EmptyEffect.hpp"
+#include "Acts/Extrapolator/detail/EmptyEffects.hpp"
 #include "Acts/Extrapolator/detail/TunningEnergyEffect.hpp"
 #include "Acts/Propagator/Propagator.hpp"
 #include "Acts/Propagator/StraightLineStepper.hpp"
@@ -55,8 +55,7 @@ namespace Test {
   std::normal_distribution<double> gauss(0., 1.);
   std::default_random_engine       generator(42);
 
-
-  bool debugMode = false;
+  bool debugMode = true;
 
   // Create a test context
   GeometryContext      tgContext  = GeometryContext();
@@ -77,12 +76,11 @@ namespace Test {
     mNavigator.resolveMaterial  = true;
     mNavigator.resolveSensitive = true;
 
-    using RecoStepper = MultiEigenStepper<ConstantBField>;
-    using RecoPropagator = Propagator<RecoStepper, Navigator>;
     ConstantBField bField(Vector3D(0., 0., 0.));
+    using RecoStepper = MultiEigenStepper<ConstantBField>;
     RecoStepper rStepper(bField);
+    using RecoPropagator = Propagator<RecoStepper, Navigator>;
     RecoPropagator multiPropagator(rStepper, mNavigator);
-
     //
     // Set initial parameters for the particle track
     ActsSymMatrixD<5> cov;

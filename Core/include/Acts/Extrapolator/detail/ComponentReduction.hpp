@@ -29,6 +29,9 @@ namespace Acts {
 		operator()(propagator_state_t& state,
 			const stepper_t&    stepper) const
 		{
+          debugLog(state, [&] {
+            return std::string("In component reduction.");
+          });
 
 		  // If we are on target, everything should have been done
 		  if (state.navigation.targetReached) {
@@ -42,7 +45,7 @@ namespace Acts {
 			auto  bs = stepper.boundState(state.stepping, *state.navigation.currentSurface, true);
 			auto& multipleBoundPar =  std::get<MultipleBoundParameters>(bs);
 			auto& trackMap = multipleBoundPar.getTrackList();
-			//stepper.outPut(state.stepping);
+			stepper.outPut(state.stepping);
 
 			using TrackParMap = typename std::remove_reference<decltype(trackMap)>::type;
 			// the aim merging map
@@ -55,7 +58,6 @@ namespace Acts {
 			  while ( numberOfComponents > constraintNum && !unmergedMap.empty() ) {
 				if( unmergedMap.size() > 1 ){
 				  auto mergedComponentIter = pairWithMinimumDistance(trackMap);
-				  //outPutMap(trackMap);
 				  auto combinedComponent = combiner( state.stepping.geoContext, *state.navigation.currentSurface, *trackMap.begin(),*mergedComponentIter);
 				  unmergedMap.erase(mergedComponentIter);
 				  unmergedMap.erase(trackMap.begin());
@@ -81,6 +83,7 @@ namespace Acts {
 			  unmergedMap.insert( std::make_pair(weight, std::move(par)) );
 			}
 			std::cout<<"in reductComponent "<<trackMap.size()<<std::endl;
+			outPutMap(trackMap);
 			stepper.update(state.stepping, multipleBoundPar);
 		  }
 		}
@@ -106,7 +109,7 @@ namespace Acts {
 		} 
 
 	  template<typename TrackParMap>
-		void
+		void	
 		outPutMap(const TrackParMap& unmergedMap) const 
 		{
 		  typename TrackParMap::const_iterator it = unmergedMap.begin();
@@ -115,6 +118,32 @@ namespace Acts {
 		  }
 		}
 
+private:
+  /// The private propagation debug logging
+  ///
+  /// It needs to be fed by a lambda function that returns a string,
+  /// that guarantees that the lambda is only called in the state.debug == true
+  /// case in order not to spend time when not needed.
+  ///
+  /// @tparam propagator_state_t Type of the propagator state
+  ///
+  /// @param state the propagator state for the debug flag, prefix and
+  /// length
+  /// @param logAction is a callable function that returns a stremable object
+  template <typename propagator_state_t>
+  void
+  debugLog(propagator_state_t&                 state,
+           const std::function<std::string()>& logAction) const
+  {
+    if (state.options.debug) {
+      std::stringstream dstream;
+      dstream << "   " << std::setw(state.options.debugPfxWidth);
+      dstream << "component reduction "
+              << " | ";
+      dstream << std::setw(state.options.debugMsgWidth) << logAction() << '\n';
+      state.options.debugString += dstream.str();
+    }
+  }
 	};
 
   }  //end of namespace detail

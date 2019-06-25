@@ -25,11 +25,12 @@ namespace Acts {
 
 		  /// the simplist combination
 		  double weightCombined  = weight_1 + weight_2;
-		  auto parametersCombined = weight_parameters_1.second->parameters() * weight_1 + weight_parameters_2.second->parameters() * weight_2;
-		  auto covCombined = *weight_parameters_1.second->covariance() * weight_1 + *weight_parameters_2.second->covariance() * weight_2;
+		  auto parametersCombined = (weight_parameters_1.second->parameters() * weight_1 + weight_parameters_2.second->parameters() * weight_2)/weightCombined;
+		  auto covCombined = (*weight_parameters_1.second->covariance() * weight_1 + *weight_parameters_2.second->covariance() * weight_2)/weightCombined;
 		  std::unique_ptr<const TrackParametersBase::CovMatrix_t> covPtr = nullptr;
 		  covPtr = std::make_unique<const TrackParametersBase::CovMatrix_t>(covCombined);
 		  TrackParametersBase* ptr = new BoundParameters(gctx, std::move(covPtr), parametersCombined, surface.getSharedPtr()) ;
+		  std::cout<<"Combine "<<weight_1<<"+"<<weight_2<<" = " <<weightCombined<<"  pararameters:  "<<weight_parameters_1.second->parameters()[4]<<","<<weight_parameters_2.second->parameters()[4]<<std::endl;
 		  return  std::make_pair(weightCombined, ptr);
 		} 
 	};

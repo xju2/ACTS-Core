@@ -175,7 +175,7 @@ namespace Test {
     std::cout << "size " << trackMap.size() << std::endl;
     CHECK_CLOSE_REL(0.75, trackMap.begin()->first, 1e-6);
     //	CHECK_CLOSE_REL(combinedParameters,
-    //trackMap.begin()->second->parameters(), 1e-6);
+    // trackMap.begin()->second->parameters(), 1e-6);
     std::cout << combinedParameters << std::endl;
     std::cout << std::endl;
     std::cout << trackMap.begin()->second->parameters() << std::endl;

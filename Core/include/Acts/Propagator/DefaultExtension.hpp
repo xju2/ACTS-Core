@@ -141,9 +141,9 @@ private:
             typename state_type>
   bool
   transportMatrix(propagator_state_t& /*unused*/,
-                  const stepper_t&    stepper,
-                  state_type&         component_state,
-                  const double        h,
+                  const stepper_t& stepper,
+                  state_type&      component_state,
+                  const double     h,
                   ActsMatrixD<7, 7>& D) const
   {
     /// The calculations are based on ATL-SOFT-PUB-2009-002. The update of the
@@ -167,7 +167,7 @@ private:
 
     auto& sd  = component_state.stepData;
     auto  dir = stepper.direction(component_state);
-    D = ActsMatrixD<7, 7>::Identity();
+    D         = ActsMatrixD<7, 7>::Identity();
 
     double half_h = h * 0.5;
     // This sets the reference to the sub matrices

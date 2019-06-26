@@ -45,10 +45,13 @@ public:
   /// type for unique pointer to covariance matrix
   using CovPtr_t = std::unique_ptr<const CovMatrix_t>;
 
-  /// pair of (weight,pointer_to_track), when insert a trackParameter, sort the track by weight
+  /// pair of (weight,pointer_to_track), when insert a trackParameter, sort the
+  /// track by weight
   using WeightedTrackPars
       = std::pair<double, std::unique_ptr<TrackParametersBase>>;
-  using TrackParMap = std::multimap<double, std::unique_ptr<TrackParametersBase>, std::greater<double> >;
+  using TrackParMap = std::multimap<double,
+                                    std::unique_ptr<TrackParametersBase>,
+                                    std::greater<double>>;
   using TrackParMapConstIter = TrackParMap::const_iterator;
   using TrackParMapIter      = TrackParMap::iterator;
 
@@ -141,9 +144,10 @@ public:
   virtual void
   append(double weight, TrackParametersBase* pTrackBase)
   {
-//    WeightedTrackPars weight_parameter(
- //       weight, std::unique_ptr<TrackParametersBase>(pTrackBase) );
-    m_TrackList.insert(std::make_pair(weight, std::unique_ptr<TrackParametersBase>(pTrackBase) ));
+    //    WeightedTrackPars weight_parameter(
+    //       weight, std::unique_ptr<TrackParametersBase>(pTrackBase) );
+    m_TrackList.insert(std::make_pair(
+        weight, std::unique_ptr<TrackParametersBase>(pTrackBase)));
   }
 
   /*
@@ -183,7 +187,8 @@ protected:
   MultiTrackParameters(double weight, TrackParametersBase* pTrackBase)
     : TrackParametersBase()
   {
-    m_TrackList.insert(std::make_pair( weight,std::unique_ptr<TrackParametersBase>(pTrackBase)));
+    m_TrackList.insert(std::make_pair(
+        weight, std::unique_ptr<TrackParametersBase>(pTrackBase)));
   }
 
   /// @brief standard constructor for track parameters of neutral particles
@@ -197,10 +202,11 @@ protected:
   MultiTrackParameters(double weight, TrackParametersBase* pTrackBase)
     : TrackParametersBase()
   {
-    m_TrackList.insert(std::make_pair( weight,std::unique_ptr<TrackParametersBase>(pTrackBase)));
-    //WeightedTrackPars weight_parameter(
+    m_TrackList.insert(std::make_pair(
+        weight, std::unique_ptr<TrackParametersBase>(pTrackBase)));
+    // WeightedTrackPars weight_parameter(
     //    weight, std::unique_ptr<TrackParametersBase>(pTrackBase));
-    //m_TrackList.insert(std::make_pair(std::move(weight_parameter), 0));
+    // m_TrackList.insert(std::make_pair(std::move(weight_parameter), 0));
   }
 
   /// @brief default constructor
@@ -249,40 +255,41 @@ protected:
   ///
   /// @note This function is triggered when called with an argument of a type
   ///       different from Acts::local_parameter
-//  template <typename T>
-//  void
-//  updateGlobalCoordinates(const GeometryContext& /*gctx*/,
-//                          const T& /*unused*/,
-//                          unsigned int id)
-//  {
-//    auto vMomentum
-//        = detail::coordinate_transformation::parameters2globalMomentum(
-//            getParameterSet(id).getParameters());
-//    TrackParMapIter it = std::find_if(
-//        m_TrackList.begin(), m_TrackList.end(), TrackIndexFinder(id));
-//    assert(it != m_TrackList.end());
-//    (*it).first.second->updateMom(vMomentum);
-//  }
-//
-//  /// @brief update global position from current parameter values
-//  ///
-//  /// @note This function is triggered when called with an argument of a type
-//  /// Acts::local_parameter
-//  void
-//  updateGlobalCoordinates(const GeometryContext& gctx,
-//                          const local_parameter& /*unused*/,
-//                          unsigned int id)
-//  {
-//    auto vPosition
-//        = detail::coordinate_transformation::parameters2globalPosition(
-//            gctx,
-//            getParameterSet(id).getParameters(),
-//            this->referenceSurface(id));
-//    TrackParMapIter it = std::find_if(
-//        m_TrackList.begin(), m_TrackList.end(), TrackIndexFinder(id));
-//    assert(it != m_TrackList.end());
-//    (*it).first.second->updatePos(vPosition);
-//  }
+  //  template <typename T>
+  //  void
+  //  updateGlobalCoordinates(const GeometryContext& /*gctx*/,
+  //                          const T& /*unused*/,
+  //                          unsigned int id)
+  //  {
+  //    auto vMomentum
+  //        = detail::coordinate_transformation::parameters2globalMomentum(
+  //            getParameterSet(id).getParameters());
+  //    TrackParMapIter it = std::find_if(
+  //        m_TrackList.begin(), m_TrackList.end(), TrackIndexFinder(id));
+  //    assert(it != m_TrackList.end());
+  //    (*it).first.second->updateMom(vMomentum);
+  //  }
+  //
+  //  /// @brief update global position from current parameter values
+  //  ///
+  //  /// @note This function is triggered when called with an argument of a
+  //  type
+  //  /// Acts::local_parameter
+  //  void
+  //  updateGlobalCoordinates(const GeometryContext& gctx,
+  //                          const local_parameter& /*unused*/,
+  //                          unsigned int id)
+  //  {
+  //    auto vPosition
+  //        = detail::coordinate_transformation::parameters2globalPosition(
+  //            gctx,
+  //            getParameterSet(id).getParameters(),
+  //            this->referenceSurface(id));
+  //    TrackParMapIter it = std::find_if(
+  //        m_TrackList.begin(), m_TrackList.end(), TrackIndexFinder(id));
+  //    assert(it != m_TrackList.end());
+  //    (*it).first.second->updatePos(vPosition);
+  //  }
 
   virtual const Surface&
   referenceSurface() const = 0;

@@ -22,8 +22,9 @@ public:
   /// allow to sort the track by weight
   using WeightedTrackPars
       = std::pair<double, std::unique_ptr<TrackParametersBase>>;
-  using TrackParMap = std::multimap<double, std::unique_ptr<TrackParametersBase>,
-                               std::greater<double> >;
+  using TrackParMap = std::multimap<double,
+                                    std::unique_ptr<TrackParametersBase>,
+                                    std::greater<double>>;
   using TrackParMapConstIter = TrackParMap::const_iterator;
   using TrackParMapIter      = TrackParMap::iterator;
 
@@ -109,25 +110,25 @@ public:
   ///
   /// For curvilinear parameters the local parameters are forced to be
   /// (0,0), hence an update is an effective shift of the reference
-//  template <ParID_t par,
-//            std::enable_if_t<std::is_same<typename par_type<par>::type,
-//                                          local_parameter>::value,
-//                             int> = 0>
-//  void
-//  set(const GeometryContext& gctx, ParValue_t newValue, unsigned int id)
-//  {
-//    // set the parameter & update the new global position
-//    this->getParameterSet(id).template setParameter<par>(newValue);
-//    this->updateGlobalCoordinates(gctx, typename par_type<par>::type(), id);
-//    // update the referece surface with the aimed parameter
-//    this->updateReferenceSurface(
-//        this->position(id), this->momentum(id).normalized(), id);
-//    // reset to (0,0)
-//    this->getParameterSet(id).template setParameter<par>(0.);
-//    // update the referece surface with the combination
-//    this->updateReferenceSurface(this->position(),
-//                                 this->momentum().normalized());
-//  }
+  //  template <ParID_t par,
+  //            std::enable_if_t<std::is_same<typename par_type<par>::type,
+  //                                          local_parameter>::value,
+  //                             int> = 0>
+  //  void
+  //  set(const GeometryContext& gctx, ParValue_t newValue, unsigned int id)
+  //  {
+  //    // set the parameter & update the new global position
+  //    this->getParameterSet(id).template setParameter<par>(newValue);
+  //    this->updateGlobalCoordinates(gctx, typename par_type<par>::type(), id);
+  //    // update the referece surface with the aimed parameter
+  //    this->updateReferenceSurface(
+  //        this->position(id), this->momentum(id).normalized(), id);
+  //    // reset to (0,0)
+  //    this->getParameterSet(id).template setParameter<par>(0.);
+  //    // update the referece surface with the combination
+  //    this->updateReferenceSurface(this->position(),
+  //                                 this->momentum().normalized());
+  //  }
 
   /// @brief update of the track parameterisation
   /// only possible on non-const objects
@@ -138,22 +139,22 @@ public:
   ///
   /// For curvilinear parameters the directional change of parameters
   /// causes a recalculation of the surface
-//  template <ParID_t par,
-//            std::enable_if_t<not std::is_same<typename par_type<par>::type,
-//                                              local_parameter>::value,
-//                             int> = 0>
-//  void
-//  set(const GeometryContext& gctx, ParValue_t newValue, unsigned int id)
-//  {
-//    this->getParameterSet(id).template setParameter<par>(newValue);
-//    this->updateGlobalCoordinates(gctx, typename par_type<par>::type(), id);
-//    // update the referece surface with the aimed parameter
-//    this->updateReferenceSurface(
-//        this->position(id), this->momentum(id).normalized(), id);
-//    // update the referece surface with the combination
-//    this->updateReferenceSurface(this->position(),
-//                                 this->momentum().normalized());
-//  }
+  //  template <ParID_t par,
+  //            std::enable_if_t<not std::is_same<typename par_type<par>::type,
+  //                                              local_parameter>::value,
+  //                             int> = 0>
+  //  void
+  //  set(const GeometryContext& gctx, ParValue_t newValue, unsigned int id)
+  //  {
+  //    this->getParameterSet(id).template setParameter<par>(newValue);
+  //    this->updateGlobalCoordinates(gctx, typename par_type<par>::type(), id);
+  //    // update the referece surface with the aimed parameter
+  //    this->updateReferenceSurface(
+  //        this->position(id), this->momentum(id).normalized(), id);
+  //    // update the referece surface with the combination
+  //    this->updateReferenceSurface(this->position(),
+  //                                 this->momentum().normalized());
+  //  }
 
   /// @brief access to the reference surface
   const Surface&
@@ -163,15 +164,15 @@ public:
   }
 
   /// @brief access to the reference surface
-//  const Surface&
-//  referenceSurface(unsigned int id) const final
-//  {
-//    TrackParMapConstIter it = std::find_if(this->m_TrackList.begin(),
-//                                           this->m_TrackList.end(),
-//                                           TrackIndexFinder(id));
-//    assert(it != this->m_TrackList.end());
-//    return (*it).first.second->referenceSurface();
-//  }
+  //  const Surface&
+  //  referenceSurface(unsigned int id) const final
+  //  {
+  //    TrackParMapConstIter it = std::find_if(this->m_TrackList.begin(),
+  //                                           this->m_TrackList.end(),
+  //                                           TrackIndexFinder(id));
+  //    assert(it != this->m_TrackList.end());
+  //    return (*it).first.second->referenceSurface();
+  //  }
 
   /// @brief update the reference surface
   void
@@ -180,17 +181,17 @@ public:
   {
     m_upSurface = Surface::makeShared<PlaneSurface>(pos, dir);
   }
-//  void
-//  updateReferenceSurface(const ActsVectorD<3>& pos,
-//                         const ActsVectorD<3>& dir,
-//                         unsigned int          id)
-//  {
-//    TrackParMapConstIter it = std::find_if(this->m_TrackList.begin(),
-//                                           this->m_TrackList.end(),
-//                                           TrackIndexFinder(id));
-//    assert(it != this->m_TrackList.end());
-//    (*it).first.second->updateReferenceSurface(pos, dir);
-//  }
+  //  void
+  //  updateReferenceSurface(const ActsVectorD<3>& pos,
+  //                         const ActsVectorD<3>& dir,
+  //                         unsigned int          id)
+  //  {
+  //    TrackParMapConstIter it = std::find_if(this->m_TrackList.begin(),
+  //                                           this->m_TrackList.end(),
+  //                                           TrackIndexFinder(id));
+  //    assert(it != this->m_TrackList.end());
+  //    (*it).first.second->updateReferenceSurface(pos, dir);
+  //  }
 
   /// @brief access to the measurement frame, i.e. the rotation matrix with
   /// respect to the global coordinate system, in which the local error

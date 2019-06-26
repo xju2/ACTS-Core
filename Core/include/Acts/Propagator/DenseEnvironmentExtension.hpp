@@ -219,9 +219,9 @@ private:
             typename state_type>
   bool
   transportMatrix(propagator_state_t& /*unused*/,
-                  const stepper_t&    stepper,
-                  state_type&         component_state,
-                  const double        h,
+                  const stepper_t& stepper,
+                  state_type&      component_state,
+                  const double     h,
                   ActsMatrixD<7, 7>& D) const
   {
     /// The calculations are based on ATL-SOFT-PUB-2009-002. The update of the

@@ -103,7 +103,6 @@ namespace Test {
     multi_ataPlane_from_pars.append(0.6, ataPlane_from_pars_0);
     multi_ataPlane_from_pars.append(0.7, ataPlane_from_pars_1);
 
-
     // test the append method
     MultipleBoundParameters::TrackParMapConstIter it
         = multi_ataPlane_from_pars.getTrackList().begin();
@@ -119,7 +118,6 @@ namespace Test {
     // check that the reference frame is the rotation matrix
     CHECK_CLOSE_REL(
         multi_ataPlane_from_pars.referenceFrame(tgContext), rot, 1e-6);
-
   }
 }
 }

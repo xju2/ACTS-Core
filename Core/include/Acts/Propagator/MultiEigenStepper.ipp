@@ -291,27 +291,27 @@ Acts::MultiEigenStepper<B, C, E, A>::curvilinearState(State& state,
 
 template <typename B, typename C, typename E, typename A>
 void
-Acts::MultiEigenStepper<B, C, E, A>::update(State& state,
-                                            const MultipleBoundParameters& pars) const
+Acts::MultiEigenStepper<B, C, E, A>::update(
+    State&                         state,
+    const MultipleBoundParameters& pars) const
 {
   auto& trackMap = pars.getTrackList();
-	auto it = trackMap.begin();
+  auto  it       = trackMap.begin();
 
   for (auto& tuple_state : state.stateCol) {
-	auto& singlestate = std::get<0>(tuple_state);
-	// Get the BoundParameters
-	if( it!= trackMap.end() ){
-	const double weight = it->first;
-	// update track state with new bound parameter
-	EigenStepper<B>::update(singlestate, *it->second);
-	// update track state weight and status
-	std::get<1>(tuple_state) = weight;
-	std::get<2>(tuple_state) = StateStatus::FREE;
-	++it;
-	}
-	else {
-	  std::get<2>(tuple_state) = StateStatus::DEAD; 
-	}
+    auto& singlestate = std::get<0>(tuple_state);
+    // Get the BoundParameters
+    if (it != trackMap.end()) {
+      const double weight = it->first;
+      // update track state with new bound parameter
+      EigenStepper<B>::update(singlestate, *it->second);
+      // update track state weight and status
+      std::get<1>(tuple_state) = weight;
+      std::get<2>(tuple_state) = StateStatus::FREE;
+      ++it;
+    } else {
+      std::get<2>(tuple_state) = StateStatus::DEAD;
+    }
   }
   deleteComponents(state);
   normalizeComponents(state);
@@ -338,15 +338,19 @@ Acts::MultiEigenStepper<B, C, E, A>::update(SingleStateType& singlestate,
 /// cov transport
 template <typename B, typename C, typename E, typename A>
 void
-Acts::MultiEigenStepper<B, C, E, A>::covarianceTransport(SingleStateType& singlestate,
-                                            bool reinitialize) const
+Acts::MultiEigenStepper<B, C, E, A>::covarianceTransport(
+    SingleStateType& singlestate,
+    bool             reinitialize) const
 {
   EigenStepper<B>::covarianceTransport(singlestate, reinitialize);
 }
 
 template <typename B, typename C, typename E, typename A>
 void
-Acts::MultiEigenStepper<B, C, E, A>::covarianceTransport(SingleStateType& singlestate, const Surface& surface, bool reinitialize) const
+Acts::MultiEigenStepper<B, C, E, A>::covarianceTransport(
+    SingleStateType& singlestate,
+    const Surface&   surface,
+    bool             reinitialize) const
 {
   EigenStepper<B>::covarianceTransport(singlestate, surface, reinitialize);
 }

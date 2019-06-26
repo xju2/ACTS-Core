@@ -338,7 +338,8 @@ public:
              double      abortStep,
              cstep::Type type = cstep::aborter) const;
 
-  /// @brief update for the mulit state, update each singlestate to some parameters
+  /// @brief update for the mulit state, update each singlestate to some
+  /// parameters
   void
   update(State& state, const MultipleBoundParameters& pars) const;
 
@@ -354,11 +355,12 @@ public:
          double           up) const;
 
   void
-  covarianceTransport(SingleStateType& singlestate, bool reinitialize = false) const;
+  covarianceTransport(SingleStateType& singlestate,
+                      bool             reinitialize = false) const;
   void
-  covarianceTransport(SingleStateType&         singlestate,
-                      const Surface& surface,
-                      bool           reinitialize = true) const;
+  covarianceTransport(SingleStateType& singlestate,
+                      const Surface&   surface,
+                      bool             reinitialize = true) const;
 
   /// Perform a Runge-Kutta track parameter propagation step
   ///

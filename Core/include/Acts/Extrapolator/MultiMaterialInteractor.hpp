@@ -29,7 +29,7 @@ using InteractionPointVec = std::vector<Acts::MaterialInteraction>;
 /// This is a plugin to the Propagator that
 /// performs material interaction on the currentSurface
 /// of the Propagagor state
-template<typename extensioneffect_t= detail::EmptyEffect>
+template <typename extensioneffect_t = detail::EmptyEffect>
 struct MultiMaterialInteractor
 {
   /// Configuration for this MultiMaterialInteractor
@@ -246,13 +246,13 @@ struct MultiMaterialInteractor
       }
       // record the number of components at the last step
       result.numComponents = state.stepping.stateCol.size();
-        debugLog(state, [&] {
-          std::stringstream dstream;
-          dstream << "In multi-material effect, split into ";
-          dstream << result.numComponents;
-          dstream << " components.";
-          return dstream.str();
-        });
+      debugLog(state, [&] {
+        std::stringstream dstream;
+        dstream << "In multi-material effect, split into ";
+        dstream << result.numComponents;
+        dstream << " components.";
+        return dstream.str();
+      });
     }
   }
 

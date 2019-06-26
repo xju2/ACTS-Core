@@ -99,10 +99,14 @@ namespace Test {
     SingleCurvilinearTrackParameters<ChargedPolicy> rStart(
         std::move(covPtr), rPos, rMom, 1.);
 
-	using ComponentReduction = detail::ComponentReduction;
-	using MultiMaterialEffect= MultiMaterialInteractor<detail::TunningEnergyEffect>;
+    using ComponentReduction = detail::ComponentReduction;
+    using MultiMaterialEffect
+        = MultiMaterialInteractor<detail::TunningEnergyEffect>;
 
-    PropagatorOptions<ActionList<DebugOutput,MultiMaterialEffect,ComponentReduction>, AbortList<detail::EndOfWorldReached> >
+    PropagatorOptions<ActionList<DebugOutput,
+                                 MultiMaterialEffect,
+                                 ComponentReduction>,
+                      AbortList<detail::EndOfWorldReached>>
         rOptions(tgContext, mfContext);
     rOptions.debug = debugMode;
 

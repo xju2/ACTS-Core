@@ -96,7 +96,7 @@ namespace Test {
     SingleCurvilinearTrackParameters<ChargedPolicy> rStart(
         std::move(covPtr), rPos, rMom, 1.);
 
-	using EmptyMultiMaterialInteractor = MultiMaterialInteractor<>;
+    using EmptyMultiMaterialInteractor = MultiMaterialInteractor<>;
     PropagatorOptions<ActionList<DebugOutput, EmptyMultiMaterialInteractor>,
                       AbortList<detail::EndOfWorldReached>>
         rOptions(tgContext, mfContext);

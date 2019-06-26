@@ -58,7 +58,7 @@ namespace Test {
   using BFieldType          = ConstantBField;
   using EigenStepperType    = EigenStepper<BFieldType>;
   using EigenPropagatorType = Propagator<EigenStepperType, Navigator>;
-  const double        Bz = 2. * units::_T;
+  const double        Bz    = 2. * units::_T;
   BFieldType          bField(0, 0, 0.);
   EigenStepperType    estepper(bField);
   EigenPropagatorType epropagator(std::move(estepper), std::move(navigator));

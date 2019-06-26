@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include<vector>
+#include <vector>
 //#include <cmath>
 //#include <fstream>
 //#include <iostream>
@@ -17,23 +17,23 @@
 
 namespace Acts {
 
-  namespace detail {
-	struct EmptyEffect
-	{
-	  //const static int N = 2;
-	  struct ComponentValues
-	  {
-		double weight   = 1. / 2;
-		double mean     = 0.;
-		double variance = 0.;
-	  };
-	  std::vector<ComponentValues>
-		operator()(double /*noused*/, double /*noused*/) const
-		{
-		  // make non effect, just means copy the components in material effect
-		  std::vector<ComponentValues> comp(2);
-		  return std::move(comp);
-		}
-	};
-  }
+namespace detail {
+  struct EmptyEffect
+  {
+    // const static int N = 2;
+    struct ComponentValues
+    {
+      double weight   = 1. / 2;
+      double mean     = 0.;
+      double variance = 0.;
+    };
+    std::vector<ComponentValues>
+    operator()(double /*noused*/, double /*noused*/) const
+    {
+      // make non effect, just means copy the components in material effect
+      std::vector<ComponentValues> comp(2);
+      return std::move(comp);
+    }
+  };
+}
 }

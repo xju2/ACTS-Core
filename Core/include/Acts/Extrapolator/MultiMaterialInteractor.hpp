@@ -108,7 +108,6 @@ struct MultiMaterialInteractor
 
     // A current surface has been already assigned by the navigator
     // check for material
-	std::cout<<"surface material "<<state.navigation.currentSurface<<","<< state.navigation.currentSurface->surfaceMaterial()<<std::endl;
     if (state.navigation.currentSurface
         && state.navigation.currentSurface->surfaceMaterial()) {
       // Let's set the pre/full/post update stage

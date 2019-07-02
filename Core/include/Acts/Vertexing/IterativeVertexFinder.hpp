@@ -90,8 +90,9 @@ class IterativeVertexFinder {
                 bfield_t, input_track_t, propagator_t>::Config(bIn,
                                                                propagatorIn)),
           propagator(propagatorIn),
-          zScanFinderCfg(typename ZScanVertexFinder<bfield_t, BoundParameters,
-                                                    propagator_t>::Config()),
+          zScanFinderCfg(
+              typename ZScanVertexFinder<bfield_t, BoundParameters,
+                                         propagator_t>::Config(propagatorIn)),
           seedFinder(ZScanVertexFinder<bfield_t, BoundParameters, propagator_t>(
               std::move(zScanFinderCfg))) {}
 

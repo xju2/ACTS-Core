@@ -373,16 +373,16 @@ Acts::IterativeVertexFinder<bfield_t, input_track_t, propagator_t, vfitter_t>::
   return {};
 }
 
-template <typename bfield_t, typename input_track_t, typename propagator_t>
+template <typename bfield_t, typename input_track_t, typename propagator_t,
+          typename vfitter_t>
 Acts::Result<void>
-Acts::IterativeVertexFinder<bfield_t, input_track_t, propagator_t>::
+Acts::IterativeVertexFinder<bfield_t, input_track_t, propagator_t, vfitter_t>::
     fillPerigeesToFit(
         const std::vector<input_track_t>& perigeeList,
         const Vertex<input_track_t>& seedVertex,
         std::vector<input_track_t>& perigeesToFitOut,
         std::vector<input_track_t>& perigeesToFitSplitVertexOut,
         const VertexFinderOptions<input_track_t>& vFinderOptions) const {
-      
   int numberOfTracks = perigeeList.size();
 
   // Count how many tracks are used for fit

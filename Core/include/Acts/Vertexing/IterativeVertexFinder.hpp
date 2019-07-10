@@ -69,7 +69,6 @@ class IterativeVertexFinder {
  public:
   /// @struct Config Configuration struct
   struct Config {
-
     /// @brief Config constructor
     ///
     /// @param bIn bfield_t
@@ -106,7 +105,7 @@ class IterativeVertexFinder {
     LinearizedTrackFactory<bfield_t, propagator_t> linFactory;
 
     /// ImpactPoint3dEstimator
-    ImpactPoint3dEstimator<input_track_t> ipEst;
+    ImpactPoint3dEstimator<bfield_t, input_track_t, propagator_t> ipEst;
 
     /// Propagator
     propagator_t propagator;

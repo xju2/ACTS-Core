@@ -243,6 +243,9 @@ class KalmanFitter {
 
       // Measurement surfaces without hits
       std::vector<const Surface*> missedActiveSurfaces = {};
+
+      // Measurements classified as outliers
+      std::multimap<const Surface*, source_link_t> outlierMeasurements;
     };
 
     /// Broadcast the result_type
@@ -356,12 +359,23 @@ class KalmanFitter {
 
         // If the update is successful, set covariance and
         if (m_updater(state.geoContext, trackState)) {
-          // Update the stepping state
-          ACTS_VERBOSE("Filtering step successful, updated parameters are : \n"
-                       << *trackState.parameter.filtered);
-          // update stepping state using filtered parameters
-          // after kalman update
-          stepper.update(state.stepping, *trackState.parameter.filtered);
+          // Check if the measurement is outlier & update the stepping state
+          // add the chi2 criteria for outlier in KalmanFitterOptions (@todo)
+          if (trackState.parameter.chi2 < 5) {
+            ACTS_VERBOSE(
+                "Filtering step successful, updated parameters are : \n"
+                << *trackState.parameter.filtered);
+            // update stepping state using filtered parameters
+            // after kalman update
+            stepper.update(state.stepping, *trackState.parameter.filtered);
+          } else {
+            // don't keep filtered parameter in this case
+            trackState.parameter.filtered.reset();
+            ACTS_VERBOSE(
+                "Measurement is an outlier, parameters are not updated."
+            result.outlierMeasurements.emplace(sourcelink_it->first,
+                                               sourcelink_it->second);
+          }
         }
         // We count the processed state
         ++result.processedStates;
@@ -391,8 +405,10 @@ class KalmanFitter {
       std::sort(result.fittedStates.begin(), result.fittedStates.end(),
                 plSorter);
       // Screen output for debugging
-      ACTS_VERBOSE("Apply smoothing on " << result.fittedStates.size()
-                                         << " filtered track states.");
+      ACTS_VERBOSE("Apply smoothing on "
+                   << result.fittedStates.size() -
+                          result.outlierMeasurements.size()
+                   << " filtered track states.");
       // Smooth the track states and obtain the last smoothed track parameters
       const auto& smoothedPars =
           m_smoother(state.geoContext, result.fittedStates);

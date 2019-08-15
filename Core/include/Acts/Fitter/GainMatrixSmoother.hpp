@@ -51,6 +51,10 @@ class GainMatrixSmoother {
     // Loop and smooth the remaining states
     for (track_state_t& ts :
          filteredStates | sliced(0, filteredStates.size() - 1) | reversed) {
+      // Skip the unfiltered state
+      if (!ts.parameter.filtered) {
+        continue;
+      }
       // The current state
       assert(ts.parameter.filtered);
       assert(ts.parameter.predicted);

@@ -16,9 +16,9 @@ auto Acts::EigenStepper<B, C, E, A>::boundState(State& state,
                                                 bool reinitialize) const
     -> BoundState {
   // Transport the covariance to here
-  std::unique_ptr<const Covariance> covPtr = nullptr;
+  std::unique_ptr<const BoundSymMatrix> covPtr = nullptr;
   if (state.covTransport) {
-    covPtr = std::make_unique<const Covariance>(covarianceTransport(state, surface, reinitialize));
+    covPtr = std::make_unique<const BoundSymMatrix>(covarianceTransport(state, surface, reinitialize));
   }
   // Create the bound parameters
   BoundParameters parameters(state.geoContext, std::move(covPtr), state.pos,
@@ -40,9 +40,9 @@ auto Acts::EigenStepper<B, C, E, A>::curvilinearState(State& state,
                                                       bool reinitialize) const
     -> CurvilinearState {
   // Transport the covariance to here
-  std::unique_ptr<const Covariance> covPtr = nullptr;
+  std::unique_ptr<const BoundSymMatrix> covPtr = nullptr;
   if (state.covTransport) {
-    covPtr = std::make_unique<const Covariance>(covarianceTransport(state, reinitialize));
+    covPtr = std::make_unique<const BoundSymMatrix>(covarianceTransport(state, reinitialize));
   }
   // Create the curvilinear parameters
   CurvilinearParameters parameters(std::move(covPtr), state.pos,
@@ -60,7 +60,7 @@ auto Acts::EigenStepper<B, C, E, A>::curvilinearState(State& state,
 }
 
 template <typename B, typename C, typename E, typename A>
-void Acts::EigenStepper<B, C, E, A>::update(GeometryContext& gctx, State& state,
+void Acts::EigenStepper<B, C, E, A>::update(State& state,
                                             const BoundParameters& pars) const {
   const auto& mom = pars.momentum();
   state.pos = pars.position();
@@ -68,7 +68,7 @@ void Acts::EigenStepper<B, C, E, A>::update(GeometryContext& gctx, State& state,
   state.p = mom.norm();
   state.dt = pars.time();
   if (pars.covariance() != nullptr) {
-    state.cov = pars.globalCovariance(gctx);
+    state.cov = pars.globalCovariance(state.geoContext);
   }
 }
 
@@ -84,7 +84,7 @@ void Acts::EigenStepper<B, C, E, A>::update(State& state,
 }
 
 template <typename B, typename C, typename E, typename A>
-void Acts::EigenStepper<B, C, E, A>::covarianceTransport(
+Acts::BoundSymMatrix Acts::EigenStepper<B, C, E, A>::covarianceTransport(
     State& state, bool reinitialize) const {
   // Optimized trigonometry on the propagation direction
   const double x = state.dir(0);  // == cos(phi) * sin(theta)
@@ -145,7 +145,7 @@ void Acts::EigenStepper<B, C, E, A>::covarianceTransport(
 }
 
 template <typename B, typename C, typename E, typename A>
-void Acts::EigenStepper<B, C, E, A>::covarianceTransport(
+Acts::BoundSymMatrix Acts::EigenStepper<B, C, E, A>::covarianceTransport(
     State& state, const Surface& surface, bool reinitialize) const {
   using VectorHelpers::phi;
   using VectorHelpers::theta;
@@ -172,7 +172,7 @@ void Acts::EigenStepper<B, C, E, A>::covarianceTransport(
   }
   // Store The global and bound jacobian (duplication for the moment)
   state.jacobian = jacFull * state.jacobian;
-  return jacToCurv * state.cov * jacToCurv.transpose();
+  return jacToLocal * state.cov * jacToLocal.transpose();
 }
 
 template <typename B, typename C, typename E, typename A>

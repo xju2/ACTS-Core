@@ -29,21 +29,23 @@ namespace Acts {
 /// 2. If no contraint is given, returns (0,0, z0_mode) as vertex position
 /// 3. If vertex contraint is given with x=x_constr and y=y_constr,
 ///    the returned vertex position will be (x_constr, y_constr, z0_mode).
-template <typename bfield_t, typename input_track_t, typename propagator_t>
+template <typename bfield_t, typename input_track_t, typename vfitter_t>
 class ZScanVertexFinder {
+  using Propagator_t = typename vfitter_t::Propagator_t;
+
  public:
   /// @struct Config Configuration struct
   struct Config {
     /// @brief Finder configuration
     ///
     /// @param propagatorIn Propagator
-    Config(const propagator_t& propagatorIn) : propagator(propagatorIn) {}
+    Config(const Propagator_t& propagatorIn) : propagator(propagatorIn) {}
 
     // Propagator
-    propagator_t propagator;
+    Propagator_t propagator;
 
     // TrackToVertexIPEstimator
-    TrackToVertexIPEstimator<input_track_t, propagator_t> ipEstimator;
+    TrackToVertexIPEstimator<input_track_t, Propagator_t> ipEstimator;
 
     // FsmwMode1dFinder
     FsmwMode1dFinder mode1dFinder;

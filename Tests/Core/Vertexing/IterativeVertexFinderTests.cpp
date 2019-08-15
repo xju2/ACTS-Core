@@ -90,8 +90,7 @@ BOOST_AUTO_TEST_CASE(iterative_finder_test) {
     // Set up propagator with void navigator
     Propagator<EigenStepper<ConstantBField>> propagator(stepper);
 
-    typedef FullBilloirVertexFitter<ConstantBField, BoundParameters,
-                                    Propagator<EigenStepper<ConstantBField>>>
+    typedef FullBilloirVertexFitter<ConstantBField, BoundParameters>
         BilloirFitter;
 
     // Set up Billoir Vertex Fitter
@@ -101,7 +100,6 @@ BOOST_AUTO_TEST_CASE(iterative_finder_test) {
 
     // Vertex Finder
     typedef IterativeVertexFinder<ConstantBField, BoundParameters,
-                                  Propagator<EigenStepper<ConstantBField>>,
                                   BilloirFitter>
         VertexFinder;
     VertexFinder::Config cfg(bField, std::move(bFitter), propagator);

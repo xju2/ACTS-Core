@@ -79,6 +79,13 @@ class TrackParametersBase : public ParametersBase {
   const CovMatrix_t* covariance() const {
     return getParameterSet().getCovariance();
   }
+  
+  /// @brief access covariance matrix of track parameters in global coordinates
+  ///
+  /// @param [in] gctx The geometry context
+  ///
+  /// @return Covariance matrix in global coordinates
+  virtual FreeSymMatrix globalCovariance(GeometryContext& gctx) const = 0;
 
   /// @brief access associated surface defining the coordinate system for track
   ///        parameters and their covariance

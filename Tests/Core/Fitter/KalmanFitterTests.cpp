@@ -373,6 +373,75 @@ BOOST_AUTO_TEST_CASE(kalman_fitter_zero_field) {
   BOOST_CHECK(!Acts::Test::checkCloseRel(fittedParameters.parameters(),
                                          fittedWithHoleParameters.parameters(),
                                          1e-6));
+
+  // create the outliers based on the measurements
+  std::vector<FittableMeasurement<SourceLink>> outliers;
+  for (const auto& meas : measurements) {
+    auto surface = MeasurementHelpers::getSurface(meas);
+    std::visit(
+        [&](const auto& fittable_meas) {
+          // type of measurement
+          using meas_t =
+              typename std::remove_const<typename std::remove_reference<
+                  decltype(fittable_meas)>::type>::type;
+
+          if constexpr (std::is_same_v<meas_t, MeasurementType<eLOC_0>>) {
+            MeasurementType<eLOC_0> m0(surface->getSharedPtr(), {},
+                                       fittable_meas.covariance(), 10_mm);
+            outliers.push_back(std::move(m0));
+          } else if constexpr (std::is_same_v<meas_t,
+                                              MeasurementType<eLOC_1>>) {
+            MeasurementType<eLOC_1> m1(surface->getSharedPtr(), {},
+                                       fittable_meas.covariance(), 10_mm);
+            outliers.push_back(std::move(m1));
+          } else if constexpr (std::is_same_v<
+                                   meas_t, MeasurementType<eLOC_0, eLOC_1>>) {
+            MeasurementType<eLOC_0, eLOC_1> m01(surface->getSharedPtr(), {},
+                                                fittable_meas.covariance(),
+                                                10_mm, 10_mm);
+            outliers.push_back(std::move(m01));
+          }
+        },
+        meas);
+  }
+
+  // Replace one measurement with outlier
+  std::vector<SourceLink> measurementsWithOneOutlier = {
+      sourcelinks[0],           sourcelinks[1], sourcelinks[2],
+      SourceLink{&outliers[3]}, sourcelinks[4], sourcelinks[5]};
+
+  // Make sure it works with one outlier
+  auto fittedWithOneOutlierTrack =
+      kFitter.fit(measurementsWithOneOutlier, rStart, kfOptions);
+  auto fittedWithOneOutlierParameters =
+      fittedWithOneOutlierTrack.fittedParameters.get();
+
+  // Count the number of outliers
+  BOOST_CHECK_EQUAL(fittedWithOneOutlierTrack.outlierMeasurements.size(), 1);
+
+  // The parameters should be different
+  BOOST_CHECK(!Acts::Test::checkCloseRel(
+      fittedParameters.parameters(),
+      fittedWithOneOutlierParameters.parameters(), 1e-6));
+
+  // Replace two measurements with outlier
+  std::vector<SourceLink> measurementsWithTwoOutlier = {
+      sourcelinks[0],           SourceLink{&outliers[1]}, sourcelinks[2],
+      SourceLink{&outliers[3]}, sourcelinks[4],           sourcelinks[5]};
+
+  // Make sure it works with two outliers
+  auto fittedWithTwoOutlierTrack =
+      kFitter.fit(measurementsWithTwoOutlier, rStart, kfOptions);
+  auto fittedWithTwoOutlierParameters =
+      fittedWithTwoOutlierTrack.fittedParameters.get();
+
+  // Count the number of outliers
+  BOOST_CHECK_EQUAL(fittedWithTwoOutlierTrack.outlierMeasurements.size(), 2);
+
+  // The parameters should be different
+  BOOST_CHECK(!Acts::Test::checkCloseRel(
+      fittedParameters.parameters(),
+      fittedWithTwoOutlierParameters.parameters(), 1e-6));
 }
 
 }  // namespace Test

@@ -371,8 +371,9 @@ class KalmanFitter {
           } else {
             // don't keep filtered parameter in this case
             trackState.parameter.filtered.reset();
-            ACTS_VERBOSE(
-                "Measurement is an outlier, parameters are not updated."
+            ACTS_VERBOSE("Measurement on "
+                         << surface->geoID().toString()
+                         << " is an outlier, parameters are not updated.");
             result.outlierMeasurements.emplace(sourcelink_it->first,
                                                sourcelink_it->second);
           }

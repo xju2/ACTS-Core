@@ -135,11 +135,9 @@ BOOST_AUTO_TEST_CASE(zscan_finder_test) {
                                        perigeeSurface));
     }
 
-    ZScanVertexFinder<ConstantBField, BoundParameters, BilloirFitter>::Config
-        cfg(propagator);
+    ZScanVertexFinder<BilloirFitter>::Config cfg(propagator);
 
-    ZScanVertexFinder<ConstantBField, BoundParameters, BilloirFitter> finder(
-        std::move(cfg));
+    ZScanVertexFinder<BilloirFitter> finder(std::move(cfg));
 
     VertexFinderOptions<BoundParameters> vFinderOptions(tgContext, mfContext);
 
@@ -190,8 +188,7 @@ BOOST_AUTO_TEST_CASE(zscan_finder_usertrack_test) {
     // Set up propagator with void navigator
     Propagator<EigenStepper<ConstantBField>> propagator(stepper);
 
-    typedef FullBilloirVertexFitter<ConstantBField, BoundParameters>
-        BilloirFitter;
+    typedef FullBilloirVertexFitter<ConstantBField, InputTrack> BilloirFitter;
 
     // Create perigee surface
     std::shared_ptr<PerigeeSurface> perigeeSurface =
@@ -238,16 +235,14 @@ BOOST_AUTO_TEST_CASE(zscan_finder_usertrack_test) {
                                                   paramVec, perigeeSurface)));
     }
 
-    ZScanVertexFinder<ConstantBField, InputTrack, BilloirFitter>::Config cfg(
-        propagator);
+    ZScanVertexFinder<BilloirFitter>::Config cfg(propagator);
 
     // Create a custom std::function to extract BoundParameters from
     // user-defined InputTrack
     std::function<BoundParameters(InputTrack)> extractParameters =
         [](InputTrack params) { return params.parameters(); };
 
-    ZScanVertexFinder<ConstantBField, InputTrack, BilloirFitter> finder(
-        std::move(cfg), extractParameters);
+    ZScanVertexFinder<BilloirFitter> finder(std::move(cfg), extractParameters);
 
     VertexFinderOptions<InputTrack> vFinderOptions(tgContext, mfContext);
 

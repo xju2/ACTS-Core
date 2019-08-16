@@ -99,9 +99,7 @@ BOOST_AUTO_TEST_CASE(iterative_finder_test) {
     BilloirFitter bFitter(vertexFitterCfg);
 
     // Vertex Finder
-    typedef IterativeVertexFinder<ConstantBField, BoundParameters,
-                                  BilloirFitter>
-        VertexFinder;
+    typedef IterativeVertexFinder<BilloirFitter> VertexFinder;
     VertexFinder::Config cfg(bField, std::move(bFitter), propagator);
     cfg.reassignTracksAfterFirstFit = true;
 

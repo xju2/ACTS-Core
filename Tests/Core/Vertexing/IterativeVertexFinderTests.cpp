@@ -67,8 +67,21 @@ std::uniform_int_distribution<> nVertexDist(1, 6);
 // Number of tracks per vertex distribution
 std::uniform_int_distribution<> nTracksDist(5, 15);
 
+// Dummy user-defined InputTrack type
+struct InputTrack {
+  InputTrack(const BoundParameters& params) : m_parameters(params) {}
+
+  const BoundParameters& parameters() const { return m_parameters; }
+
+  // store e.g. link to original objects here
+
+ private:
+  BoundParameters m_parameters;
+};
+
 ///
-/// @brief Unit test for IterativeVertexFinder
+/// @brief Unit test for IterativeVertexFinder for BoundParameters and
+///        user defined InputTrack track type
 ///
 BOOST_AUTO_TEST_CASE(iterative_finder_test) {
   bool debug = false;
@@ -90,6 +103,7 @@ BOOST_AUTO_TEST_CASE(iterative_finder_test) {
     // Set up propagator with void navigator
     Propagator<EigenStepper<ConstantBField>> propagator(stepper);
 
+    // Set up vertex fitter
     typedef FullBilloirVertexFitter<ConstantBField, BoundParameters>
         BilloirFitter;
 
@@ -98,6 +112,19 @@ BOOST_AUTO_TEST_CASE(iterative_finder_test) {
 
     BilloirFitter bFitter(vertexFitterCfg);
 
+    // Set up vertex fitter for user track type
+    typedef FullBilloirVertexFitter<ConstantBField, InputTrack> BilloirFitterUT;
+
+    // Create a custom std::function to extract BoundParameters from
+    // user-defined InputTrack
+    std::function<BoundParameters(InputTrack)> extractParameters =
+        [](InputTrack params) { return params.parameters(); };
+
+    // Set up Billoir Vertex Fitter
+    BilloirFitterUT::Config vertexFitterCfgUT(bField, propagator);
+
+    BilloirFitterUT bFitterUT(vertexFitterCfgUT, extractParameters);
+
     // Vertex Finder
     typedef IterativeVertexFinder<BilloirFitter> VertexFinder;
     VertexFinder::Config cfg(bField, std::move(bFitter), propagator);
@@ -105,8 +132,18 @@ BOOST_AUTO_TEST_CASE(iterative_finder_test) {
 
     VertexFinder finder(cfg);
 
+    // Vertex Finder for user track type
+    typedef IterativeVertexFinder<BilloirFitterUT> VertexFinderUT;
+    VertexFinderUT::Config cfgUT(bField, std::move(bFitterUT), propagator,
+                                 extractParameters);
+    cfgUT.reassignTracksAfterFirstFit = true;
+
+    VertexFinderUT finderUT(cfgUT, extractParameters);
+
     // Vector to be filled with all tracks in current event
     std::vector<BoundParameters> tracks;
+    // Same for user track type tracks
+    std::vector<InputTrack> tracksUT;
 
     // Vector to be filled with truth vertices for later comparison
     std::vector<Vertex<BoundParameters>> trueVertices;
@@ -151,9 +188,6 @@ BOOST_AUTO_TEST_CASE(iterative_finder_test) {
         paramVec << d0_v + d0Dist(gen), z0track, phiDist(gen), thetaDist(gen),
             q / pTDist(gen), 0.;
 
-        // Fill vector of track objects with simple covariance matrix
-        std::unique_ptr<Covariance> covMat = std::make_unique<Covariance>();
-
         // Resolutions
         double res_d0 = resIPDist(gen);
         double res_z0 = resIPDist(gen);
@@ -161,13 +195,28 @@ BOOST_AUTO_TEST_CASE(iterative_finder_test) {
         double res_th = resAngDist(gen);
         double res_qp = resQoPDist(gen);
 
+        // Fill vector of track objects with simple covariance matrix
+        std::unique_ptr<Covariance> covMat = std::make_unique<Covariance>();
+
         (*covMat) << res_d0 * res_d0, 0., 0., 0., 0., 0., 0., res_z0 * res_z0,
             0., 0., 0., 0., 0., 0., res_ph * res_ph, 0., 0., 0., 0., 0., 0.,
             res_th * res_th, 0., 0., 0., 0., 0., 0., res_qp * res_qp, 0., 0.,
             0., 0., 0., 0., 1.;
         auto params = BoundParameters(tgContext, std::move(covMat), paramVec,
                                       perigeeSurface);
+
+        // Fill vector of track objects now for user track type
+        std::unique_ptr<Covariance> covMatUT = std::make_unique<Covariance>();
+
+        (*covMatUT) << res_d0 * res_d0, 0., 0., 0., 0., 0., 0., res_z0 * res_z0,
+            0., 0., 0., 0., 0., 0., res_ph * res_ph, 0., 0., 0., 0., 0., 0.,
+            res_th * res_th, 0., 0., 0., 0., 0., 0., res_qp * res_qp, 0., 0.,
+            0., 0., 0., 0., 1.;
+        auto paramsUT = InputTrack(BoundParameters(
+            tgContext, std::move(covMatUT), paramVec, perigeeSurface));
+
         tracks.push_back(params);
+        tracksUT.push_back(paramsUT);
 
         TrackAtVertex<BoundParameters> trAtVt(0., params, params);
         tracksAtTrueVtx.push_back(trAtVt);
@@ -180,19 +229,27 @@ BOOST_AUTO_TEST_CASE(iterative_finder_test) {
 
     // shuffle list of tracks
     std::shuffle(std::begin(tracks), std::end(tracks), gen);
+    std::shuffle(std::begin(tracksUT), std::end(tracksUT), gen);
 
     VertexFinderOptions<BoundParameters> vFinderOptions(tgContext, mfContext);
+    VertexFinderOptions<InputTrack> vFinderOptionsUT(tgContext, mfContext);
 
     // find vertices
     auto res = finder.find(tracks, vFinderOptions);
 
+    // find vertices
+    auto resUT = finderUT.find(tracksUT, vFinderOptionsUT);
+
     BOOST_CHECK(res.ok());
+    BOOST_CHECK(resUT.ok());
 
     // Retrieve vertices found by vertex finder
     auto vertexCollection = *res;
+    auto vertexCollectionUT = *resUT;
 
     // check if same amount of vertices has been found with tolerance of 2
     CHECK_CLOSE_ABS(vertexCollection.size(), nVertices, 2);
+    CHECK_CLOSE_ABS(vertexCollectionUT.size(), nVertices, 2);
 
     if (debug) {
       std::cout << "########## RESULT: ########## Event " << iEvent
@@ -231,6 +288,15 @@ BOOST_AUTO_TEST_CASE(iterative_finder_test) {
       SpacePointVector truePos = trueVertex.fullPosition();
       bool currentVertexFound = false;
       for (const auto& recoVertex : vertexCollection) {
+        SpacePointVector recoPos = recoVertex.fullPosition();
+        // check only for close z distance
+        double zDistance = std::abs(truePos[eZ] - recoPos[eZ]);
+        if (zDistance < 2_mm) {
+          currentVertexFound = true;
+        }
+      }
+      // Same for vertices from user defined track type
+      for (const auto& recoVertex : vertexCollectionUT) {
         SpacePointVector recoPos = recoVertex.fullPosition();
         // check only for close z distance
         double zDistance = std::abs(truePos[eZ] - recoPos[eZ]);

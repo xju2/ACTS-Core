@@ -323,6 +323,10 @@ BOOST_AUTO_TEST_CASE(kalman_fitter_zero_field) {
 
   KalmanFitterOptions kfOptions(tgContext, mfContext, calContext, rSurface);
 
+  // The kfOptions with rejecting outlier turned on
+  KalmanFitterOptions kfOptionsCheckOutlier(tgContext, mfContext, calContext,
+                                            rSurface, true, 5);
+
   // Fit the track
   auto fittedTrack = kFitter.fit(sourcelinks, rStart, kfOptions);
   auto fittedParameters = fittedTrack.fittedParameters.get();
@@ -358,7 +362,7 @@ BOOST_AUTO_TEST_CASE(kalman_fitter_zero_field) {
       sourcelinks[0], sourcelinks[1], sourcelinks[2], sourcelinks[4],
       sourcelinks[5]};
 
-  // Make sure it works for shuffled measurements as well
+  // Make sure it works for holes as well
   auto fittedWithHoleTrack =
       kFitter.fit(measurementsWithHole, rStart, kfOptions);
   auto fittedWithHoleParameters = fittedWithHoleTrack.fittedParameters.get();
@@ -374,7 +378,7 @@ BOOST_AUTO_TEST_CASE(kalman_fitter_zero_field) {
                                          fittedWithHoleParameters.parameters(),
                                          1e-6));
 
-  // create the outliers based on the measurements
+  // Create the outliers based on the measurements
   std::vector<FittableMeasurement<SourceLink>> outliers;
   for (const auto& meas : measurements) {
     auto surface = MeasurementHelpers::getSurface(meas);
@@ -412,7 +416,7 @@ BOOST_AUTO_TEST_CASE(kalman_fitter_zero_field) {
 
   // Make sure it works with one outlier
   auto fittedWithOneOutlierTrack =
-      kFitter.fit(measurementsWithOneOutlier, rStart, kfOptions);
+      kFitter.fit(measurementsWithOneOutlier, rStart, kfOptionsCheckOutlier);
   auto fittedWithOneOutlierParameters =
       fittedWithOneOutlierTrack.fittedParameters.get();
 
@@ -431,7 +435,7 @@ BOOST_AUTO_TEST_CASE(kalman_fitter_zero_field) {
 
   // Make sure it works with two outliers
   auto fittedWithTwoOutlierTrack =
-      kFitter.fit(measurementsWithTwoOutlier, rStart, kfOptions);
+      kFitter.fit(measurementsWithTwoOutlier, rStart, kfOptionsCheckOutlier);
   auto fittedWithTwoOutlierParameters =
       fittedWithTwoOutlierTrack.fittedParameters.get();
 

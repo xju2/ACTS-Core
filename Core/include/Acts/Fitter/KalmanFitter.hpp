@@ -30,7 +30,6 @@
 #include "Acts/Utilities/Logger.hpp"
 
 namespace Acts {
-
 /// @brief Options struct how the Fitter is called
 ///
 /// It contains the context of the fitter call and the optional
@@ -50,11 +49,14 @@ struct KalmanFitterOptions {
   KalmanFitterOptions(std::reference_wrapper<const GeometryContext> gctx,
                       std::reference_wrapper<const MagneticFieldContext> mctx,
                       std::reference_wrapper<const CalibrationContext> cctx,
-                      const Surface* rSurface = nullptr)
+                      const Surface* rSurface = nullptr,
+                      bool runOutlier = false, double outlierCut = 5)
       : geoContext(gctx),
         magFieldContext(mctx),
         calibrationContext(cctx),
-        referenceSurface(rSurface) {}
+        referenceSurface(rSurface),
+        checkOutlier(runOutlier),
+        outlierChi2Cut(outlierCut) {}
 
   /// Context object for the geometry
   std::reference_wrapper<const GeometryContext> geoContext;
@@ -65,6 +67,12 @@ struct KalmanFitterOptions {
 
   /// The reference Surface
   const Surface* referenceSurface = nullptr;
+
+  /// Indicator if an outlier will be checked
+  bool checkOutlier = false;
+
+  /// The outlier checkion criteria
+  double outlierChi2Cut = 5;
 };
 
 /// @brief Kalman fitter implementation of Acts as a plugin
@@ -175,6 +183,8 @@ class KalmanFitter {
     kalmanActor.m_logger = m_logger.get();
     kalmanActor.inputMeasurements = std::move(inputMeasurements);
     kalmanActor.targetSurface = kfOptions.referenceSurface;
+    kalmanActor.checkOutlier = kfOptions.checkOutlier;
+    kalmanActor.outlierChi2Cut = kfOptions.outlierChi2Cut;
 
     // Run the fitter
     const auto& result =
@@ -256,6 +266,12 @@ class KalmanFitter {
 
     /// Allows retrieving measurements for a surface
     std::map<const Surface*, source_link_t> inputMeasurements;
+
+    /// Indicator if an outlier will be checked
+    bool checkOutlier = false;
+
+    /// The outlier checkion criteria
+    double outlierChi2Cut = 5;
 
     /// @brief Kalman actor operation
     ///
@@ -360,8 +376,8 @@ class KalmanFitter {
         // If the update is successful, set covariance and
         if (m_updater(state.geoContext, trackState)) {
           // Check if the measurement is outlier & update the stepping state
-          // add the chi2 criteria for outlier in KalmanFitterOptions (@todo)
-          if (trackState.parameter.chi2 < 5) {
+          if (!checkOutlier ||
+              (checkOutlier && trackState.parameter.chi2 < outlierChi2Cut)) {
             ACTS_VERBOSE(
                 "Filtering step successful, updated parameters are : \n"
                 << *trackState.parameter.filtered);

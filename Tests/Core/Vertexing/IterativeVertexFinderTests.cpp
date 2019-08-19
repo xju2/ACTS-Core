@@ -114,7 +114,7 @@ BOOST_AUTO_TEST_CASE(iterative_finder_test) {
     Linearizer_t linearizer(ltConfig);
 
     // Set up vertex fitter
-    typedef FullBilloirVertexFitter<ConstantBField, BoundParameters>
+    typedef FullBilloirVertexFitter<BoundParameters, Linearizer_t>
         BilloirFitter;
 
     // Set up Billoir Vertex Fitter
@@ -316,7 +316,7 @@ BOOST_AUTO_TEST_CASE(iterative_finder_test_user_track_type) {
     Linearizer_t linearizer(ltConfigUT);
 
     // Set up vertex fitter for user track type
-    typedef FullBilloirVertexFitter<ConstantBField, InputTrack> BilloirFitter;
+    typedef FullBilloirVertexFitter<InputTrack, Linearizer_t> BilloirFitter;
 
     // Create a custom std::function to extract BoundParameters from
     // user-defined InputTrack

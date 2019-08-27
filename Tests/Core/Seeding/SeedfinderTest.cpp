@@ -23,6 +23,7 @@
 #include <iostream>
 #include <sstream>
 #include <utility>
+#include <string>
 
 
 std::vector<const SpacePoint*> readFile(std::string filename) {
@@ -65,12 +66,16 @@ std::vector<const SpacePoint*> readFile(std::string filename) {
 }
 
 int main(int argc, char** argv) {
-	int n_threads = 1;
-	if (argc > 1) {
-		n_threads = atoi(argv[1]);
+	if (argc < 2) {
+		std::cout << argv[0] << " file_name " << " nthreads " << std::endl;
+		exit(1);
 	}
-  std::vector<const SpacePoint*> spVec = readFile("sp.txt");
-  std::cout << "size of read SP: " << spVec.size() << std::endl;
+	std::string input_name(argv[1]);
+	int n_threads = atoi(argv[2]);
+	std::vector<const SpacePoint*> spVec = readFile(input_name.c_str());
+	std::cout << "input file: " << input_name << std::endl;
+	std::cout << "N threads: " << n_threads << std::endl;
+	std::cout << "size of read SP: " << spVec.size() << std::endl;
 
   Acts::SeedfinderConfig<SpacePoint> config;
   // silicon detector max
@@ -118,7 +123,7 @@ int main(int argc, char** argv) {
   }
   std::cout << "number of states: " << its.size() << std::endl;
 
-  #pragma omp parallel num_threads(n_threads) shared(a, state, its) default(none)
+  #pragma omp parallel num_threads(n_threads) shared(seed_finder, state, its, std::cout) default(none) 
   {
 	#pragma omp master
   	std::cout << "number of threads: " << omp_get_num_threads() << std::endl;

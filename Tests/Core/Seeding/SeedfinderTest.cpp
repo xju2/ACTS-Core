@@ -14,6 +14,7 @@
 
 #include "ATLASCuts.hpp"
 #include "SpacePoint.hpp"
+#include "omp.h"
 
 #include <boost/type_erasure/any_cast.hpp>
 
@@ -22,6 +23,7 @@
 #include <iostream>
 #include <sstream>
 #include <utility>
+
 
 std::vector<const SpacePoint*> readFile(std::string filename) {
   std::string line;
@@ -62,7 +64,11 @@ std::vector<const SpacePoint*> readFile(std::string filename) {
   return readSP;
 }
 
-int main() {
+int main(int argc, char** argv) {
+	int n_threads = 1;
+	if (argc > 1) {
+		n_threads = atoi(argv[1]);
+	}
   std::vector<const SpacePoint*> spVec = readFile("sp.txt");
   std::cout << "size of read SP: " << spVec.size() << std::endl;
 
@@ -94,20 +100,40 @@ int main() {
   Acts::ATLASCuts<SpacePoint> atlasCuts = Acts::ATLASCuts<SpacePoint>();
   config.seedFilter = std::make_unique<Acts::SeedFilter<SpacePoint>>(
       Acts::SeedFilter<SpacePoint>(sfconf, &atlasCuts));
-  Acts::Seedfinder<SpacePoint> a(config);
+  Acts::Seedfinder<SpacePoint> seed_finder(config);
 
   // covariance tool, sets covariances per spacepoint as required
   auto ct = [=](const SpacePoint& sp, float, float, float) -> Acts::Vector2D {
     return {sp.covr, sp.covz};
   };
 
-  Acts::SeedfinderState<SpacePoint> state = a.initState(
+  Acts::SeedfinderState<SpacePoint> state = seed_finder.initState(
       spVec.begin(), spVec.end(), ct, bottomBinFinder, topBinFinder);
   auto start = std::chrono::system_clock::now();
-  for (Acts::SeedfinderStateIterator<SpacePoint> it = state.begin();
-       !(it == state.end()); ++it) {
-    a.createSeedsForRegion(it, state);
+///////
+  std::vector<Acts::SeedfinderStateIterator<SpacePoint> > its ;
+  for(Acts::SeedfinderStateIterator<SpacePoint> it = state.begin();
+		  !(it == state.end()); ++it) {
+		its.push_back(it);
   }
+  std::cout << "number of states: " << its.size() << std::endl;
+
+  #pragma omp parallel num_threads(n_threads) shared(a, state, its) default(none)
+  {
+	#pragma omp master
+  	std::cout << "number of threads: " << omp_get_num_threads() << std::endl;
+
+	#pragma omp for
+	for(int i = 0; i < (int) its.size(); i++){
+		// Acts::SeedfinderStateIterator<SpacePoint>& it = its.at(i);
+		seed_finder.createSeedsForRegion(its[i], state);
+	}
+  }
+  // for (Acts::SeedfinderStateIterator<SpacePoint> it = state.begin();
+  //      !(it == state.end()); ++it) {
+  //   seed_finder.createSeedsForRegion(it, state);
+  // }
+
   auto end = std::chrono::system_clock::now();
   std::chrono::duration<double> elapsed_seconds = end - start;
   std::cout << "time to create seeds: " << elapsed_seconds.count() << std::endl;
@@ -121,7 +147,7 @@ int main() {
     for (size_t i = 0; i < regionVec.size(); i++) {
       const Acts::Seed<SpacePoint>* seed = regionVec[i].get();
       const SpacePoint* sp = seed->sp()[0];
-      std::cout << " (" << sp->x() << ", " << sp->y() << ", " << sp->z()
+      std::cout << sp->surface << " (" << sp->x() << ", " << sp->y() << ", " << sp->z()
                 << ") ";
       sp = seed->sp()[1];
       std::cout << sp->surface << " (" << sp->x() << ", " << sp->y() << ", "

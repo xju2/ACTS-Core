@@ -14,7 +14,12 @@
 
 #include "ATLASCuts.hpp"
 #include "SpacePoint.hpp"
+
+#ifdef _OPENMP
 #include "omp.h"
+#else
+	#define omp_get_num_threads() 0
+#endif
 
 #include <boost/type_erasure/any_cast.hpp>
 

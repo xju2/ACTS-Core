@@ -84,7 +84,7 @@ int main(int argc, char** argv) {
   bool quiet(false);
 
   int opt;
-  size_t npoints;
+  size_t npoints = 0;
   while ((opt = getopt(argc, argv, "hf:n:qt:")) != -1) {
     switch (opt) {
     case 'f':

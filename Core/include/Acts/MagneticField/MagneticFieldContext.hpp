@@ -24,7 +24,7 @@ namespace Acts {
 /// dependent magnetic field changes
 
 //using MagneticFieldContext = std::any;
-typedef int MagneticFieldContext;
+using MagneticFieldContext = int;
 
 }  // namespace Acts
 

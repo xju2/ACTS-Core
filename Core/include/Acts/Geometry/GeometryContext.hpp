@@ -13,7 +13,7 @@
 #include ACTS_CORE_GEOMETRYCONTEXT_PLUGIN
 #else
 
-#include <any>
+//#include <any>
 
 namespace Acts {
 
@@ -23,8 +23,7 @@ namespace Acts {
 /// It is propagated through the code to allow for event/thread
 /// dependent geometry changes
 
-// using GeometryContext = std::any;
-typedef int GeometryContext;
+using GeometryContext = int;
 
 }  // namespace Acts
 

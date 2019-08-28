@@ -109,12 +109,14 @@ int main(int argc, char** argv) {
     case 'h':
       help = true;
     default: /* '?' */
-      fprintf(stderr, "Usage: %s [-h] [-t NTHREADS] [-f FILENAME]\n",
+      fprintf(stderr, "Usage: %s [-hq] [-t NTHREADS] [-f FILENAME] [-n NPOINTS]\n",
               argv[0]);
       if (help) {
-        printf("         -t N : use only N threads. Default is %d\n",
-               nthreads);
         printf("         -f FILE : read spacepoints from FILE. Default is \"sp.txt\"\n");
+        printf("         -n N : use only N input points. Default is full file\n");
+        printf("         -q : don't print out all found seeds\n");
+        printf("         -t N : use only N threads. Default is %d (from OMP_NUM_THREADS env var)\n",
+               nthreads);
       }
       
       exit(EXIT_FAILURE);

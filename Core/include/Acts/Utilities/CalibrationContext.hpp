@@ -23,7 +23,8 @@ namespace Acts {
 /// It is propagated through the code to allow for event/thread
 /// dependent calibration
 
-using CalibrationContext = std::any;
+//using CalibrationContext = std::any;
+using CalibrationContext = int;
 
 }  // namespace Acts
 

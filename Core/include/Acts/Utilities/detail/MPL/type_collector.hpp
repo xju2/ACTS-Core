@@ -52,11 +52,11 @@ struct action_type_extractor {
  * filters by predicate and uses extracter to construct a resulting output
  * set.
  */
-auto type_collector = [](auto t_, auto predicate, auto extractor) {
+const auto type_collector = [](auto t_, auto predicate_, auto extractor) {
   // filtered list using predicate
   // [XY] remove constexpr for icc
   auto have_result =
-      hana::filter(t_, [&](auto t) { return predicate(t); });
+      hana::filter(t_, [&](auto t) { return predicate_(t); });
   // convert to set to remove duplicates, and transform to unpacked type
   // using extractor.
   // [XY] remove constexpr for icc
@@ -74,7 +74,8 @@ auto type_collector = [](auto t_, auto predicate, auto extractor) {
  * @tparam items The items to filter / collect from.
  */
 template <typename helper, typename... items>
-constexpr auto type_collector_t = type_collector(hana::tuple_t<items...>,
+// [XY] remove constexpr for icc
+auto type_collector_t = type_collector(hana::tuple_t<items...>,
                                                  helper::predicate,
                                                  helper::extractor);
 

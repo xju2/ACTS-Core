@@ -1,5 +1,5 @@
 # set Acts compiler flags
-set (ACTS_CXX_FLAGS "-Wall -Wextra -Wpedantic -Wshadow -Wunused-local-typedefs")
+set (ACTS_CXX_FLAGS "-Wall -Wextra -Wpedantic -Wshadow -Wunused-local-typedefs -fopenmp")
 set (ACTS_CXX_FLAGS_DEBUG "--coverage")
 set (ACTS_CXX_FLAGS_MINSIZEREL "")
 set (ACTS_CXX_FLAGS_RELEASE "")

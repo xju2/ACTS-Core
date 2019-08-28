@@ -16,9 +16,10 @@
 #include "SpacePoint.hpp"
 
 #ifdef _OPENMP
-#include "omp.h"
+  #include "omp.h"
 #else
-	#define omp_get_num_threads() 0
+  #define omp_get_num_threads() 0
+  #define omp_get_max_threads() 0
 #endif
 
 #include <boost/type_erasure/any_cast.hpp>
@@ -28,12 +29,14 @@
 #include <iostream>
 #include <sstream>
 #include <utility>
+#include <unistd.h>
 #include <string>
 
 
-std::vector<const SpacePoint*> readFile(std::string filename) {
+std::vector<const SpacePoint*> readFile(std::string filename, size_t npoints=0) {
   std::string line;
   int layer;
+  size_t ipoint {0};
   std::vector<const SpacePoint*> readSP;
 
   std::ifstream spFile(filename);
@@ -64,6 +67,10 @@ std::vector<const SpacePoint*> readFile(std::string filename) {
         //       sp->setClusterList(1,0);
         //     }
         readSP.push_back(sp);
+        ++ipoint;
+        if (npoints != 0 && ipoint >= npoints) {
+            break;
+        }
       }
     }
   }
@@ -71,16 +78,62 @@ std::vector<const SpacePoint*> readFile(std::string filename) {
 }
 
 int main(int argc, char** argv) {
-	if (argc < 2) {
-		std::cout << argv[0] << " file_name " << " nthreads " << std::endl;
-		exit(1);
-	}
-	std::string input_name(argv[1]);
-	int n_threads = atoi(argv[2]);
-	std::vector<const SpacePoint*> spVec = readFile(input_name.c_str());
-	std::cout << "input file: " << input_name << std::endl;
-	std::cout << "N threads: " << n_threads << std::endl;
-	std::cout << "size of read SP: " << spVec.size() << std::endl;
+  int nthreads = omp_get_max_threads();
+  std::string file = "sp.txt";
+  bool help(false);
+  bool quiet(false);
+
+  int opt;
+  size_t npoints;
+  while ((opt = getopt(argc, argv, "hf:n:qt:")) != -1) {
+    switch (opt) {
+    case 'f':
+      file = optarg;
+      break;
+    case 'n':
+      npoints = atoi(optarg);
+      break;
+    case 'q':
+      quiet = true;
+      break;
+    case 't':
+      {
+        int nt = atoi(optarg);
+        if (nt > nthreads) {
+          std::cout << "can only use up to " << nthreads << " threads\n";
+        } else {
+          nthreads = nt;
+        }
+      }
+      break;
+    case 'h':
+      help = true;
+    default: /* '?' */
+      fprintf(stderr, "Usage: %s [-hq] [-t NTHREADS] [-f FILENAME] [-n NPOINTS]\n",
+              argv[0]);
+      if (help) {
+        printf("         -f FILE : read spacepoints from FILE. Default is \"sp.txt\"\n");
+        printf("         -n N : use only N input points. Default is full file\n");
+        printf("         -q : don't print out all found seeds\n");
+        printf("         -t N : use only N threads. Default is %d (from OMP_NUM_THREADS env var)\n",
+               nthreads);
+      }
+      
+      exit(EXIT_FAILURE);
+    }
+  }
+  
+  std::ifstream f(file);
+  if(!f.good()) {
+    std::cerr << "input file \"" << file << "\" does not exist\n";
+    exit(1);
+  } 
+    
+  std::vector<const SpacePoint*> spVec = readFile(file,npoints);
+  std::cout << "size of read SP: " << spVec.size() << std::endl;
+  if (npoints != 0 && spVec.size() != npoints) {
+      std::cout << "    but requested " << npoints << std::endl;
+  }
 
   Acts::SeedfinderConfig<SpacePoint> config;
   // silicon detector max
@@ -128,10 +181,11 @@ int main(int argc, char** argv) {
   }
   std::cout << "number of states: " << its.size() << std::endl;
 
-  #pragma omp parallel num_threads(n_threads) shared(seed_finder, state, its, std::cout) default(none) 
+  #pragma omp parallel num_threads(nthreads) shared(seed_finder, state, its, std::cout) default(none) 
   {
-	#pragma omp master
-  	std::cout << "number of threads: " << omp_get_num_threads() << std::endl;
+    #pragma omp master
+    std::cout << "number of threads: " << omp_get_num_threads()
+              << " out of max " << omp_get_max_threads() << std::endl;
 
 	#pragma omp for
 	for(int i = 0; i < (int) its.size(); i++){
@@ -153,19 +207,21 @@ int main(int argc, char** argv) {
     numSeeds += outVec.size();
   }
   std::cout << "Number of seeds generated: " << numSeeds << std::endl;
-  for (auto& regionVec : state.outputVec) {
-    for (size_t i = 0; i < regionVec.size(); i++) {
-      const Acts::Seed<SpacePoint>* seed = regionVec[i].get();
-      const SpacePoint* sp = seed->sp()[0];
-      std::cout << sp->surface << " (" << sp->x() << ", " << sp->y() << ", " << sp->z()
-                << ") ";
-      sp = seed->sp()[1];
-      std::cout << sp->surface << " (" << sp->x() << ", " << sp->y() << ", "
-                << sp->z() << ") ";
-      sp = seed->sp()[2];
-      std::cout << sp->surface << " (" << sp->x() << ", " << sp->y() << ", "
-                << sp->z() << ") ";
-      std::cout << std::endl;
+  if (!quiet) {
+    for (auto& regionVec : state.outputVec) {
+      for (size_t i = 0; i < regionVec.size(); i++) {
+        const Acts::Seed<SpacePoint>* seed = regionVec[i].get();
+        const SpacePoint* sp = seed->sp()[0];
+        std::cout << sp->surface << " (" << sp->x() << ", " << sp->y() << ", " << sp->z()
+                  << ") ";
+        sp = seed->sp()[1];
+        std::cout << sp->surface << " (" << sp->x() << ", " << sp->y() << ", "
+                  << sp->z() << ") ";
+        sp = seed->sp()[2];
+        std::cout << sp->surface << " (" << sp->x() << ", " << sp->y() << ", "
+                  << sp->z() << ") ";
+        std::cout << std::endl;
+      }
     }
   }
   return 0;

@@ -52,13 +52,15 @@ struct action_type_extractor {
  * filters by predicate and uses extracter to construct a resulting output
  * set.
  */
-constexpr auto type_collector = [](auto t_, auto predicate, auto extractor) {
+auto type_collector = [](auto t_, auto predicate, auto extractor) {
   // filtered list using predicate
-  constexpr auto have_result =
+  // [XY] remove constexpr for icc
+  auto have_result =
       hana::filter(t_, [&](auto t) { return predicate(t); });
   // convert to set to remove duplicates, and transform to unpacked type
   // using extractor.
-  constexpr auto result_types =
+  // [XY] remove constexpr for icc
+  auto result_types =
       hana::to_set(hana::transform(have_result, extractor));
   return result_types;
 };

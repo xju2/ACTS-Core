@@ -23,7 +23,8 @@ namespace Acts {
 /// It is propagated through the code to allow for event/thread
 /// dependent magnetic field changes
 
-using MagneticFieldContext = std::any;
+//using MagneticFieldContext = std::any;
+typedef int MagneticFieldContext;
 
 }  // namespace Acts
 

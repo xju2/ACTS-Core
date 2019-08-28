@@ -23,7 +23,8 @@ namespace Acts {
 /// It is propagated through the code to allow for event/thread
 /// dependent geometry changes
 
-using GeometryContext = std::any;
+// using GeometryContext = std::any;
+typedef int GeometryContext;
 
 }  // namespace Acts
 

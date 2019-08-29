@@ -1,13 +1,21 @@
 # set Acts compiler flags
-set (ACTS_CXX_FLAGS "-Wall -Wextra -Wpedantic -Wshadow -Wunused-local-typedefs -fopenmp")
-set (ACTS_CXX_FLAGS_DEBUG "--coverage")
+
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+	set (ACTS_CXX_FLAGS "-Wall -Wextra -Wpedantic -Wshadow -Wunused-local-typedefs -ffp-contract=fast -fopenmp")
+	set (ACTS_CXX_FLAGS_DEBUG "--coverage")
+	# set Acts linker flags
+	set (ACTS_EXE_LINKER_FLAGS_DEBUG "--coverage")
+	set (ACTS_SHARED_LINKER_FLAGS_DEBUG "--coverage ")
+endif()
+
+if( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
+	set (ACTS_CXX_FLAGS "-Wall -Wextra -Wshadow -fopenmp")
+endif()
+
 set (ACTS_CXX_FLAGS_MINSIZEREL "")
 set (ACTS_CXX_FLAGS_RELEASE "")
 set (ACTS_CXX_FLAGS_RELWITHDEBINFO "")
 
-# set Acts linker flags
-set (ACTS_EXE_LINKER_FLAGS_DEBUG "--coverage")
-set (ACTS_SHARED_LINKER_FLAGS_DEBUG "--coverage ")
 
 # assign to global CXX flags
 set (CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} ${ACTS_CXX_FLAGS}")

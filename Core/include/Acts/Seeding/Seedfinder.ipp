@@ -262,6 +262,8 @@ void Seedfinder<external_spacepoint_t>::createSeedsForRegion(
       topSpVec.clear();
       curvatures.clear();
       impactParameters.clear();
+
+	  #pragma omp simd
       for (size_t t = 0; t < numTopSP; t++) {
         auto lt = linCircleTop[t];
 

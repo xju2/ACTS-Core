@@ -34,7 +34,7 @@ Acts::SpacePointGridCreator::createGrid(
   // FIXME: phibin size must include max impact parameters
   // divide 2pi by angle delta to get number of phi-bins
   // size is always 2pi even for regions of interest
-  int phiBins = std::floor(2 * M_PI / (outerAngle - innerAngle));
+  int phiBins = 32*(std::floor(2 * M_PI / (outerAngle - innerAngle))-1);
   Acts::detail::Axis<detail::AxisType::Equidistant,
                      detail::AxisBoundaryType::Closed>
       phiAxis(-M_PI, M_PI, phiBins);

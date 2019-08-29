@@ -155,6 +155,33 @@ int main(int argc, char** argv) {
   config.beamPos = {-.5, -.5};
   config.impactMax = 10.;
 
+  //explicit computation of # of bins
+  float minHelixRadius = config.minPt / (300. * config.bFieldInZ);  // in mm
+  float maxR2 = config.rMax * config.rMax;
+  float xOuter = maxR2 / (2 * minHelixRadius);
+  float yOuter = std::sqrt(maxR2 - xOuter * xOuter);
+  float outerAngle = std::atan(xOuter / yOuter);
+  // intersection of helix and max detector radius minus maximum R distance from
+  // middle SP to top SP
+  float innerAngle = 0;
+  if (config.rMax > config.deltaRMax) {
+    float innerCircleR2 =
+        (config.rMax - config.deltaRMax) * (config.rMax - config.deltaRMax);
+    float xInner = innerCircleR2 / (2 * minHelixRadius);
+    float yInner = std::sqrt(innerCircleR2 - xInner * xInner);
+    innerAngle = std::atan(xInner / yInner);
+  }
+
+  // FIXME: phibin size must include max impact parameters
+  // divide 2pi by angle delta to get number of phi-bins
+  // size is always 2pi even for regions of interest
+  int phiBins = std::floor(2 * M_PI / (outerAngle - innerAngle));
+  float zBinSize = config.cotThetaMax * config.deltaRMax;
+  int zBins = std::floor((config.zMax - config.zMin) / zBinSize);
+
+  std::cout<<"Bins in phi: "<<phiBins<<std::endl;
+  std::cout<<"Bins in z:   "<<zBins  <<std::endl;
+  
   auto bottomBinFinder = std::make_shared<Acts::BinFinder<SpacePoint>>(
       Acts::BinFinder<SpacePoint>());
   auto topBinFinder = std::make_shared<Acts::BinFinder<SpacePoint>>(
@@ -181,13 +208,13 @@ int main(int argc, char** argv) {
   }
   std::cout << "number of states: " << its.size() << std::endl;
 
-  #pragma omp parallel num_threads(nthreads) shared(seed_finder, state, its, std::cout) default(none) 
+#pragma omp parallel num_threads(nthreads) shared(seed_finder, state, its, std::cout) default(none) 
   {
     #pragma omp master
     std::cout << "number of threads: " << omp_get_num_threads()
               << " out of max " << omp_get_max_threads() << std::endl;
 
-	#pragma omp for
+#pragma omp for schedule(guided, 1) 
 	for(int i = 0; i < (int) its.size(); i++){
 		// Acts::SeedfinderStateIterator<SpacePoint>& it = its.at(i);
 		seed_finder.createSeedsForRegion(its[i], state);

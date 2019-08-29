@@ -9,6 +9,7 @@
 #include <cmath>
 #include <numeric>
 #include <type_traits>
+#include <iostream>
 
 #include "Acts/Seeding/IBinFinder.hpp"
 #include "Acts/Seeding/SeedFilter.hpp"
@@ -33,7 +34,7 @@ Seedfinder<external_spacepoint_t>::Seedfinder(
       std::pow(m_config.minPt * 2 / m_config.pTPerHelixRadius, 2);
   m_config.pT2perRadius =
       std::pow(m_config.highland / m_config.pTPerHelixRadius, 2);
-}
+    }
 
 template <typename external_spacepoint_t>
 template <typename spacepoint_iterator_t>
@@ -262,6 +263,35 @@ void Seedfinder<external_spacepoint_t>::createSeedsForRegion(
       topSpVec.clear();
       curvatures.clear();
       impactParameters.clear();
+    
+
+      // simple test for the variables: m_config and linCircleTop
+      auto config = m_config;
+      auto linCircleTopData = linCircleTop.data();
+      int linCircleTopSize = linCircleTop.size();
+      float *returnData;
+      returnData = static_cast<float*>(std::malloc(sizeof(float)*linCircleTopSize));
+//      std::cout<<"Outside: size of linCircleTopData = " << linCircleTopData[0].cotTheta<<std::endl;
+
+      std::cout<<"Outside: ErB = " << ErB <<", covrM = "<<covrM <<", covzM = "<<covzM<<", iDeltaRB = "<<iDeltaRB <<", cotThetaB = "<<cotThetaB<<std::endl; 
+      std::cout<<"Outside: Size of BottonSP is " << compatBottomSP.size() << std::endl;
+      int i;  
+      for(i=0; i< linCircleTopSize; i++){
+         std::cout<<"Outside: Returned data at " << i << " is "<< linCircleTopData[i].cotTheta * 2<<std::endl;
+      }
+
+      #pragma omp target teams distribute parallel for num_teams(1) map(to: linCircleTopData[0:linCircleTopSize]) map(from: returnData[0:linCircleTopSize])
+      //  printf("===========Check for the variables.===================\n");      
+      //  printf("ErB = %f, covrM = %f, covzM = %f, iDeltaRB = %f, cotThetaB=%f\n", ErB, covrM, covzM, iDeltaRB, cotThetaB);      
+      //  printf("Size of BottomSP is %i\n", compatBottomSP.size());      
+       // #pragma omp teams distribute parallel for num_teams(1) 
+        for(i=0; i< linCircleTopSize; i++){
+           returnData[i] = linCircleTopData[i].cotTheta * 2;        
+           printf("Returned data at %i is %f\n ", i, returnData[i]);      
+        }
+        printf("==============================\n");      
+
+       
       for (size_t t = 0; t < numTopSP; t++) {
         auto lt = linCircleTop[t];
 
@@ -335,7 +365,8 @@ void Seedfinder<external_spacepoint_t>::createSeedsForRegion(
           curvatures.push_back(B / std::sqrt(S2));
           impactParameters.push_back(Im);
         }
-      }
+      }  // end of numTopSP
+
       if (!topSpVec.empty()) {
         std::vector<std::pair<
             float, std::unique_ptr<const InternalSeed<external_spacepoint_t>>>>
@@ -347,10 +378,12 @@ void Seedfinder<external_spacepoint_t>::createSeedsForRegion(
                            std::make_move_iterator(sameTrackSeeds.begin()),
                            std::make_move_iterator(sameTrackSeeds.end()));
       }
-    }
+
+    } // end of numBottomSP
+
     m_config.seedFilter->filterSeeds_1SpFixed(seedsPerSpM,
                                               state.outputVec[it.outputIndex]);
-  }
+  } // end of loop for all space points in the middle region
 }
 
 template <typename external_spacepoint_t>

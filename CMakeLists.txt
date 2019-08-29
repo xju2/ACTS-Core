@@ -82,3 +82,6 @@ add_subdirectory_if (doc ACTS_BUILD_DOC)
 configure_file (${CMAKE_CURRENT_SOURCE_DIR}/setup.sh.in ${CMAKE_CURRENT_BINARY_DIR}/setup.sh)
 install (FILES ${CMAKE_CURRENT_BINARY_DIR}/setup.sh DESTINATION ${CMAKE_INSTALL_BINDIR})
 include (ActsCreateConfig)
+
+set_source_files_properties(/global/homes/x/xiaocong/software/github/ACTS-Core/Tests/Core/Seeding/SeedfinderTest.cpp PROPERTIES COMPILE_FLAGS "-fopenmp-targets=nvptx64-nvidia-cuda")
+

@@ -222,6 +222,22 @@ void Seedfinder<external_spacepoint_t>::createSeedsForRegion(
     transformCoordinates(compatBottomSP, *spM, true, linCircleBottom);
     transformCoordinates(compatTopSP, *spM, false, linCircleTop);
 
+#ifdef VEC_SOA
+    int N = linCircleTop.size();
+    float *linCircleTop_cotTheta = new float[N];
+    float *linCircleTop_iDeltaR = new float[N];
+    float *linCircleTop_Er = new float[N];
+    float *linCircleTop_U = new float[N];
+    float *linCircleTop_V = new float[N];
+    for (int i=0; i<N; ++i) {
+      linCircleTop_cotTheta[i] = linCircleTop[i].cotTheta;
+      linCircleTop_iDeltaR[i] = linCircleTop[i].iDeltaR;
+      linCircleTop_Er[i] = linCircleTop[i].Er;
+      linCircleTop_U[i] = linCircleTop[i].U;
+      linCircleTop_V[i] = linCircleTop[i].V;
+    }
+#endif
+
     // create vectors here to avoid reallocation in each loop
     std::vector<const InternalSpacePoint<external_spacepoint_t>*> topSpVec;
     std::vector<float> curvatures;
@@ -263,17 +279,32 @@ void Seedfinder<external_spacepoint_t>::createSeedsForRegion(
       curvatures.clear();
       impactParameters.clear();
 
-	  #pragma omp simd
+//JJJ SIMD LOOP BEGIN
+      #pragma omp simd
       for (size_t t = 0; t < numTopSP; t++) {
         auto lt = linCircleTop[t];
 
+#ifdef VEC_SOA
+        float tmp_cotTheta = linCircleTop_cotTheta[t];
+        float tmp_iDeltaR = linCircleTop_iDeltaR[t];
+        float tmp_Er = linCircleTop_Er[t];
+        float tmp_U = linCircleTop_U[t];
+        float tmp_V = linCircleTop_V[t];
+#else
+        float tmp_cotTheta = lt.cotTheta;
+        float tmp_iDeltaR = lt.iDeltaR;
+        float tmp_Er = lt.Er;
+        float tmp_U = lt.U;
+        float tmp_V = lt.V;
+#endif
+
         // add errors of spB-spM and spM-spT pairs and add the correlation term
         // for errors on spM
-        float error2 = lt.Er + ErB +
-                       2 * (cotThetaB * lt.cotTheta * covrM + covzM) *
-                           iDeltaRB * lt.iDeltaR;
+        float error2 = tmp_Er + ErB +
+                       2 * (cotThetaB * tmp_cotTheta * covrM + covzM) *
+                           iDeltaRB * tmp_iDeltaR;
 
-        float deltaCotTheta = cotThetaB - lt.cotTheta;
+        float deltaCotTheta = cotThetaB - tmp_cotTheta;
         float deltaCotTheta2 = deltaCotTheta * deltaCotTheta;
         float error;
         float dCotThetaMinusError2;
@@ -296,13 +327,13 @@ void Seedfinder<external_spacepoint_t>::createSeedsForRegion(
         }
 
         // protects against division by 0
-        float dU = lt.U - Ub;
+        float dU = tmp_U - Ub;
         if (dU == 0.) {
           continue;
         }
         // A and B are evaluated as a function of the circumference parameters
         // x_0 and y_0
-        float A = (lt.V - Vb) / dU;
+        float A = (tmp_V - Vb) / dU;
         float S2 = 1. + A * A;
         float B = Vb - A * Ub;
         float B2 = B * B;
@@ -338,6 +369,8 @@ void Seedfinder<external_spacepoint_t>::createSeedsForRegion(
           impactParameters.push_back(Im);
         }
       }
+//JJJ SIMD LOOP BEGIN
+
       if (!topSpVec.empty()) {
         std::vector<std::pair<
             float, std::unique_ptr<const InternalSeed<external_spacepoint_t>>>>

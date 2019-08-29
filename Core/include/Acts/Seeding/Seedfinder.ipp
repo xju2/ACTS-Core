@@ -222,7 +222,7 @@ void Seedfinder<external_spacepoint_t>::createSeedsForRegion(
     transformCoordinates(compatBottomSP, *spM, true, linCircleBottom);
     transformCoordinates(compatTopSP, *spM, false, linCircleTop);
 
-#ifdef VEC_SOA
+#if 1
     int N = linCircleTop.size();
     float *linCircleTop_cotTheta = new float[N];
     float *linCircleTop_iDeltaR = new float[N];
@@ -282,7 +282,21 @@ void Seedfinder<external_spacepoint_t>::createSeedsForRegion(
 //JJJ SIMD LOOP BEGIN
       #pragma omp simd
       for (size_t t = 0; t < numTopSP; t++) {
-        auto lt = linCircleTop[t];
+       // auto lt = linCircleTop[t];
+
+#if 1
+        float tmp_cotTheta = linCircleTop_cotTheta[t];
+        float tmp_iDeltaR = linCircleTop_iDeltaR[t];
+        float tmp_Er = linCircleTop_Er[t];
+        float tmp_U = linCircleTop_U[t];
+        float tmp_V = linCircleTop_V[t];
+#else
+        float tmp_cotTheta = lt.cotTheta;
+        float tmp_iDeltaR = lt.iDeltaR;
+        float tmp_Er = lt.Er;
+        float tmp_U = lt.U;
+        float tmp_V = lt.V;
+#endif
 
 #ifdef VEC_SOA
         float tmp_cotTheta = linCircleTop_cotTheta[t];

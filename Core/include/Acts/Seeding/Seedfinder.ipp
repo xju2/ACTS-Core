@@ -150,7 +150,12 @@ void Seedfinder<external_spacepoint_t>::createSeedsForRegion(
     std::vector<size_t>& topBinIndices = it.topBinIndices;
     std::vector<const InternalSpacePoint<external_spacepoint_t>*>
         compatBottomSP;
-
+	int nBottomIndices = bottomBinIndices.size();
+	int nTopIndices = topBinIndices.size();
+	for (int i = 0; i < nBottomIndices; i++) {
+		for(int j = 0; j < nTopIndices; j++) {
+		}
+	}	
     // bottom space point
     for (auto bottomBinIndex : bottomBinIndices) {
       auto& bottomBin = it.grid->at(bottomBinIndex);
@@ -280,7 +285,7 @@ void Seedfinder<external_spacepoint_t>::createSeedsForRegion(
       impactParameters.clear();
 
 //JJJ SIMD LOOP BEGIN
-      #pragma omp simd
+      // #pragma omp simd --> does not help
       for (size_t t = 0; t < numTopSP; t++) {
         auto lt = linCircleTop[t];
 

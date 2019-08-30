@@ -199,8 +199,8 @@ void Seedfinder<external_spacepoint_t>::createSeedsForRegion(
           break;
         }
 
-        float cotTheta = (spT->z() - zM) / deltaR;
-        if (std::fabs(cotTheta) > m_config.cotThetaMax) {
+        float cotTheta = (spT->z() - zM) ;
+        if (std::fabs(cotTheta) >  deltaR * m_config.cotThetaMax) {
           continue;
         }
         float zOrigin = zM - rM * cotTheta;
@@ -279,11 +279,13 @@ void Seedfinder<external_spacepoint_t>::createSeedsForRegion(
       curvatures.clear();
       impactParameters.clear();
 
+            
 //JJJ SIMD LOOP BEGIN
       #pragma omp simd
       for (size_t t = 0; t < numTopSP; t++) {
-       // auto lt = linCircleTop[t];
-
+        //auto lt = linCircleTop[t];
+	
+	
 #if 1
         float tmp_cotTheta = linCircleTop_cotTheta[t];
         float tmp_iDeltaR = linCircleTop_iDeltaR[t];
@@ -306,71 +308,92 @@ void Seedfinder<external_spacepoint_t>::createSeedsForRegion(
 
         float deltaCotTheta = cotThetaB - tmp_cotTheta;
         float deltaCotTheta2 = deltaCotTheta * deltaCotTheta;
-        float error;
+
+	float error;
         float dCotThetaMinusError2;
-        // if the error is larger than the difference in theta, no need to
-        // compare with scattering
-        if (deltaCotTheta2 - error2 > 0) {
-          deltaCotTheta = std::abs(deltaCotTheta);
-          // if deltaTheta larger than the scattering for the lower pT cut, skip
-          error = std::sqrt(error2);
-          dCotThetaMinusError2 =
-              deltaCotTheta2 + error2 - 2 * deltaCotTheta * error;
-          // avoid taking root of scatteringInRegion
-          // if left side of ">" is positive, both sides of unequality can be
-          // squared
-          // (scattering is always positive)
 
-          if (dCotThetaMinusError2 > scatteringInRegion2) {
-            continue;
-          }
-        }
+	// A and B are evaluated as a function of the circumference parameters
+	// x_0 and y_0 
+float dU = tmp_U - Ub;			
+float A = (tmp_V - Vb) / dU;
+	float S2 = 1. + A * A;
+	float B = Vb - A * Ub;
+	float B2 = B * B;
 
+	// 1/helixradius: (B/sqrt(S2))/2 (we leave everything squared)
+	//~ot of scatteringInRegion
+	// if left side of
+	// calculate scattering for p(T) calculated from seed curvature
+	float pT2scatter = 4 * B2 * m_config.pT2perRadius;
+	// TODO: include upper pT limit for scatter calc
+	// convert p(T) to p scaling by sin^2(theta) AND scale by 1/sin^4(theta)
+	// from rad to deltaCotTheta
+	float p2scatter = pT2scatter * iSinTheta2;
+
+	
+	
+	// A and B allow calculation of impact params in U/V plane with linear
+	// function
+	// (in contrast to having to solve a quadratic function in x/y plane)
+	float Im = std::abs((A - B * rM) * rM);
+		
+	deltaCotTheta = std::abs(deltaCotTheta);
+	// if deltaTheta larger than the scattering for the lower pT cut, skip
+	error = std::sqrt(error2);
+	dCotThetaMinusError2 =
+	  deltaCotTheta2 + error2 - 2 * deltaCotTheta * error;
+	// avoid taking root of scatteringInRegion
+	// if left side of ">" is positive, both sides of unequality can be
+	// squared
+	// (scattering is always positive)
+bool mask = false;
+
+	if (dCotThetaMinusError2 > scatteringInRegion2) {
+	  mask = false;
+	}
+        else
+	  mask = true;
         // protects against division by 0
-        float dU = tmp_U - Ub;
+        
         if (dU == 0.) {
-          continue;
+          mask = false;
         }
-        // A and B are evaluated as a function of the circumference parameters
-        // x_0 and y_0
-        float A = (tmp_V - Vb) / dU;
-        float S2 = 1. + A * A;
-        float B = Vb - A * Ub;
-        float B2 = B * B;
-        // sqrt(S2)/B = 2 * helixradius
+	else
+	  mask = true;
+	
         // calculated radius must not be smaller than minimum radius
         if (S2 < B2 * m_config.minHelixDiameter2) {
-          continue;
+          mask = false;
         }
-        // 1/helixradius: (B/sqrt(S2))/2 (we leave everything squared)
-        float iHelixDiameter2 = B2 / S2;
-        // calculate scattering for p(T) calculated from seed curvature
-        float pT2scatter = 4 * iHelixDiameter2 * m_config.pT2perRadius;
-        // TODO: include upper pT limit for scatter calc
-        // convert p(T) to p scaling by sin^2(theta) AND scale by 1/sin^4(theta)
-        // from rad to deltaCotTheta
-        float p2scatter = pT2scatter * iSinTheta2;
+        else
+	  mask = true;
         // if deltaTheta larger than allowed scattering for calculated pT, skip
-        if (deltaCotTheta2 - error2 > 0 &&
-            dCotThetaMinusError2 > p2scatter * m_config.sigmaScattering *
+	//quantities are named incorrectly to avoid division
+	if (deltaCotTheta2 - error2 > 0 &&
+            dCotThetaMinusError2 * S2 > p2scatter * m_config.sigmaScattering *
                                        m_config.sigmaScattering) {
-          continue;
+	  mask = false;
         }
-        // A and B allow calculation of impact params in U/V plane with linear
-        // function
-        // (in contrast to having to solve a quadratic function in x/y plane)
-        float Im = std::abs((A - B * rM) * rM);
+        else
+	  mask = true;
+	
+        if (Im <= m_config.impactMax) 
+	  mask = true;
+	else
+	  mask = false;
 
-        if (Im <= m_config.impactMax) {
-          topSpVec.push_back(compatTopSP[t]);
-          // inverse diameter is signed depending if the curvature is
-          // positive/negative in phi
-          curvatures.push_back(B / std::sqrt(S2));
-          impactParameters.push_back(Im);
-        }
+	if(mask == true) {
+	  topSpVec.push_back(compatTopSP[t]);
+	  // inverse diameter is signed depending if the curvature is
+	  // positive/negative in phi
+	  curvatures.push_back(B / std::sqrt(S2));
+	  impactParameters.push_back(Im);
+	}
       }
 //JJJ SIMD LOOP BEGIN
 
+
+            
       if (!topSpVec.empty()) {
         std::vector<std::pair<
             float, std::unique_ptr<const InternalSeed<external_spacepoint_t>>>>

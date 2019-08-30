@@ -128,21 +128,22 @@ int main(int argc, char** argv) {
   }
   std::cout << "number of states: " << its.size() << std::endl;
 
-  #pragma omp parallel num_threads(n_threads) shared(seed_finder, state, its, std::cout) default(none) 
-  {
-	#pragma omp master
-  	std::cout << "number of threads: " << omp_get_num_threads() << std::endl;
+//  #pragma omp parallel num_threads(n_threads) shared(seed_finder, state, its, std::cout) default(none) 
+//  {
+//	#pragma omp master
+//  	std::cout << "number of threads: " << omp_get_num_threads() << std::endl;
+//
+//	#pragma omp for
+//	for(int i = 0; i < (int) its.size(); i++){
+//		// Acts::SeedfinderStateIterator<SpacePoint>& it = its.at(i);
+//		seed_finder.createSeedsForRegion(its[i], state);
+//	}
+//  }
 
-	#pragma omp for
-	for(int i = 0; i < (int) its.size(); i++){
-		// Acts::SeedfinderStateIterator<SpacePoint>& it = its.at(i);
-		seed_finder.createSeedsForRegion(its[i], state);
-	}
-  }
-  // for (Acts::SeedfinderStateIterator<SpacePoint> it = state.begin();
-  //      !(it == state.end()); ++it) {
-  //   seed_finder.createSeedsForRegion(it, state);
-  // }
+  for (Acts::SeedfinderStateIterator<SpacePoint> it = state.begin();
+        !(it == state.end()); ++it) {
+     seed_finder.createSeedsForRegion(it, state);
+   }
 
   auto end = std::chrono::system_clock::now();
   std::chrono::duration<double> elapsed_seconds = end - start;

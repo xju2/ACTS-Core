@@ -305,9 +305,15 @@ void Seedfinder<external_spacepoint_t>::createSeedsForRegion(
     }
 
     size_t b, t;
-#pragma omp target data map(to: linCircleBotZo, linCircleBotcotTheta, linCircleBotV, linCircleBotU, linCircleBotEr, linCircleBotiDeltaR, linCircleTopEr, linCircleTopcotTheta, linCircleTopiDeltaR, linCircleTopU, linCircleTopV)  map(from: topSpIndexData, curvaturesData, impactParametersData)
+#pragma omp target data map(                                                   \
+    to                                                                         \
+    : linCircleBotZo, linCircleBotcotTheta, linCircleBotV, linCircleBotU,      \
+      linCircleBotEr, linCircleBotiDeltaR, linCircleTopEr,                     \
+      linCircleTopcotTheta, linCircleTopiDeltaR, linCircleTopU, linCircleTopV) \
+    map(from                                                                   \
+        : topSpIndexData, curvaturesData, impactParametersData)
 #pragma omp target teams distribute
-  for (b = 0; b < numBotSP; b++) {
+    for (b = 0; b < numBotSP; b++) {
       float Zob = linCircleBotZo[b];
       float cotThetaB = linCircleBotcotTheta[b];
       float Vb = linCircleBotV[b];
@@ -416,9 +422,9 @@ void Seedfinder<external_spacepoint_t>::createSeedsForRegion(
 
     }  // end of numBottomSP
 
-//    std::free(topSpIndexData);
-//    std::free(curvaturesData);
-//    std::free(impactParametersData);
+    //    std::free(topSpIndexData);
+    //    std::free(curvaturesData);
+    //    std::free(impactParametersData);
 
     auto end = std::chrono::system_clock::now();
     std::chrono::duration<double> elapsed_seconds = end - start;
@@ -436,8 +442,8 @@ void Seedfinder<external_spacepoint_t>::createSeedsForRegion(
         if (topSpIndexData[b][t] != -1) {
           // std::cout<<"topSpIndexData[ " << i << " ] = "<< topSpIndexData[t];
           // std::cout<< ", curvaturesData[ " << i << " ] =  " <<
-          // curvaturesData[t]; std::cout<< ", impactParametersData[ " <<i << " ]
-          // = " << impactParametersData[t]<<std::endl;
+          // curvaturesData[t]; std::cout<< ", impactParametersData[ " <<i << "
+          // ] = " << impactParametersData[t]<<std::endl;
           topSpVec.push_back(compatTopSP[t]);
           curvatures.push_back(curvaturesData[b][t]);
           impactParameters.push_back(impactParametersData[b][t]);

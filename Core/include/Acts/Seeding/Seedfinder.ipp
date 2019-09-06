@@ -7,9 +7,9 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include <cmath>
+#include <iostream>
 #include <numeric>
 #include <type_traits>
-#include <iostream>
 
 #include "Acts/Seeding/IBinFinder.hpp"
 #include "Acts/Seeding/SeedFilter.hpp"
@@ -34,7 +34,7 @@ Seedfinder<external_spacepoint_t>::Seedfinder(
       std::pow(m_config.minPt * 2 / m_config.pTPerHelixRadius, 2);
   m_config.pT2perRadius =
       std::pow(m_config.highland / m_config.pTPerHelixRadius, 2);
-    }
+}
 
 template <typename external_spacepoint_t>
 template <typename spacepoint_iterator_t>
@@ -233,15 +233,87 @@ void Seedfinder<external_spacepoint_t>::createSeedsForRegion(
         seedsPerSpM;
     size_t numBotSP = compatBottomSP.size();
     size_t numTopSP = compatTopSP.size();
+    std::cout << "numBotSP = " << numBotSP << " numTopSP = " << numTopSP
+              << std::endl;
+
+    // input data list
+    // 1) m_config.pT2perRadius, m_config.sigmaScattering,
+    // m_config.minHelixDiameter2, m_config.impactMax 2) Ub, ErB, covrM, covzM,
+    // iDeltaRB, cotThetaB 3) linCircleTop.Er, linCircleTop.cotTheta,
+    // linCircleTop.iDeltaR, linCircleTop.U, linCircleTop.V
+    // auto linCircleTopData = linCircleTop.data();
+    float maxScatteringAngle2 = m_config.maxScatteringAngle2;
+    float pT2perRadius = m_config.pT2perRadius;
+    float sigmaScattering = m_config.sigmaScattering;
+    float minHelixDiameter2 = m_config.minHelixDiameter2;
+    float impactMax = m_config.impactMax;
+
+    auto start = std::chrono::system_clock::now();
+
+    float* linCircleBotEr =
+        static_cast<float*>(std::malloc(sizeof(float) * numBotSP));
+    float* linCircleBotcotTheta =
+        static_cast<float*>(std::malloc(sizeof(float) * numBotSP));
+    float* linCircleBotiDeltaR =
+        static_cast<float*>(std::malloc(sizeof(float) * numBotSP));
+    float* linCircleBotU =
+        static_cast<float*>(std::malloc(sizeof(float) * numBotSP));
+    float* linCircleBotV =
+        static_cast<float*>(std::malloc(sizeof(float) * numBotSP));
+    float* linCircleBotZo =
+        static_cast<float*>(std::malloc(sizeof(float) * numBotSP));
+
+    float* linCircleTopEr =
+        static_cast<float*>(std::malloc(sizeof(float) * numTopSP));
+    float* linCircleTopcotTheta =
+        static_cast<float*>(std::malloc(sizeof(float) * numTopSP));
+    float* linCircleTopiDeltaR =
+        static_cast<float*>(std::malloc(sizeof(float) * numTopSP));
+    float* linCircleTopU =
+        static_cast<float*>(std::malloc(sizeof(float) * numTopSP));
+    float* linCircleTopV =
+        static_cast<float*>(std::malloc(sizeof(float) * numTopSP));
 
     for (size_t b = 0; b < numBotSP; b++) {
-      auto lb = linCircleBottom[b];
-      float Zob = lb.Zo;
-      float cotThetaB = lb.cotTheta;
-      float Vb = lb.V;
-      float Ub = lb.U;
-      float ErB = lb.Er;
-      float iDeltaRB = lb.iDeltaR;
+      linCircleBotEr[b] = linCircleBottom[b].Er;
+      linCircleBotcotTheta[b] = linCircleBottom[b].cotTheta;
+      linCircleBotiDeltaR[b] = linCircleBottom[b].iDeltaR;
+      linCircleBotU[b] = linCircleBottom[b].U;
+      linCircleBotV[b] = linCircleBottom[b].V;
+      linCircleBotZo[b] = linCircleBottom[b].Zo;
+    }
+
+    for (size_t t = 0; t < numTopSP; t++) {
+      linCircleTopEr[t] = linCircleTop[t].Er;
+      linCircleTopcotTheta[t] = linCircleTop[t].cotTheta;
+      linCircleTopiDeltaR[t] = linCircleTop[t].iDeltaR;
+      linCircleTopU[t] = linCircleTop[t].U;
+      linCircleTopV[t] = linCircleTop[t].V;
+    }
+
+    // malloc for output data: topSpIndex, curvatures, impactParameters
+    int* topSpIndexData[numBotSP];
+    float* curvaturesData[numBotSP];
+    float* impactParametersData[numBotSP];
+    for (size_t b = 0; b < numBotSP; b++) {
+      topSpIndexData[b] =
+          static_cast<int*>(std::malloc(sizeof(int) * numTopSP));
+      curvaturesData[b] =
+          static_cast<float*>(std::malloc(sizeof(float) * numTopSP));
+      impactParametersData[b] =
+          static_cast<float*>(std::malloc(sizeof(float) * numTopSP));
+    }
+
+    size_t b, t;
+#pragma omp target data map(to: linCircleBotZo, linCircleBotcotTheta, linCircleBotV, linCircleBotU, linCircleBotEr, linCircleBotiDeltaR, linCircleTopEr, linCircleTopcotTheta, linCircleTopiDeltaR, linCircleTopU, linCircleTopV)  map(from: topSpIndexData, curvaturesData, impactParametersData)
+#pragma omp target teams distribute
+  for (b = 0; b < numBotSP; b++) {
+      float Zob = linCircleBotZo[b];
+      float cotThetaB = linCircleBotcotTheta[b];
+      float Vb = linCircleBotV[b];
+      float Ub = linCircleBotU[b];
+      float ErB = linCircleBotEr[b];
+      float iDeltaRB = linCircleBotiDeltaR[b];
 
       // 1+(cot^2(theta)) = 1/sin^2(theta)
       float iSinTheta2 = (1. + cotThetaB * cotThetaB);
@@ -254,157 +326,123 @@ void Seedfinder<external_spacepoint_t>::createSeedsForRegion(
       // resolving with pT to p scaling --> only divide by sin^2(theta)
       // max approximation error for allowed scattering angles of 0.04 rad at
       // eta=infinity: ~8.5%
-      float scatteringInRegion2 = m_config.maxScatteringAngle2 * iSinTheta2;
+      float scatteringInRegion2 = maxScatteringAngle2 * iSinTheta2;
       // multiply the squared sigma onto the squared scattering
-      scatteringInRegion2 *=
-          m_config.sigmaScattering * m_config.sigmaScattering;
+      scatteringInRegion2 *= sigmaScattering * sigmaScattering;
 
-      // clear all vectors used in each inner for loop
+#pragma omp parallel for
+      for (t = 0; t < numTopSP; t++) {
+        // add errors of spB-spM and spM-spT pairs and add the correlation term
+        // for errors on spM
+        float error2 =
+            linCircleTopEr[t] + ErB +
+            2 * (cotThetaB * linCircleTopcotTheta[t] * covrM + covzM) *
+                iDeltaRB * linCircleTopiDeltaR[t];
+
+        float deltaCotTheta = cotThetaB - linCircleTopcotTheta[t];
+        float deltaCotTheta2 = deltaCotTheta * deltaCotTheta;
+        float error;
+        float dCotThetaMinusError2;
+        // if the error is larger than the difference in theta, no need to
+        // compare with scattering
+        if (deltaCotTheta2 - error2 > 0) {
+          deltaCotTheta = std::abs(deltaCotTheta);
+          // if deltaTheta larger than the scattering for the lower pT cut, skip
+          error = std::sqrt(error2);
+          dCotThetaMinusError2 =
+              deltaCotTheta2 + error2 - 2 * deltaCotTheta * error;
+          // avoid taking root of scatteringInRegion
+          // if left side of ">" is positive, both sides of unequality can be
+          // squared
+          // (scattering is always positive)
+
+          if (dCotThetaMinusError2 > scatteringInRegion2) {
+            topSpIndexData[b][t] = -1;
+            continue;
+          }
+        }
+
+        // protects against division by 0
+        float dU = linCircleTopU[t] - Ub;
+        if (dU == 0.) {
+          topSpIndexData[b][t] = -1;
+          continue;
+        }
+        // A and B are evaluated as a function of the circumference parameters
+        // x_0 and y_0
+        float A = (linCircleTopV[t] - Vb) / dU;
+        float S2 = 1. + A * A;
+        float B = Vb - A * Ub;
+        float B2 = B * B;
+        // sqrt(S2)/B = 2 * helixradius
+        // calculated radius must not be smaller than minimum radius
+        if (S2 < B2 * minHelixDiameter2) {
+          topSpIndexData[b][t] = -1;
+          continue;
+        }
+        // 1/helixradius: (B/sqrt(S2))/2 (we leave everything squared)
+        float iHelixDiameter2 = B2 / S2;
+        // calculate scattering for p(T) calculated from seed curvature
+        float pT2scatter = 4 * iHelixDiameter2 * pT2perRadius;
+        // TODO: include upper pT limit for scatter calc
+        // convert p(T) to p scaling by sin^2(theta) AND scale by 1/sin^4(theta)
+        // from rad to deltaCotTheta
+        float p2scatter = pT2scatter * iSinTheta2;
+        // if deltaTheta larger than allowed scattering for calculated pT, skip
+        if (deltaCotTheta2 - error2 > 0 &&
+            dCotThetaMinusError2 >
+                p2scatter * sigmaScattering * sigmaScattering) {
+          topSpIndexData[b][t] = -1;
+          continue;
+        }
+        // A and B allow calculation of impact params in U/V plane with linear
+        // function
+        // (in contrast to having to solve a quadratic function in x/y plane)
+        float Im = std::abs((A - B * rM) * rM);
+
+        if (Im <= impactMax) {
+          topSpIndexData[b][t] = t;
+          // inverse diameter is signed depending if the curvature is
+          // positive/negative in phi
+          curvaturesData[b][t] = B / std::sqrt(S2);
+          impactParametersData[b][t] = Im;
+        } else {
+          topSpIndexData[b][t] = -1;
+          curvaturesData[b][t] = -9;
+          impactParametersData[b][t] = -9;
+        }
+
+      }  // end of numTopSP
+
+    }  // end of numBottomSP
+
+//    std::free(topSpIndexData);
+//    std::free(curvaturesData);
+//    std::free(impactParametersData);
+
+    auto end = std::chrono::system_clock::now();
+    std::chrono::duration<double> elapsed_seconds = end - start;
+    std::cout << "time to match top for this sp is " << elapsed_seconds.count()
+              << std::endl;
+
+    // check for the data taken back from GPU and push them back to the original
+    // vector
+    for (b = 0; b < numBotSP; b++) {
+      //  // clear all vectors used in each inner for loop
       topSpVec.clear();
       curvatures.clear();
       impactParameters.clear();
-    
-      // size of the array 
-      size_t linCircleTopSize = linCircleTop.size();
-      std::cout<<"linCircleTopSize = " << linCircleTopSize <<std::endl;
- 
-      // input data list 
-      // 1) m_config.pT2perRadius, m_config.sigmaScattering, m_config.minHelixDiameter2, m_config.impactMax
-      // 2) Ub, ErB, covrM, covzM, iDeltaRB, cotThetaB
-      // 3) linCircleTop.Er, linCircleTop.cotTheta, linCircleTop.iDeltaR, linCircleTop.U, linCircleTop.V 
-      //auto linCircleTopData = linCircleTop.data();
-
-      float pT2perRadius = m_config.pT2perRadius;
-      float sigmaScattering = m_config.sigmaScattering;
-      float minHelixDiameter2 = m_config.minHelixDiameter2;
-      float impactMax = m_config.impactMax;
-
-      auto start = std::chrono::system_clock::now();
-   
-      float *linCircleTopEr = static_cast<float*>(std::malloc(sizeof(float)*linCircleTopSize));  
-      float *linCircleTopcotTheta = static_cast<float*>(std::malloc(sizeof(float)*linCircleTopSize));  
-      float *linCircleTopiDeltaR = static_cast<float*>(std::malloc(sizeof(float)*linCircleTopSize));  
-      float *linCircleTopU = static_cast<float*>(std::malloc(sizeof(float)*linCircleTopSize));  
-      float *linCircleTopV = static_cast<float*>(std::malloc(sizeof(float)*linCircleTopSize));  
- 
-      for(size_t t=0; t< linCircleTopSize; t++){
-	 linCircleTopEr[t] = linCircleTop[t].Er;     
-	 linCircleTopcotTheta[t] = linCircleTop[t].cotTheta;     
-	 linCircleTopiDeltaR[t] = linCircleTop[t].iDeltaR;     
-	 linCircleTopU[t] = linCircleTop[t].U;     
-	 linCircleTopV[t] = linCircleTop[t].V;     
+      for (t = 0; t < numTopSP; t++) {
+        if (topSpIndexData[b][t] != -1) {
+          // std::cout<<"topSpIndexData[ " << i << " ] = "<< topSpIndexData[t];
+          // std::cout<< ", curvaturesData[ " << i << " ] =  " <<
+          // curvaturesData[t]; std::cout<< ", impactParametersData[ " <<i << " ]
+          // = " << impactParametersData[t]<<std::endl;
+          topSpVec.push_back(compatTopSP[t]);
+          curvatures.push_back(curvaturesData[b][t]);
+          impactParameters.push_back(impactParametersData[b][t]);
+        }
       }
-
-      // malloc for output data: topSpIndex, curvatures, impactParameters
-      int *topSpIndexData = static_cast<int*>(std::malloc(sizeof(int)*linCircleTopSize));
-      float *curvaturesData = static_cast<float*>(std::malloc(sizeof(float)*linCircleTopSize));
-      float *impactParametersData = static_cast<float*>(std::malloc(sizeof(float)*linCircleTopSize));
-   
-      size_t i;  
-      #pragma omp target data map(to: linCircleTopEr[0:linCircleTopSize], linCircleTopcotTheta[0:linCircleTopSize], linCircleTopiDeltaR[0:linCircleTopSize], linCircleTopU[0:linCircleTopSize], linCircleTopV[0:linCircleTopSize]) map(from: topSpIndexData[0: linCircleTopSize], curvaturesData[0: linCircleTopSize], impactParametersData[0: linCircleTopSize])
-      #pragma omp target teams distribute parallel for   
-        for(i=0; i< linCircleTopSize; i++){
-
-          // add errors of spB-spM and spM-spT pairs and add the correlation term
-          // for errors on spM
-          float error2 = linCircleTopEr[i] + ErB +
-                         2 * (cotThetaB * linCircleTopcotTheta[i] * covrM + covzM) *
-                             iDeltaRB * linCircleTopiDeltaR[i];
-
-          float deltaCotTheta = cotThetaB - linCircleTopcotTheta[i];
-          float deltaCotTheta2 = deltaCotTheta * deltaCotTheta;
-          float error;
-          float dCotThetaMinusError2;
-          // if the error is larger than the difference in theta, no need to
-          // compare with scattering
-          if (deltaCotTheta2 - error2 > 0) {
-            deltaCotTheta = std::abs(deltaCotTheta);
-            // if deltaTheta larger than the scattering for the lower pT cut, skip
-            error = std::sqrt(error2);
-            dCotThetaMinusError2 =
-                deltaCotTheta2 + error2 - 2 * deltaCotTheta * error;
-            // avoid taking root of scatteringInRegion
-            // if left side of ">" is positive, both sides of unequality can be
-            // squared
-            // (scattering is always positive)
-
-            if (dCotThetaMinusError2 > scatteringInRegion2) {
-              topSpIndexData[i] = -1;
-              continue;
-            }
-          }
-
-          // protects against division by 0
-          float dU = linCircleTopU[i] - Ub;
-          if (dU == 0.) {
-            topSpIndexData[i] = -1;
-            continue;
-          }
-          // A and B are evaluated as a function of the circumference parameters
-          // x_0 and y_0
-          float A = (linCircleTopV[i] - Vb) / dU;
-          float S2 = 1. + A * A;
-          float B = Vb - A * Ub;
-          float B2 = B * B;
-          // sqrt(S2)/B = 2 * helixradius
-          // calculated radius must not be smaller than minimum radius
-          if (S2 < B2 * minHelixDiameter2) {
-            topSpIndexData[i] = -1;
-            continue;
-          }
-          // 1/helixradius: (B/sqrt(S2))/2 (we leave everything squared)
-          float iHelixDiameter2 = B2 / S2;
-          // calculate scattering for p(T) calculated from seed curvature
-          float pT2scatter = 4 * iHelixDiameter2 * pT2perRadius;
-          // TODO: include upper pT limit for scatter calc
-          // convert p(T) to p scaling by sin^2(theta) AND scale by 1/sin^4(theta)
-          // from rad to deltaCotTheta
-          float p2scatter = pT2scatter * iSinTheta2;
-          // if deltaTheta larger than allowed scattering for calculated pT, skip
-          if (deltaCotTheta2 - error2 > 0 &&
-              dCotThetaMinusError2 > p2scatter * sigmaScattering *
-                                         sigmaScattering) {
-            topSpIndexData[i] = -1;
-            continue;
-          }
-          // A and B allow calculation of impact params in U/V plane with linear
-          // function
-          // (in contrast to having to solve a quadratic function in x/y plane)
-          float Im = std::abs((A - B * rM) * rM);
-
-          if (Im <= impactMax) {
-            topSpIndexData[i] = i;
-            // inverse diameter is signed depending if the curvature is
-            // positive/negative in phi
-            curvaturesData[i]= B / std::sqrt(S2);
-            impactParametersData[i] = Im;
-          } else {
-            topSpIndexData[i] = -1;
-            curvaturesData[i]= -9;
-            impactParametersData[i] = -9;
-         }
-
-       }  // end of numTopSP
-   
-      // check for the data taken back from GPU and push them back to the original vector
-      for(i=0; i<linCircleTopSize; i++){
-	   if(topSpIndexData[i] != -1){
-//	   std::cout<<"topSpIndexData[ " << i << " ] = "<< topSpIndexData[i];
-//	   std::cout<< ", curvaturesData[ " << i << " ] =  " << curvaturesData[i];
-//	   std::cout<< ", impactParametersData[ " <<i << " ] = " << impactParametersData[i]<<std::endl;
-             topSpVec.push_back(compatTopSP[i]);
-             curvatures.push_back(curvaturesData[i]);
-	     impactParameters.push_back(impactParametersData[i]);  
-           }		   
-      }
-
-      std::free(topSpIndexData);
-      std::free(curvaturesData);
-      std::free(impactParametersData);
-
-      auto end = std::chrono::system_clock::now();
-      std::chrono::duration<double> elapsed_seconds = end - start;
-      std::cout << "time to match bottom and top for this sp is " << elapsed_seconds.count() << std::endl;
 
       if (!topSpVec.empty()) {
         std::vector<std::pair<
@@ -412,17 +450,16 @@ void Seedfinder<external_spacepoint_t>::createSeedsForRegion(
             sameTrackSeeds;
         sameTrackSeeds = std::move(m_config.seedFilter->filterSeeds_2SpFixed(
             *compatBottomSP[b], *spM, topSpVec, curvatures, impactParameters,
-            Zob));
+            linCircleBottom[b].Zo));
         seedsPerSpM.insert(seedsPerSpM.end(),
                            std::make_move_iterator(sameTrackSeeds.begin()),
                            std::make_move_iterator(sameTrackSeeds.end()));
       }
-
-    } // end of numBottomSP
+    }
 
     m_config.seedFilter->filterSeeds_1SpFixed(seedsPerSpM,
                                               state.outputVec[it.outputIndex]);
-  } // end of loop for all space points in the middle region
+  }  // end of loop for all space points in the middle region
 }
 
 template <typename external_spacepoint_t>

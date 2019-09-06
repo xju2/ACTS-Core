@@ -18,7 +18,7 @@
 #ifdef _OPENMP
 #include "omp.h"
 #else
-	#define omp_get_num_threads() 0
+#define omp_get_num_threads() 0
 #endif
 
 //#include <boost/type_erasure/any_cast.hpp>
@@ -27,9 +27,8 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
-#include <utility>
 #include <string>
-
+#include <utility>
 
 std::vector<const SpacePoint*> readFile(std::string filename) {
   std::string line;
@@ -71,16 +70,17 @@ std::vector<const SpacePoint*> readFile(std::string filename) {
 }
 
 int main(int argc, char** argv) {
-	if (argc < 2) {
-		std::cout << argv[0] << " file_name " << " nthreads " << std::endl;
-		exit(1);
-	}
-	std::string input_name(argv[1]);
-	int n_threads = atoi(argv[2]);
-	std::vector<const SpacePoint*> spVec = readFile(input_name.c_str());
-	std::cout << "input file: " << input_name << std::endl;
-	std::cout << "N threads: " << n_threads << std::endl;
-	std::cout << "size of read SP: " << spVec.size() << std::endl;
+  if (argc < 2) {
+    std::cout << argv[0] << " file_name "
+              << " nthreads " << std::endl;
+    exit(1);
+  }
+  std::string input_name(argv[1]);
+  int n_threads = atoi(argv[2]);
+  std::vector<const SpacePoint*> spVec = readFile(input_name.c_str());
+  std::cout << "input file: " << input_name << std::endl;
+  std::cout << "N threads: " << n_threads << std::endl;
+  std::cout << "size of read SP: " << spVec.size() << std::endl;
 
   Acts::SeedfinderConfig<SpacePoint> config;
   // silicon detector max
@@ -120,30 +120,32 @@ int main(int argc, char** argv) {
   Acts::SeedfinderState<SpacePoint> state = seed_finder.initState(
       spVec.begin(), spVec.end(), ct, bottomBinFinder, topBinFinder);
   auto start = std::chrono::system_clock::now();
-///////
-  std::vector<Acts::SeedfinderStateIterator<SpacePoint> > its ;
-  for(Acts::SeedfinderStateIterator<SpacePoint> it = state.begin();
-		  !(it == state.end()); ++it) {
-		its.push_back(it);
+  ///////
+  std::vector<Acts::SeedfinderStateIterator<SpacePoint>> its;
+  for (Acts::SeedfinderStateIterator<SpacePoint> it = state.begin();
+       !(it == state.end()); ++it) {
+    its.push_back(it);
   }
   std::cout << "number of states: " << its.size() << std::endl;
 
-//  #pragma omp parallel num_threads(n_threads) shared(seed_finder, state, its, std::cout) default(none) 
-//  {
-//	#pragma omp master
-//  	std::cout << "number of threads: " << omp_get_num_threads() << std::endl;
-//
-//	#pragma omp for
-//	for(int i = 0; i < (int) its.size(); i++){
-//		// Acts::SeedfinderStateIterator<SpacePoint>& it = its.at(i);
-//		seed_finder.createSeedsForRegion(its[i], state);
-//	}
-//  }
+  //  #pragma omp parallel num_threads(n_threads) shared(seed_finder, state,
+  //  its, std::cout) default(none)
+  //  {
+  //	#pragma omp master
+  //  	std::cout << "number of threads: " << omp_get_num_threads() <<
+  //  std::endl;
+  //
+  //	#pragma omp for
+  //	for(int i = 0; i < (int) its.size(); i++){
+  //		// Acts::SeedfinderStateIterator<SpacePoint>& it = its.at(i);
+  //		seed_finder.createSeedsForRegion(its[i], state);
+  //	}
+  //  }
 
   for (Acts::SeedfinderStateIterator<SpacePoint> it = state.begin();
-        !(it == state.end()); ++it) {
-     seed_finder.createSeedsForRegion(it, state);
-   }
+       !(it == state.end()); ++it) {
+    seed_finder.createSeedsForRegion(it, state);
+  }
 
   auto end = std::chrono::system_clock::now();
   std::chrono::duration<double> elapsed_seconds = end - start;
@@ -158,8 +160,8 @@ int main(int argc, char** argv) {
     for (size_t i = 0; i < regionVec.size(); i++) {
       const Acts::Seed<SpacePoint>* seed = regionVec[i].get();
       const SpacePoint* sp = seed->sp()[0];
-      std::cout << sp->surface << " (" << sp->x() << ", " << sp->y() << ", " << sp->z()
-                << ") ";
+      std::cout << sp->surface << " (" << sp->x() << ", " << sp->y() << ", "
+                << sp->z() << ") ";
       sp = seed->sp()[1];
       std::cout << sp->surface << " (" << sp->x() << ", " << sp->y() << ", "
                 << sp->z() << ") ";

@@ -14,6 +14,11 @@ get_git_head_revision(_git_refspec _git_hash)
 git_local_changes(_git_local_changes)
 string(SUBSTRING "${_git_hash}" 0 8 _git_hash_short)
 
+# 17 standard (need the all three)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
 # build options
 
 # all options must be defined here to keep the list directly visible and
@@ -48,6 +53,7 @@ include (GNUInstallDirs) # GNU-like installation paths, e.g. lib/, include/, ...
 include (ActsCompilerOptions) # default compile options
 include (ActsFunctions) # Acts-specific helper functions
 include (ActsComponentsHelpers) # handle components via add_..._if commands
+
 
 # required packages
 find_package(Boost 1.62 REQUIRED COMPONENTS program_options unit_test_framework)

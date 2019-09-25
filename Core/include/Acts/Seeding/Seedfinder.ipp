@@ -9,6 +9,7 @@
 #include <cmath>
 #include <numeric>
 #include <type_traits>
+#include <iostream>
 
 #include "Acts/Seeding/IBinFinder.hpp"
 #include "Acts/Seeding/SeedFilter.hpp"
@@ -33,7 +34,7 @@ Seedfinder<external_spacepoint_t>::Seedfinder(
       std::pow(m_config.minPt * 2 / m_config.pTPerHelixRadius, 2);
   m_config.pT2perRadius =
       std::pow(m_config.highland / m_config.pTPerHelixRadius, 2);
-}
+    }
 
 template <typename external_spacepoint_t>
 template <typename spacepoint_iterator_t>
@@ -327,9 +328,115 @@ void Seedfinder<external_spacepoint_t>::createSeedsForRegion(
           // (scattering is always positive)
 
           if (dCotThetaMinusError2 > scatteringInRegion2) {
+
+    
+      // size of the array 
+      //size_t linCircleTopSize = linCircleTop.size();
+      //std::cout<<"linCircleTopSize = " << linCircleTopSize <<std::endl;
+ 
+      // input data list 
+      // 1) m_config.pT2perRadius, m_config.sigmaScattering, m_config.minHelixDiameter2, m_config.impactMax
+      // 2) Ub, ErB, covrM, covzM, iDeltaRB, cotThetaB
+      // 3) linCircleTop.Er, linCircleTop.cotTheta, linCircleTop.iDeltaR, linCircleTop.U, linCircleTop.V 
+      //auto linCircleTopData = linCircleTop.data();
+
+      float pT2perRadius = m_config.pT2perRadius;
+      float sigmaScattering = m_config.sigmaScattering;
+      float minHelixDiameter2 = m_config.minHelixDiameter2;
+      float impactMax = m_config.impactMax;
+
+      auto start = std::chrono::system_clock::now();
+   
+	  float *linCircleTopEr = static_cast<float*>(std::malloc(sizeof(float)*linCircleTopSize));  
+	  float *linCircleTopcotTheta = static_cast<float*>(std::malloc(sizeof(float)*linCircleTopSize));  
+      float *linCircleTopiDeltaR = static_cast<float*>(std::malloc(sizeof(float)*linCircleTopSize));  
+      float *linCircleTopU = static_cast<float*>(std::malloc(sizeof(float)*linCircleTopSize));  
+      float *linCircleTopV = static_cast<float*>(std::malloc(sizeof(float)*linCircleTopSize));  
+ 
+      for(size_t t=0; t< linCircleTopSize; t++){
+		  linCircleTopEr[t] = linCircleTop[t].Er;     
+		  linCircleTopcotTheta[t] = linCircleTop[t].cotTheta;     
+		  linCircleTopiDeltaR[t] = linCircleTop[t].iDeltaR;     
+		  linCircleTopU[t] = linCircleTop[t].U;     
+		  linCircleTopV[t] = linCircleTop[t].V;     
+      }
+
+      // malloc for output data: topSpIndex, curvatures, impactParameters
+      int *topSpIndexData = static_cast<int*>(std::malloc(sizeof(int)*linCircleTopSize));
+      float *curvaturesData = static_cast<float*>(std::malloc(sizeof(float)*linCircleTopSize));
+      float *impactParametersData = static_cast<float*>(std::malloc(sizeof(float)*linCircleTopSize));
+   
+      size_t i;  
+      #pragma omp target data map(to: linCircleTopEr[0:linCircleTopSize], linCircleTopcotTheta[0:linCircleTopSize], linCircleTopiDeltaR[0:linCircleTopSize], linCircleTopU[0:linCircleTopSize], linCircleTopV[0:linCircleTopSize]) map(from: topSpIndexData[0: linCircleTopSize], curvaturesData[0: linCircleTopSize], impactParametersData[0: linCircleTopSize])
+      #pragma omp target teams distribute parallel for   
+        for(i=0; i< linCircleTopSize; i++){
+
+          // add errors of spB-spM and spM-spT pairs and add the correlation term
+          // for errors on spM
+          float error2 = linCircleTopEr[i] + ErB +
+                         2 * (cotThetaB * linCircleTopcotTheta[i] * covrM + covzM) *
+                             iDeltaRB * linCircleTopiDeltaR[i];
+
+          float deltaCotTheta = cotThetaB - linCircleTopcotTheta[i];
+          float deltaCotTheta2 = deltaCotTheta * deltaCotTheta;
+          float error;
+          float dCotThetaMinusError2;
+          // if the error is larger than the difference in theta, no need to
+          // compare with scattering
+          if (deltaCotTheta2 - error2 > 0) {
+            deltaCotTheta = std::abs(deltaCotTheta);
+            // if deltaTheta larger than the scattering for the lower pT cut, skip
+            error = std::sqrt(error2);
+            dCotThetaMinusError2 =
+                deltaCotTheta2 + error2 - 2 * deltaCotTheta * error;
+            // avoid taking root of scatteringInRegion
+            // if left side of ">" is positive, both sides of unequality can be
+            // squared
+            // (scattering is always positive)
+
+            if (dCotThetaMinusError2 > scatteringInRegion2) {
+              topSpIndexData[i] = -1;
+              continue;
+            }
+          }
+
+          // protects against division by 0
+          float dU = linCircleTopU[i] - Ub;
+          if (dU == 0.) {
+            topSpIndexData[i] = -1;
             continue;
           }
-        }
+          // A and B are evaluated as a function of the circumference parameters
+          // x_0 and y_0
+          float A = (linCircleTopV[i] - Vb) / dU;
+          float S2 = 1. + A * A;
+          float B = Vb - A * Ub;
+          float B2 = B * B;
+          // sqrt(S2)/B = 2 * helixradius
+          // calculated radius must not be smaller than minimum radius
+          if (S2 < B2 * minHelixDiameter2) {
+            topSpIndexData[i] = -1;
+            continue;
+          }
+          // 1/helixradius: (B/sqrt(S2))/2 (we leave everything squared)
+          float iHelixDiameter2 = B2 / S2;
+          // calculate scattering for p(T) calculated from seed curvature
+          float pT2scatter = 4 * iHelixDiameter2 * pT2perRadius;
+          // TODO: include upper pT limit for scatter calc
+          // convert p(T) to p scaling by sin^2(theta) AND scale by 1/sin^4(theta)
+          // from rad to deltaCotTheta
+          float p2scatter = pT2scatter * iSinTheta2;
+          // if deltaTheta larger than allowed scattering for calculated pT, skip
+          if (deltaCotTheta2 - error2 > 0 &&
+              dCotThetaMinusError2 > p2scatter * sigmaScattering *
+                                         sigmaScattering) {
+            topSpIndexData[i] = -1;
+            continue;
+          }
+          // A and B allow calculation of impact params in U/V plane with linear
+          // function
+          // (in contrast to having to solve a quadratic function in x/y plane)
+          float Im = std::abs((A - B * rM) * rM);
 
         // protects against division by 0
         float dU = tmp_U - Ub;
@@ -366,15 +473,40 @@ void Seedfinder<external_spacepoint_t>::createSeedsForRegion(
         // (in contrast to having to solve a quadratic function in x/y plane)
         float Im = std::abs((A - B * rM) * rM);
 
-        if (Im <= m_config.impactMax) {
-          topSpVec.push_back(compatTopSP[t]);
-          // inverse diameter is signed depending if the curvature is
-          // positive/negative in phi
-          curvatures.push_back(B / std::sqrt(S2));
-          impactParameters.push_back(Im);
-        }
-      }
 //JJJ SIMD LOOP BEGIN
+          if (Im <= impactMax) {
+            topSpIndexData[i] = i;
+            // inverse diameter is signed depending if the curvature is
+            // positive/negative in phi
+            curvaturesData[i]= B / std::sqrt(S2);
+            impactParametersData[i] = Im;
+          } else {
+            topSpIndexData[i] = -1;
+            curvaturesData[i]= -9;
+            impactParametersData[i] = -9;
+         }
+
+       }  // end of numTopSP
+   
+      // check for the data taken back from GPU and push them back to the original vector
+      for(i=0; i<linCircleTopSize; i++){
+	   if(topSpIndexData[i] != -1){
+//	   std::cout<<"topSpIndexData[ " << i << " ] = "<< topSpIndexData[i];
+//	   std::cout<< ", curvaturesData[ " << i << " ] =  " << curvaturesData[i];
+//	   std::cout<< ", impactParametersData[ " <<i << " ] = " << impactParametersData[i]<<std::endl;
+             topSpVec.push_back(compatTopSP[i]);
+             curvatures.push_back(curvaturesData[i]);
+	     impactParameters.push_back(impactParametersData[i]);  
+           }		   
+      }
+
+      std::free(topSpIndexData);
+      std::free(curvaturesData);
+      std::free(impactParametersData);
+
+      auto end = std::chrono::system_clock::now();
+      std::chrono::duration<double> elapsed_seconds = end - start;
+      std::cout << "time to match bottom and top for this sp is " << elapsed_seconds.count() << std::endl;
 
       if (!topSpVec.empty()) {
         std::vector<std::pair<
@@ -387,10 +519,12 @@ void Seedfinder<external_spacepoint_t>::createSeedsForRegion(
                            std::make_move_iterator(sameTrackSeeds.begin()),
                            std::make_move_iterator(sameTrackSeeds.end()));
       }
-    }
+
+    } // end of numBottomSP
+
     m_config.seedFilter->filterSeeds_1SpFixed(seedsPerSpM,
                                               state.outputVec[it.outputIndex]);
-  }
+  } // end of loop for all space points in the middle region
 }
 
 template <typename external_spacepoint_t>

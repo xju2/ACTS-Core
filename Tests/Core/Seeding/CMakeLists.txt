@@ -1,6 +1,7 @@
 add_executable (SeedfinderTest SeedfinderTest.cpp)
-if( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang") 
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang") 
 	target_compile_options(SeedfinderTest PUBLIC -fopenmp-targets=nvptx64-nvidia-cuda)
+	target_link_options(SeedfinderTest PUBLIC -fopenmp-targets=nvptx64-nvidia-cuda)
 endif()
 target_link_libraries (SeedfinderTest PRIVATE ActsCore)
 add_test (NAME SeedfinderTests COMMAND SeedfinderTest)

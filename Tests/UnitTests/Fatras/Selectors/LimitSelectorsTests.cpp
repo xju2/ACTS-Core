@@ -9,28 +9,42 @@
 #include <boost/test/unit_test.hpp>
 
 #include "Acts/Material/MaterialProperties.hpp"
+#include "Acts/Tests/CommonHelpers/PredefinedMaterials.hpp"
 #include "ActsFatras/Selectors/LimitSelectors.hpp"
 #include "Dataset.hpp"
 
-using namespace Acts::UnitLiterals;
+namespace {
+// Construct a particle that is close to its X0/L0 path limit.
+//
+// Passing a thin slab should still be Ok, but the thick slab should not.
+ActsFatras::Particle makeParticleCloseToLimit() {
+  // create particle and move it close to the X0/L0 limit
+  auto particle = Dataset::centralPion;
+  particle.setMaterialPassed(0.125, 0.0125);
+  // limit is a bit above 1% in radiation/interaction length
+  particle.setMaterialLimits(0.125 + 0.0125, 0.0125 + 0.0125);
+  return particle;
+}
+}  // namespace
 
 BOOST_AUTO_TEST_SUITE(LimitSelectors)
 
-BOOST_AUTO_TEST_CASE(X0L0Limits) {
-  ActsFatras::X0Limit selectX0;
-  ActsFatras::L0Limit selectL0;
-
-  // create particle and move it close to the X0/L0 limit
-  auto particle = Dataset::centralPion;
-  particle.setLimits(0.15, 0.45);
-  particle.update(particle.position(), particle.momentum(), 0.10, 0.34);
-
+BOOST_AUTO_TEST_CASE(PathLimitX0) {
+  ActsFatras::PathLimitX0 select;
+  auto particle = makeParticleCloseToLimit();
   // particle is still within limits for thin block
-  BOOST_TEST(not selectX0(Dataset::thinSlab, particle));
-  BOOST_TEST(not selectL0(Dataset::thinSlab, particle));
+  BOOST_TEST(not select(particle, Acts::Test::makePercentSlab()));
   // particle would pass limits for thick block
-  BOOST_TEST(selectX0(Dataset::thickSlab, particle));
-  BOOST_TEST(selectL0(Dataset::thickSlab, particle));
+  BOOST_TEST(select(particle, Acts::Test::makeUnitSlab()));
+}
+
+BOOST_AUTO_TEST_CASE(PathLimitL0) {
+  ActsFatras::PathLimitL0 select;
+  auto particle = makeParticleCloseToLimit();
+  // particle is still within limits for thin block
+  BOOST_TEST(not select(particle, Acts::Test::makePercentSlab()));
+  // particle would pass limits for thick block
+  BOOST_TEST(select(particle, Acts::Test::makeUnitSlab()));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

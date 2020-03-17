@@ -18,40 +18,36 @@
 #include "ActsFatras/Physics/EnergyLoss/BetheHeitler.hpp"
 #include "Dataset.hpp"
 
+using Generator = std::ranlux48;
+
 BOOST_AUTO_TEST_SUITE(FatrasEnergyLoss)
 
-BOOST_DATA_TEST_CASE(BetheBloch, Dataset::particleParameters, phi, lambda, p,
-                     pdg, m, q) {
-  std::default_random_engine gen;
-  ActsFatras::Particle before =
-      Dataset::makeParticle(phi, lambda, p, pdg, m, q);
+BOOST_DATA_TEST_CASE(BetheBloch, Dataset::parameters, pdg, phi, lambda, p,
+                     seed) {
+  Generator gen(seed);
+  ActsFatras::Particle before = Dataset::makeParticle(pdg, phi, lambda, p);
   ActsFatras::Particle after = before;
 
   ActsFatras::BetheBloch process;
-  const auto outgoing = process(gen, Dataset::thickSlab, after);
+  const auto outgoing = process(gen, Acts::Test::makeUnitSlab(), after);
   // energy loss changes momentum and energy
-  // TODO fix process computation
-  // BOOST_TEST(after.pT() < before.pT());
-  // BOOST_TEST(after.p() < before.p());
-  // BOOST_TEST(after.E() < before.E());
+  BOOST_TEST(after.absMomentum() < before.absMomentum());
+  BOOST_TEST(after.energy() < before.energy());
   // energy loss creates no new particles
   BOOST_TEST(outgoing.empty());
 }
 
-BOOST_DATA_TEST_CASE(BetheHeitler, Dataset::particleParameters, phi, lambda, p,
-                     pdg, m, q) {
-  std::default_random_engine gen;
-  ActsFatras::Particle before =
-      Dataset::makeParticle(phi, lambda, p, pdg, m, q);
+BOOST_DATA_TEST_CASE(BetheHeitler, Dataset::parameters, pdg, phi, lambda, p,
+                     seed) {
+  Generator gen(seed);
+  ActsFatras::Particle before = Dataset::makeParticle(pdg, phi, lambda, p);
   ActsFatras::Particle after = before;
 
   ActsFatras::BetheHeitler process;
-  const auto outgoing = process(gen, Dataset::thickSlab, after);
+  const auto outgoing = process(gen, Acts::Test::makeUnitSlab(), after);
   // energy loss changes momentum and energy
-  // TODO fix process computation
-  // BOOST_TEST(after.pT() < before.pT());
-  // BOOST_TEST(after.p() < before.p());
-  // BOOST_TEST(after.E() < before.E());
+  BOOST_TEST(after.absMomentum() < before.absMomentum());
+  BOOST_TEST(after.energy() < before.energy());
   // energy loss creates no new particles
   BOOST_TEST(outgoing.empty());
 }

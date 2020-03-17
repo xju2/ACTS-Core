@@ -8,37 +8,35 @@
 
 #pragma once
 
+#include "ActsFatras/EventData/Particle.hpp"
+
 namespace ActsFatras {
 
-struct ChargedSelector {
-  /// Return true for all particles with charge != 0.
-  template <typename detector_t, typename particle_t>
-  bool operator()(const detector_t &, const particle_t &particle) const {
-    return (particle.q() * particle.q() > 0.);
-  }
-};
-
+/// Select neutral particles.
 struct NeutralSelector {
-  /// Return true for all particles with charge == 0.
-  template <typename detector_t, typename particle_t>
-  bool operator()(const detector_t &, const particle_t &particle) const {
-    return (particle.q() == 0.);
+  bool operator()(const Particle &particle) const {
+    return (particle.charge() == Particle::Scalar(0));
   }
 };
 
+/// Select all charged particles.
+struct ChargedSelector {
+  bool operator()(const Particle &particle) const {
+    return (particle.charge() != Particle::Scalar(0));
+  }
+};
+
+/// Select positively charged particles.
 struct PositiveSelector {
-  /// Return true for all particles with charge > 0.
-  template <typename detector_t, typename particle_t>
-  bool operator()(const detector_t &, const particle_t &particle) const {
-    return (particle.q() > 0.);
+  bool operator()(const Particle &particle) const {
+    return (Particle::Scalar(0) < particle.charge());
   }
 };
 
+/// Select negatively charged particles.
 struct NegativeSelector {
-  /// Return true for all particles with charge<> 0.
-  template <typename detector_t, typename particle_t>
-  bool operator()(const detector_t &, const particle_t &particle) const {
-    return (particle.q() * particle.q() > 0.);
+  bool operator()(const Particle &particle) const {
+    return (particle.charge() < Particle::Scalar(0));
   }
 };
 

@@ -10,185 +10,127 @@
 #include "Acts/Vertexing/VertexingError.hpp"
 
 template <typename input_track_t>
-Acts::Result<void> Acts::KalmanVertexUpdater::updateVertexWithTrack(
-    Vertex<input_track_t>* vtx, TrackAtVertex<input_track_t>& trk) {
-  if (vtx == nullptr) {
-    return VertexingError::EmptyInput;
-  }
-
-  auto res = detail::update<input_track_t>(vtx, trk, 1);
-
-  if (!res.ok()) {
-    return res.error();
-  }
-
-  return {};
+void Acts::KalmanVertexUpdater::updateVertexWithTrack(
+    Vertex<input_track_t>& vtx, TrackAtVertex<input_track_t>& trk) {
+  detail::update<input_track_t>(vtx, trk, 1);
 }
 
 template <typename input_track_t>
-Acts::Result<Acts::Vertex<input_track_t>>
-Acts::KalmanVertexUpdater::updatePosition(
-    const Acts::Vertex<input_track_t>* vtx,
-    const Acts::LinearizedTrack& linTrack, double trackWeight, int sign) {
-  if (vtx == nullptr) {
-    return VertexingError::EmptyInput;
-  }
-
-  // Retrieve linTrack information
-  const SpacePointToBoundMatrix& posJac = linTrack.positionJacobian;
-  const ActsMatrixD<BoundParsDim, 3>& momJac =
-      linTrack.momentumJacobian;  // B_k in comments below
-  const BoundVector& trkParams = linTrack.parametersAtPCA;
-  const BoundVector& constTerm = linTrack.constantTerm;
-  const BoundSymMatrix& trkParamWeight =
-      linTrack.covarianceAtPCA.inverse();  // G_k in comments below
-
-  // Vertex to be updated
-  const SpacePointVector& oldVtxPos = vtx->fullPosition();
-  const SpacePointSymMatrix& oldVtxWeight = vtx->fullCovariance().inverse();
-
-  // W_k matrix
-  ActsSymMatrixD<3> wMat =
-      (momJac.transpose() * (trkParamWeight * momJac)).inverse();
-
-  // G_b = G_k - G_k*B_k*W_k*B_k^(T)*G_k^T
-  BoundSymMatrix gBmat =
-      trkParamWeight - trkParamWeight * (momJac * (wMat * momJac.transpose())) *
-                           trkParamWeight.transpose();
-
-  // New vertex cov matrix
-  SpacePointSymMatrix newVtxCov =
-      (oldVtxWeight +
-       trackWeight * sign * posJac.transpose() * (gBmat * posJac))
-          .inverse();
-
-  // New vertex position
-  SpacePointVector newVtxPos =
-      newVtxCov *
-      (oldVtxWeight * oldVtxPos + trackWeight * sign * posJac.transpose() *
-                                      gBmat * (trkParams - constTerm));
-
-  // Create return vertex with new position
-  // and covariance, but w/o tracks
-  Vertex<input_track_t> returnVertex;
-
-  // Set position
-  returnVertex.setFullPosition(newVtxPos);
-  // Set cov
-  returnVertex.setFullCovariance(newVtxCov);
-  // Set fit quality
-  returnVertex.setFitQuality(vtx->fitQuality().first, vtx->fitQuality().second);
-
-  return returnVertex;
-}
-
-template <typename input_track_t>
-double Acts::KalmanVertexUpdater::detail::vertexPositionChi2(
-    const Vertex<input_track_t>* oldVtx, const Vertex<input_track_t>* newVtx) {
-  SpacePointSymMatrix oldWeight = oldVtx->fullCovariance().inverse();
-  SpacePointVector posDiff = newVtx->fullPosition() - oldVtx->fullPosition();
-
-  // Calculate and return corresponding chi2
-  return posDiff.transpose() * (oldWeight * posDiff);
-}
-
-template <typename input_track_t>
-double Acts::KalmanVertexUpdater::detail::trackParametersChi2(
-    const Vertex<input_track_t>& vtx, const LinearizedTrack& linTrack) {
-  const SpacePointVector& vtxPos = vtx.fullPosition();
-
-  // Track properties
-  const SpacePointToBoundMatrix& posJac = linTrack.positionJacobian;
-  const ActsMatrixD<BoundParsDim, 3>& momJac = linTrack.momentumJacobian;
-  const BoundVector& trkParams = linTrack.parametersAtPCA;
-  const BoundVector& constTerm = linTrack.constantTerm;
-  const BoundSymMatrix& trkParamWeight = linTrack.covarianceAtPCA.inverse();
-
-  // Calculate temp matrix S
-  ActsSymMatrixD<3> matS =
-      (momJac.transpose() * (trkParamWeight * momJac)).inverse();
-
-  // Refitted track momentum
-  Vector3D newTrackMomentum = matS * momJac.transpose() * trkParamWeight *
-                              (trkParams - constTerm - posJac * vtxPos);
-
-  // Refitted track parameters
-  auto newTrkParams = constTerm + posJac * vtxPos + momJac * newTrackMomentum;
-
-  // Parameter difference
-  auto paramDiff = trkParams - newTrkParams;
-
-  // Return chi2
-  return paramDiff.transpose() * (trkParamWeight * paramDiff);
-}
-
-template <typename input_track_t>
-Acts::Result<void> Acts::KalmanVertexUpdater::detail::update(
-    Vertex<input_track_t>* vtx, TrackAtVertex<input_track_t>& trk, int sign) {
+void Acts::KalmanVertexUpdater::detail::update(
+    Vertex<input_track_t>& vtx, TrackAtVertex<input_track_t>& trk, int sign) {
   double trackWeight = trk.trackWeight;
 
-  auto res = updatePosition(vtx, trk.linearizedState, trackWeight, sign);
+  MatrixCache matrixCache;
 
-  if (!res.ok()) {
-    return res.error();
-  }
-
-  Vertex<input_track_t> tempVtx = *res;
+  updatePosition(vtx, trk.linearizedState, trackWeight, sign, matrixCache);
 
   // Get fit quality parameters wrt to old vertex
-  std::pair fitQuality = vtx->fitQuality();
+  std::pair fitQuality = vtx.fitQuality();
   double chi2 = fitQuality.first;
   double ndf = fitQuality.second;
 
   // Chi2 wrt to track parameters
-  double trkChi2 =
-      detail::trackParametersChi2<input_track_t>(tempVtx, trk.linearizedState);
+  double trkChi2 = detail::trackParametersChi2<input_track_t>(
+      trk.linearizedState, matrixCache);
 
   // Calculate new chi2
-  chi2 += sign * (detail::vertexPositionChi2<input_track_t>(vtx, &tempVtx) +
+  chi2 += sign * (detail::vertexPositionChi2<input_track_t>(vtx, matrixCache) +
                   trackWeight * trkChi2);
 
   // Calculate ndf
   ndf += sign * trackWeight * 2.;
 
   // Updating the vertex
-  vtx->setFullPosition(tempVtx.fullPosition());
-  vtx->setFullCovariance(tempVtx.fullCovariance());
-  vtx->setFitQuality(chi2, ndf);
+  vtx.setPosition(matrixCache.newVertexPos);
+  vtx.setCovariance(matrixCache.newVertexCov);
+  vtx.setFitQuality(chi2, ndf);
 
   // Updates track at vertex if already there
   // by removing it first and adding new one.
   // Otherwise just adds track to existing list of tracks at vertex
   if (sign > 0) {
-    // Remove old track if already there
-    detail::removeTrackIf<input_track_t>(vtx, trk);
-    // Add track with updated ndf
-    auto tracksAtVertex = vtx->tracks();
-    // Update track and add to list
+    // Update track
     trk.chi2Track = trkChi2;
     trk.ndf = 2 * trackWeight;
-    tracksAtVertex.push_back(trk);
-    vtx->setTracksAtVertex(tracksAtVertex);
   }
   // Remove trk from current vertex
   if (sign < 0) {
-    detail::removeTrackIf<input_track_t>(vtx, trk);
+    trk.trackWeight = 0;
   }
-
-  return {};
 }
 
 template <typename input_track_t>
-void Acts::KalmanVertexUpdater::detail::removeTrackIf(
-    Vertex<input_track_t>* vtx, const TrackAtVertex<input_track_t>& trk) {
-  auto tracksAtVertex = vtx->tracks();
-  auto removeIter = std::find_if(tracksAtVertex.begin(), tracksAtVertex.end(),
-                                 [&trk](const auto& trkAtVertex) {
-                                   return trk.fittedParams.parameters() ==
-                                          trkAtVertex.fittedParams.parameters();
-                                 });
-  if (removeIter != tracksAtVertex.end()) {
-    tracksAtVertex.erase(removeIter);
-  }
-  vtx->setTracksAtVertex(tracksAtVertex);
+void Acts::KalmanVertexUpdater::updatePosition(
+    const Acts::Vertex<input_track_t>& vtx,
+    const Acts::LinearizedTrack& linTrack, double trackWeight, int sign,
+    MatrixCache& matrixCache) {
+  // Retrieve linTrack information
+  // TODO: To make 4-D compatible, remove block<> and head<> statements
+  const auto posJac = linTrack.positionJacobian.block<5, 3>(0, 0);
+  const auto momJac =
+      linTrack.momentumJacobian.block<5, 3>(0, 0);  // B_k in comments below
+  const auto trkParams = linTrack.parametersAtPCA.head<5>();
+  const auto constTerm = linTrack.constantTerm.head<5>();
+  const auto trkParamWeight = linTrack.weightAtPCA.block<5, 5>(0, 0);
+
+  // Vertex to be updated
+  const auto& oldVtxPos = vtx.position();
+  matrixCache.oldVertexWeight = (vtx.covariance()).inverse();
+
+  // W_k matrix
+  matrixCache.momWeightInv =
+      (momJac.transpose() * (trkParamWeight * momJac)).inverse();
+
+  // G_b = G_k - G_k*B_k*W_k*B_k^(T)*G_k^T
+  auto gBmat = trkParamWeight -
+               trkParamWeight *
+                   (momJac * (matrixCache.momWeightInv * momJac.transpose())) *
+                   trkParamWeight.transpose();
+
+  // New vertex cov matrix
+  matrixCache.newVertexWeight =
+      matrixCache.oldVertexWeight +
+      trackWeight * sign * posJac.transpose() * (gBmat * posJac);
+  matrixCache.newVertexCov = matrixCache.newVertexWeight.inverse();
+
+  // New vertex position
+  matrixCache.newVertexPos =
+      matrixCache.newVertexCov * (matrixCache.oldVertexWeight * oldVtxPos +
+                                  trackWeight * sign * posJac.transpose() *
+                                      gBmat * (trkParams - constTerm));
+}
+
+template <typename input_track_t>
+double Acts::KalmanVertexUpdater::detail::vertexPositionChi2(
+    const Vertex<input_track_t>& oldVtx, const MatrixCache& matrixCache) {
+  Vector3D posDiff = matrixCache.newVertexPos - oldVtx.position();
+
+  // Calculate and return corresponding chi2
+  return posDiff.transpose() * (matrixCache.oldVertexWeight * posDiff);
+}
+
+template <typename input_track_t>
+double Acts::KalmanVertexUpdater::detail::trackParametersChi2(
+    const LinearizedTrack& linTrack, const MatrixCache& matrixCache) {
+  // Track properties
+  const auto posJac = linTrack.positionJacobian.block<5, 3>(0, 0);
+  const auto momJac = linTrack.momentumJacobian.block<5, 3>(0, 0);
+  const auto trkParams = linTrack.parametersAtPCA.head<5>();
+  const auto constTerm = linTrack.constantTerm.head<5>();
+  const auto trkParamWeight = linTrack.weightAtPCA.block<5, 5>(0, 0);
+
+  const auto jacVtx = posJac * matrixCache.newVertexPos;
+
+  // Refitted track momentum
+  Vector3D newTrackMomentum = matrixCache.momWeightInv * momJac.transpose() *
+                              trkParamWeight * (trkParams - constTerm - jacVtx);
+
+  // Refitted track parameters
+  auto newTrkParams = constTerm + jacVtx + momJac * newTrackMomentum;
+
+  // Parameter difference
+  auto paramDiff = trkParams - newTrkParams;
+
+  // Return chi2
+  return paramDiff.transpose() * (trkParamWeight * paramDiff);
 }

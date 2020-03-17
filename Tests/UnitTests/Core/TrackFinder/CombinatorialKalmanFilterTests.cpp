@@ -299,10 +299,12 @@ BOOST_AUTO_TEST_CASE(comb_kalman_filter_zero_field) {
   slsConfig.layerMaxChi2 = {{2, {{2, 8}, {4, 7}}}};
   // Implement different chi2 criteria for pixel (volumeID: 2) and strip
   // (volumeID: 3):
-  //-> pixel: 6
+  //-> pixel: 7
   //-> strip: 8
   slsConfig.volumeMaxChi2 = {{2, 7}, {3, 8}};
   slsConfig.maxChi2 = 8;
+  // Set the allowed maximum number of source links to be large enough
+  slsConfig.maxNumSourcelinksOnSurface = 100;
 
   CombinatorialKalmanFilter cKF(
       rPropagator,

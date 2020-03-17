@@ -8,6 +8,8 @@
 
 #include <boost/test/data/test_case.hpp>
 
+#include <cstdint>
+
 #include "Acts/Material/MaterialProperties.hpp"
 #include "Acts/Tests/CommonHelpers/PredefinedMaterials.hpp"
 #include "Acts/Utilities/PdgParticle.hpp"
@@ -15,20 +17,9 @@
 #include "ActsFatras/EventData/Particle.hpp"
 
 namespace Dataset {
-namespace {
 
 namespace data = boost::unit_test::data;
 using namespace Acts::UnitLiterals;
-
-// default test material
-Acts::Material material = Acts::Test::makeBeryllium();
-Acts::MaterialProperties thinSlab(material, 1_mm);
-Acts::MaterialProperties thickSlab(material, 15_cm);
-
-// kinematic particle parameters
-const auto momentumPhi = data::xrange(0_degree, 360_degree, 60_degree);
-const auto momentumLambda = data::xrange(-45_degree, 45_degree, 15_degree);
-const auto momentumAbs = data::xrange(500_MeV, 10_GeV, 500_MeV);
 
 // particle identity
 const auto particlePdg = data::make({
@@ -37,33 +28,29 @@ const auto particlePdg = data::make({
     Acts::PdgParticle::eMuon,
     Acts::PdgParticle::eAntiMuon,
 });
-const auto particleMass = data::make({
-    510.99895_keV,
-    510.99895_keV,
-    105.658367_MeV,
-    105.658367_MeV,
-});
-const auto particleCharge = data::make({
-    -1_e,
-    1_e,
-    -1_e,
-    1_e,
-});
 
-// combined particle dataset:
-// cartesian grid over kinematic parameters, join over identity parameters
-const auto particleParameters = momentumPhi * momentumLambda * momentumAbs *
-                                (particlePdg ^ particleMass ^ particleCharge);
+// kinematic particle parameters
+const auto momentumPhi = data::xrange(0_degree, 360_degree, 60_degree);
+const auto momentumLambda = data::xrange(-45_degree, 45_degree, 15_degree);
+const auto momentumAbs = data::xrange(500_MeV, 10_GeV, 500_MeV);
+
+// seeds for the random number generator
+const auto rngSeed =
+    data::xrange<uint32_t>((data::begin = 2u, data::step = 3u));
+
+// combined parameter set
+const auto parameters =
+    particlePdg * momentumPhi * momentumLambda * momentumAbs ^ rngSeed;
 
 // utility function to build a particle from the dataset parameters
-inline ActsFatras::Particle makeParticle(double phi, double lambda, double p,
-                                         int pdg, double m, double q) {
-  Acts::Vector3D pos(0, 0, 0);
-  Acts::Vector3D mom(p * std::cos(lambda) * std::cos(phi),
-                     p * std::cos(lambda) * std::sin(phi),
-                     p * std::sin(lambda));
-  return {pos, mom, m, q, pdg};
+inline ActsFatras::Particle makeParticle(Acts::PdgParticle pdg, double phi,
+                                         double lambda, double p) {
+  const auto id = ActsFatras::Barcode().setVertexPrimary(1).setParticle(1);
+  return ActsFatras::Particle(id, pdg)
+      .setPosition4(0, 0, 0, 0)
+      .setDirection(std::cos(lambda) * std::cos(phi),
+                    std::cos(lambda) * std::sin(phi), std::sin(lambda))
+      .setAbsMomentum(p);
 }
 
-}  // namespace
 }  // namespace Dataset

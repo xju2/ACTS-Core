@@ -8,10 +8,13 @@
 
 #pragma once
 
+#include <cstdint>
+
 namespace Acts {
 
 /// Symbolic values for commonly used PDG particle numbers.
-enum PdgParticle : int {
+enum PdgParticle : int32_t {
+  eInvalid = 0,
   eElectron = 11,
   eAntiElectron = -eElectron,
   ePositron = -eElectron,
@@ -28,5 +31,11 @@ enum PdgParticle : int {
   eProton = 2212,
   eAntiProton = -eProton,
 };
+
+/// Convert an anti-particle to its particle and leave particles as-is.
+constexpr inline PdgParticle makeAbsolutePdgParticle(PdgParticle pdg) {
+  const auto value = static_cast<int32_t>(pdg);
+  return static_cast<PdgParticle>((0 <= value) ? value : -value);
+}
 
 }  // namespace Acts
